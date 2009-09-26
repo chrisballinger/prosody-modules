@@ -7,18 +7,23 @@
 -- COPYING file in the source package for more information.
 --
 
-
 local prosody = prosody;
 local helpers = require "util/helpers";
 local st = require "util.stanza";
 local datamanager = require "util.datamanager";
 local bare_sessions = bare_sessions;
-
+local util_Jid = require "util.jid";
+local jid_bare = util_Jid.bare;
+local jid_split = util_Jid.split;
 
 function findNamedList (privacy_lists, name)
 	local ret = nil
-	if privacy_lists.lists == nil then return nil; end
+	if privacy_lists.lists == nil then
+		module:log("debug", "no lists loaded.")
+		return nil;
+	end
 
+	module:log("debug", "searching for list: %s", name);
 	for i=1, #privacy_lists.lists do
 		if privacy_lists.lists[i].name == name then
 			ret = i;
@@ -143,7 +148,7 @@ function getList(privacy_lists, origin, stanza, name)
 		end
 	else
 		local idx = findNamedList(privacy_lists, name);
-		log("debug", "list idx: %d", idx or -1);
+		module:log("debug", "list idx: %d", idx or -1);
 		if idx ~= nil then
 			list = privacy_lists.lists[idx];
 			reply = reply:tag("list", {name=list.name});
@@ -224,17 +229,147 @@ module:hook("iq/bare/jabber:iq:privacy:query", function(data)
 	return false;
 end, 500);
 
-function checkIfNeedToBeBlocked(e)
+function checkIfNeedToBeBlocked(e, node_, host_)
 	local origin, stanza = e.origin, e.stanza;
-	local privacy_lists = datamanager.load(origin.username, origin.host, "privacy") or {};
-	if privacy_lists.lists ~= nil then
+	local privacy_lists = datamanager.load(node_, host_, "privacy") or {};
+	local bare_jid = node_.."@"..host_;
+	
+	module:log("debug", "checkIfNeedToBeBlocked: username: %s, host: %s", node_, host_);
+	module:log("debug", "stanza: %s, to: %s, form: %s", stanza.name, stanza.attr.to or "nil", stanza.attr.from or "nil");
+	
+	if privacy_lists.lists ~= nil and stanza.attr.to ~= nil and stanza.attr.from ~= nil then
+		if privacy_lists.active == nil and privacy_lists.default == nil then 
+			return; -- Nothing to block, default is Allow all
+		end
+	
+		local idx;
+		local list;
+		local item;
+		local block = false;
+		local apply = false;
+		local listname = privacy_lists.active;
+		if listname == nil then
+			listname = privacy_lists.default; -- no active list selected, use default list
+		end
+		idx = findNamedList(privacy_lists, listname);
+		if idx == nil then
+			module:log("info", "given privacy listname not found.");
+			return;
+		end
+		list = privacy_lists.lists[idx];
+		if list == nil then
+			module:log("info", "privacy list index wrong.");
+			return;
+		end
+		for _,item in ipairs(list.items) do
+			local apply = false;
+			block = false;
+			if	(stanza.name == "message" and item.message) or
+				(stanza.name == "iq" and item.iq) or
+				(stanza.name == "presence" and jid_bare(stanza.attr.to) == bare_jid and item["presence-in"]) or
+				(stanza.name == "presence" and jid_bare(stanza.attr.from) == bare_jid and item["presence-out"]) or
+				(item.message == false and item.iq == false and item["presence-in"] == false and item["presence-in"] == false) then
+				module:log("debug", "stanza type matched.");
+					apply = true;
+			end
+			if apply then
+				local evilJid = {};
+				apply = false;
+				if jid_bare(stanza.attr.to) == bare_jid then
+					evilJid.node, evilJid.host, evilJid.resource = jid_split(stanza.attr.from);
+				else
+					evilJid.node, evilJid.host, evilJid.resource = jid_split(stanza.attr.to);
+				end
+				if	item.type == "jid" and 
+					(evilJid.node and evilJid.host and evilJid.resource and item.value == evilJid.node.."@"..evilJid.host.."/"..evilJid.resource) or
+					(evilJid.node and evilJid.host and item.value == evilJid.node.."@"..evilJid.host) or
+					(evilJid.host and evilJid.resource and item.value == evilJid.host.."/"..evilJid.resource) or
+					(evilJid.host and item.value == evilJid.host) then
+					module:log("debug", "jid matched.");
+					apply = true;
+					block = (item.action == "deny");
+				elseif item.type == "group" then
+					local groups = origin.roster[jid_bare(stanza.from)].groups;
+					for _,group in ipairs(groups) do
+						if group == item.value then
+							module:log("debug", "group matched.");
+							apply = true;
+							block = (item.action == "deny");
+							break;
+						end
+					end
+				elseif item.type == "subscription" then
+					if origin.roster[jid_bare(stanza.from)].subscription == item.value then
+						module:log("debug", "subscription matched.");
+						apply = true;
+						block = (item.action == "deny");
+					end
+				elseif item.type == nil then
+					module:log("debug", "no item.type, so matched.");
+					apply = true;
+					block = (item.action == "deny");
+				end
+			end
+			if apply then
+				if block then
+					module:log("info", "stanza blocked: %s, to: %s, from: %s", stanza.name, stanza.attr.to or "nil", stanza.attr.from or "nil");
+					if stanza.name == "message" then
+						origin.send(st.error_reply(stanza, "cancel", "service-unavailable"));
+					elseif stanza.name == "iq" and (stanza.attr.type == "get" or stanza.attr.type == "set") then
+						origin.send(st.error_reply(stanza, "cancel", "service-unavailable"));
+					end
+					return true; -- stanza blocked !
+				else
+					module:log("info", "stanza explicit allowed!")
+				end
+			end
+		end
 	end
-	return false;
+	return;
 end
 
-module:hook("pre-message/full", checkIfNeedToBeBlocked, 500);
-module:hook("pre-iq/bare", checkIfNeedToBeBlocked, 500);
-module:hook("pre-presence/bare", checkIfNeedToBeBlocked, 500);
+function preCheckIncoming(e)
+	if e.stanza.attr.to ~= nil then
+		local node, host, resource = jid_split(e.stanza.attr.to);
+		if node == nil or host == nil then
+			return;
+		end
+		return checkIfNeedToBeBlocked(e, node, host);
+	end
+	return;
+end
+
+function preCheckOutgoing(e)
+	if e.stanza.attr.from ~= nil then
+		local node, host, resource = jid_split(e.stanza.attr.from);
+		if node == nil or host == nil then
+			return;
+		end
+		return checkIfNeedToBeBlocked(e, node, host);
+	end
+	return;
+end
+
+
+module:hook("pre-message/full", preCheckOutgoing, 500);
+module:hook("pre-message/bare", preCheckOutgoing, 500);
+module:hook("pre-message/host", preCheckOutgoing, 500);
+module:hook("pre-iq/full", preCheckOutgoing, 500);
+module:hook("pre-iq/bare", preCheckOutgoing, 500);
+module:hook("pre-iq/host", preCheckOutgoing, 500);
+module:hook("pre-presence/full", preCheckOutgoing, 500);
+module:hook("pre-presence/bare", preCheckOutgoing, 500);
+module:hook("pre-presence/host", preCheckOutgoing, 500);
+
+module:hook("message/full", preCheckIncoming, 500);
+module:hook("message/bare", preCheckIncoming, 500);
+module:hook("message/host", preCheckIncoming, 500);
+module:hook("iq/full", preCheckIncoming, 500);
+module:hook("iq/bare", preCheckIncoming, 500);
+module:hook("iq/host", preCheckIncoming, 500);
+module:hook("presence/full", preCheckIncoming, 500);
+module:hook("presence/bare", preCheckIncoming, 500);
+module:hook("presence/host", preCheckIncoming, 500);
 
 -- helpers.log_events(hosts["albastru.de"].events, "albastru.de");
 -- helpers.log_events(prosody.events, "*");
