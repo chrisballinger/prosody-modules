@@ -94,19 +94,19 @@ function resize(e) {
 
 html.components = {};
 html.components.bit = [[<a href="###COMPONENT###/">###COMPONENT###</a><br />]]
-html.components.body = [[<h2>MUC hosts available on this server:</h2><hr /><p>
+html.components.body = [[<h2>Available Multi-User Chats:</h2><hr /><p>
 ###COMPONENTS_STUFF###
 </p><hr />]];
 
 html.rooms = {};
 html.rooms.bit = [[<a href="###ROOM###/">###ROOM###</a><br />]]
-html.rooms.body = [[<h2>Rooms hosted on MUC host: ###COMPONENT###</h2><hr /><p>
+html.rooms.body = [[<h2>Available rooms on ###COMPONENT###:</h2><hr /><p>
 ###ROOMS_STUFF###
 </p><hr />]];
 
 html.days = {};
 html.days.bit = [[<a href="###BARE_DAY###/">###DAY###</a><br />]];
-html.days.body = [[<h2>available logged days of room: ###JID###</h2><hr /><div id="main" style="overflow: auto;">
+html.days.body = [[<h2>Available days for ###JID###:</h2><hr /><div id="main" style="overflow: auto;">
 ###DAYS_STUFF###
 </div><hr />]];
 
@@ -114,10 +114,10 @@ html.day = {};
 html.day.title = [[Subject: <font class="muc_title">###TITLE###</font>]];
 html.day.time = [[<a name="###TIME###" href="####TIME###" class="timestuff">[###TIME###]</a> ]]; -- the one ####TIME### need to stay! it will evaluate to e.g. #09:10:56 which is an anker then
 html.day.presence = {};
-html.day.presence.join = [[<div name="joinLeave" style="display: ###SHOWHIDE###;">###TIME_STUFF###<font class="muc_join"> *** ###NICK### joins the room</font><br /></div>]];
-html.day.presence.leave = [[<div name="joinLeave" style="display: ###SHOWHIDE###;">###TIME_STUFF###<font class="muc_leave"> *** ###NICK### leaves the room</font><br /></div>]];
+html.day.presence.join = [[<div name="joinLeave" style="display: ###SHOWHIDE###;">###TIME_STUFF###<font class="muc_join"> *** ###NICK### has joined the room</font><br /></div>]];
+html.day.presence.leave = [[<div name="joinLeave" style="display: ###SHOWHIDE###;">###TIME_STUFF###<font class="muc_leave"> *** ###NICK### has left the room</font><br /></div>]];
 html.day.presence.statusText = [[ and his status message is "###STATUS###"]];
-html.day.presence.statusChange = [[<div name="status" style="display: ###SHOWHIDE###;">###TIME_STUFF###<font class="muc_statusChange"> *** ###NICK### shows now as "###SHOW###"###STATUS_STUFF###</font><br /></div>]];
+html.day.presence.statusChange = [[<div name="status" style="display: ###SHOWHIDE###;">###TIME_STUFF###<font class="muc_statusChange"> *** ###NICK### shows as "###SHOW###"###STATUS_STUFF###</font><br /></div>]];
 html.day.message = [[###TIME_STUFF###<font class="muc_msg_nick">&lt;###NICK###&gt;</font> ###MSG###<br />]];
 html.day.message_me = [[###TIME_STUFF###<font class="muc_msg_me">*###NICK### ###MSG###</font><br />]];
 html.day.titleChange = [[###TIME_STUFF###<font class="muc_titleChange"> *** ###NICK### changed the title to "###TITLE###"</font><br />]];
@@ -125,11 +125,11 @@ html.day.reason = [[, the reason was "###REASON###"]]
 html.day.kick = [[###TIME_STUFF###<font class="muc_kick"> *** ###VICTIM### got kicked###REASON_STUFF###</font><br />]];
 html.day.bann = [[###TIME_STUFF###<font class="muc_bann"> *** ###VICTIM### got banned###REASON_STUFF###</font><br />]];
 html.day.day_link = [[<a href="../###DAY###/">###TEXT###</a>]]
-html.day.body = [[<h2>Logs of room ###JID### of 20###YEAR###/###MONTH###/###DAY###</h2>
+html.day.body = [[<h2>Logs for ###JID### on 20###YEAR###/###MONTH###/###DAY###</h2>
 <p>###TITLE_STUFF###</p>
-<font class="join_link"><a href="http://speeqe.com/room/###JID###/" target="_blank">Join room now via speeqe.com!</a></font><br />
+<font class="join_link"><a href="http://speeqe.com/room/###JID###/" target="_blank">Join room via speeqe.com</a></font><br />
 ###PREVIOUS_LINK###   ###NEXT_LINK###<br />
-<input type="checkbox" onclick="showHide('joinLeave')" ###JOIN_CHECKED###/>show/hide joins and Leaves</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<input type="checkbox" onclick="showHide('joinLeave')" ###JOIN_CHECKED###/>show/hide joins and leaves</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <input type="checkbox" onclick="showHide('status')" ###STATUS_CHECKED###/>show/hide status changes</button>
 <hr /><div id="main" style="overflow: auto;">
 ###DAY_STUFF###
