@@ -21,16 +21,48 @@ module:add_feature("urn:xmpp:archive:pref");
 ------------------------------------------------------------
 -- Utils
 ------------------------------------------------------------
-local function load_prefs(node, host, dir)
-    return st.deserialize(dm.load(node, host, dir or PREFS_DIR));
+local function load_prefs(node, host)
+    return st.deserialize(dm.load(node, host, PREFS_DIR));
 end
 
-local function store_prefs(data, node, host, dir)
-    dm.store(node, host, dir or PREFS_DIR, st.preserialize(data));
+local function store_prefs(data, node, host)
+    dm.store(node, host, PREFS_DIR, st.preserialize(data));
 end
 
-local function store_msg(data, node, host, dir)
-    dm.list_append(node, host, dir or ARCHIVE_DIR, st.preserialize(data));
+local function store_msg(msg, node, host, isfrom)
+    local body = msg:child_with_name("body");
+    local thread = msg:child_with_name("thread");
+	local data = dm.list_load(node, host, ARCHIVE_DIR);
+    local tag = (isfrom and "from") or "to";
+    if data then
+        for k, v in ipairs(data) do
+            -- <chat with='juliet@capulet.com/chamber'
+            --       start='1469-07-21T02:56:15Z'
+            --       thread='damduoeg08'
+            --       subject='She speaks!'
+            --       version='1'>
+            --   <from secs='0'><body>Art thou not Romeo, and a Montague?</body></from>
+            --   <to secs='11'><body>Neither, fair saint, if either thee dislike.</body></to>
+            --   <from secs='7'><body>How cam'st thou hither, tell me, and wherefore?</body></from>
+            --   <note utc='1469-07-21T03:04:35Z'>I think she might fancy me.</note>
+            -- </chat>
+            local collection = st.deserialize(v);
+            if collection.attr["thread"] == thread:get_text() then
+                -- TODO figure out secs
+                collection:tag(tag, {secs='1'}):add_child(body);
+                local ver = tonumber(collection.attr["version"]) + 1;
+                collection.attr["version"] = tostring(ver);
+                data[k] = collection;
+                dm.list_store(node, host, ARCHIVE_DIR, st.preserialize(data));
+                return;
+            end
+        end
+    end
+    -- not found, create new collection
+    -- TODO figure out start time
+    local collection = st.stanza('chat', {with = isfrom and msg.attr.to or msg.attr.from, start='2010-06-01T09:56:15Z', thread=thread:get_text(), version='0'});
+    collection:tag(tag, {secs='0'}):add_child(body);
+    dm.list_append(node, host, ARCHIVE_DIR, st.preserialize(collection));
 end
 
 ------------------------------------------------------------
@@ -67,7 +99,6 @@ local function preferences_handler(event)
         local elem = stanza.tags[1].tags[1]; -- iq:pref:xxx
         if not elem then return false end
         -- "default" | "item" | "session" | "method"
-        -- FIXME there may be many item/session/method sections!! 
         elem.attr["xmlns"] = nil; -- TODO why there is an extra xmlns attr?
         if elem.name == "default" then
             local setting = data:child_with_name(elem.name)
@@ -251,21 +282,27 @@ end
 -- Message Handler
 ------------------------------------------------------------
 local function msg_handler(data)
+    -- TODO if not auto_archive_enabled then return nil;
     module:log("debug", "-- Enter msg_handler()");
     local origin, stanza = data.origin, data.stanza;
     local body = stanza:child_with_name("body");
+    local thread = stanza:child_with_name("thread");
     module:log("debug", "-- msg:\n%s", tostring(stanza));
     if body then
         module:log("debug", "-- msg body:\n%s", tostring(body));
-        -- module:log("debug", "-- msg body text:\n%s", body:get_text());
-        local from_node, from_host = jid.split(stanza.attr.from);
-        local to_node, to_host = jid.split(stanza.attr.to);
-        -- FIXME the format of collections
-        if from_host == "localhost" then -- FIXME only archive messages of users on this host
-            store_msg(stanza, from_node, from_host);
-        end
-        if to_host == "localhost" then
-            store_msg(stanza, to_node, to_host);
+        -- TODO mapping messages and conversations to collections if no thread
+        if thread then
+            module:log("debug", "-- msg thread:\n%s", tostring(thread));
+            -- module:log("debug", "-- msg body text:\n%s", body:get_text());
+            local from_node, from_host = jid.split(stanza.attr.from);
+            local to_node, to_host = jid.split(stanza.attr.to);
+            -- FIXME only archive messages of users on this host
+            if from_host == "localhost" then
+                store_msg(stanza, from_node, from_host, true);
+            end
+            if to_host == "localhost" then
+                store_msg(stanza, to_node, to_host, false);
+            end
         end
     end
     return nil;
