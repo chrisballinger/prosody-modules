@@ -108,6 +108,7 @@ local get_online_users_layout = dataforms_new{
 	{ name = "FORM_TYPE", type = "hidden", value = "http://jabber.org/protocol/admin" };
 	{ name = "max_items", type = "list-single", label = "Maximum number of users",
 		value = { "25", "50", "75", "100", "150", "200", "all" } };
+	{ name = "details", type = "boolean", label = "Show details" };
 };
 
 local get_online_users_result_layout = dataforms_new{
@@ -365,22 +366,36 @@ function get_online_users_command_handler(self, data, state)
 			return { status = "canceled" };
 		end
 
-		local fields = add_user_layout:data(data.form);
-		
+		local fields = get_online_users_layout:data(data.form);
+
 		local max_items = nil
 		if fields.max_items ~= "all" then
 			max_items = tonumber(fields.max_items);
 		end
 		local count = 0;
-		local users = nil;
+		local users = {};
 		for username, user in pairs(hosts[data.to].sessions or {}) do
 			if (max_items ~= nil) and (count >= max_items) then
 				break;
 			end
-			users = ((users and users.."\n") or "")..(username.."@"..data.to);
+			users[#users+1] = username.."@"..data.to;
 			count = count + 1;
+			if fields.details then
+				for resource, session in pairs(user.sessions or {}) do
+					local status, priority = "unavailable", tostring(session.priority or "-");
+					if session.presence then
+						status = session.presence:child_with_name("show");
+						if status then
+							status = status:get_text() or "[invalid!]";
+						else
+							status = "available";
+						end
+					end
+					users[#users+1] = " - "..resource..": "..status.."("..priority..")";
+				end
+			end
 		end
-		return { status = "completed", result = {layout = get_online_users_result_layout, data = {onlineuserjids=users}} };
+		return { status = "completed", result = {layout = get_online_users_result_layout, data = {onlineuserjids=t_concat(users, "\n")}} };
 	else
 		return { status = "executing", form = get_online_users_layout }, "executing";
 	end
