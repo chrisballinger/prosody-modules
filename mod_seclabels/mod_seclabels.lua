@@ -5,6 +5,12 @@ local xmlns_label_catalog = "urn:xmpp:sec-label:catalog:0";
 
 module:add_feature(xmlns_label);
 
+module:hook("account-disco-info", function(event)
+	local stanza = event.stanza;
+	stanza:tag('feature', {var=xmlns_label}):up();
+	stanza:tag('feature', {var=xmlns_label_catalog}):up();
+end);
+
 local labels = {
 	Classified = {
 		SECRET = { color = "black", bgcolor = "aqua", label = "THISISSECRET" };
