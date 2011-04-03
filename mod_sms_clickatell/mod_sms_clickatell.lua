@@ -49,9 +49,9 @@ local component_host = module:get_host();
 local component_name = module.name;
 local data_cache = {};
 
-local clickatell_api_id = module:get_option_string("clickatell_api_id");
+--local clickatell_api_id = module:get_option_string("clickatell_api_id");
 local sms_message_prefix = module:get_option_string("sms_message_prefix") or "";
-local sms_source_number = module:get_option_string("sms_source_number") or "";
+--local sms_source_number = module:get_option_string("sms_source_number") or "";
 
 --local users = setmetatable({}, {__mode="k"});
 
@@ -216,7 +216,7 @@ function clickatell_send_sms(user, number, message)
 	
 	local sms_message = sms_message_prefix..message;
 	local clickatell_base_url = "https://api.clickatell.com/http/sendmsg";
-	local params = {user=user.data.username, password=user.data.password, api_id=clickatell_api_id, from=sms_source_number, to=number, text=sms_message};
+	local params = {user=user.data.username, password=user.data.password, api_id=user.data.api_id, from=user.data.source_number, to=number, text=sms_message};
 	local query_string = "";
 
 	for param, data in pairs(params) do
@@ -298,11 +298,23 @@ function iq_register(origin, stanza)
 		local reply = data_cache.registration_form;
 		if reply == nil then
 			reply = st.iq({type='result', from=stanza.attr.to or component_host})
-					:tag("query", { xmlns="jabber:iq:register" })
-					:tag("instructions"):text("Enter the Clickatell username and password to use with API ID "..clickatell_api_id):up()
-					:tag("username"):up()
-					:tag("password"):up();
+				:tag("query", {xmlns="jabber:iq:register"})
+				:tag("instructions"):text("Use the enclosed form to register."):up();
+			reply:tag("x", {xmlns="jabber:x:data", type='form'});
+			reply:tag("title"):text('SMS Gateway Registration: Clickatell'):up();
+			reply:tag("instructions"):text("Enter your Clickatell username, password, API ID, and a source number for your text messages in international format (phone field)"):up();
+			reply:tag("field", {type='hidden', var='FORM_TYPE'})
+				:tag("value"):text('jabber:iq:register'):up():up();
+			reply:tag("field", {type='text-single', label='Username', var='username'})
+				:tag("required"):up():up();
+			reply:tag("field", {type='text-private', label='Password', var='password'})
+				:tag("required"):up():up();
+			reply:tag("field", {type='text-single', label='API ID', var='api_id'})
+				:tag("required"):up():up();
+			reply:tag("field", {type='text-single', label='Source Number', var='source_number'})
+				:tag("required"):up():up();
 			data_cache.registration_form = reply;
+			--module:log("info", "Register stanza to go: "..reply:pretty_print());
 		end
 		reply.attr.id = stanza.attr.id;
 		reply.attr.to = stanza.attr.from;
@@ -311,24 +323,32 @@ function iq_register(origin, stanza)
 		local from = {};
 		from.node, from.host, from.resource = jid_split(stanza.attr.from);
 		local bjid = from.node.."@"..from.host;
-		local username, password = "", "";
+		local username, password, api_id, source_number = "", "", "", "";
 		local reply;
-		for _, tag in ipairs(stanza.tags[1].tags) do
-			if tag.name == "remove" then
-				iq_success(origin, stanza);
-				return true;
+		for tag in stanza.tags[1].tags[1]:childtags() do
+--			if tag.name == "remove" then
+--				iq_success(origin, stanza);
+--				return true;
+--			end
+			if tag.attr.var == "username" then
+				username = tag.tags[1][1];
 			end
-			if tag.name == "username" then
-				username = tag[1];
+			if tag.attr.var == "password" then
+				password = tag.tags[1][1];
 			end
-			if tag.name == "password" then
-				password = tag[1];
+			if tag.attr.var == "api_id" then
+				api_id = tag.tags[1][1];
+			end
+			if tag.attr.var == "source_number" then
+				source_number = tag.tags[1][1];
 			end
 		end
-		if username ~= nil and password ~= nil then
+		if username ~= nil and password ~= nil and api_id ~= nil then
 			users[bjid] = smsuser:register(bjid);
 			users[bjid].data.username = username;
 			users[bjid].data.password = password;
+			users[bjid].data.api_id = api_id;
+			users[bjid].data.source_number = source_number;
 			users[bjid]:store();
 		end
 		iq_success(origin, stanza);
