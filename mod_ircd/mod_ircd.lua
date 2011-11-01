@@ -108,9 +108,9 @@ function irc_listener.ondisconnect(conn, error)
         for _, room in pairs(session.rooms) do
                 room:leave("Disconnected");
         end
-        if jids[session.full_jid] then jids[session.full_jid] = nil end
-        if nicks[session.nick] then nicks[session.nick] = nil end
-        if sessions[conn] then sessions[conn] = nil end
+        jids[session.full_jid] = nil
+        nicks[session.nick] = nil
+        sessions[conn] = nil
 end
 
 function commands.NICK(session, nick)
