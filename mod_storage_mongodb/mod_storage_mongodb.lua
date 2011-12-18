@@ -3,7 +3,9 @@ local setmetatable = setmetatable;
 
 local params = assert ( module:get_option("mongodb") , "mongodb configuration not found" );
 
+prosody.unlock_globals();
 local mongo = require "mongo";
+prosody.lock_globals();
 
 local conn
 
@@ -48,7 +50,9 @@ function driver:open(store, typ)
 	if not conn then
 		conn = assert ( mongo.Connection.New ( true ) );
 		assert ( conn:connect ( params.server ) );
-		assert ( conn:auth ( params ) );
+		if params.username then
+			assert ( conn:auth ( params ) );
+		end
 	end
 
 	if not typ then -- default key-value store
