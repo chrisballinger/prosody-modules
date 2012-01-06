@@ -5,8 +5,6 @@ local xmlns_carbons = "urn:xmpp:carbons:1";
 local xmlns_forward = "urn:xmpp:forward:0";
 local host_sessions = hosts[module.host].sessions;
 
--- TODO merge message handlers into one somehow
-
 module:hook("iq/self/"..xmlns_carbons..":enable", function(event)
 	local origin, stanza = event.origin, event.stanza;
 	if stanza.attr.type == "set" then
