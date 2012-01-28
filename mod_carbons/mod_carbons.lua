@@ -54,12 +54,18 @@ local function message_handler(event, c2s)
 		user_sessions = host_sessions[username];
 		if resource then
 			no_carbon_to[resource] = true;
-		else
+		elseif user_sessions then
 			local top_resources = user_sessions.top_resources;
-			for _, session in ipairs(top_resources) do
-				no_carbon_to[session.resource] = true;
+			if top_resources then
+				for _, session in ipairs(top_resources) do
+					no_carbon_to[session.resource] = true;
+				end
 			end
 		end
+	end
+
+	if not user_sessions then
+		return -- No use in sending carbons to an offline user
 	end
 
 	if not c2s and stanza:get_child("private", xmlns_carbons) then
