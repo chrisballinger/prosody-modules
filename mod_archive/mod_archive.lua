@@ -455,39 +455,43 @@ local function list_handler(event)
     local count = table.getn(resset);
     if count > 0 then
         list_reverse(resset);
-        local max = elem.tags[1]:child_with_name("max");
-        if max then
-            max = tonumber(max:get_text()) or DEFAULT_MAX;
-        else max = DEFAULT_MAX; end
-        local after = elem.tags[1]:child_with_name("after");
-        local before = elem.tags[1]:child_with_name("before");
-        local index = elem.tags[1]:child_with_name("index");
-        local s, e = 1, 1+max;
-        if after then
-            after = after:get_text();
-            s = find_coll(resset, after);
-            if not s then -- not found
-                origin.send(st.error_reply(stanza, "cancel", "item-not-found"));
-                return true;
-            end
-            s = s + 1;
-            e = s + max;
-        elseif before then
-            before = before:get_text();
-            if not before or before == '' then -- the last page
-                e = count + 1;
-                s = e - max;
-            else
-                e = find_coll(resset, before);
-                if not e then -- not found
+        local s, e = 1, 1+DEFAULT_MAX;
+        local rsmset = elem:child_with_name("set")
+        if rsmset then
+            local max = elem.tags[1]:child_with_name("max");
+            if max then
+                max = tonumber(max:get_text()) or DEFAULT_MAX;
+            else max = DEFAULT_MAX; end
+            e = 1 + max
+            local after = elem.tags[1]:child_with_name("after");
+            local before = elem.tags[1]:child_with_name("before");
+            local index = elem.tags[1]:child_with_name("index");
+            if after then
+                after = after:get_text();
+                s = find_coll(resset, after);
+                if not s then -- not found
                     origin.send(st.error_reply(stanza, "cancel", "item-not-found"));
                     return true;
                 end
-                s = e - max;
+                s = s + 1;
+                e = s + max;
+            elseif before then
+                before = before:get_text();
+                if not before or before == '' then -- the last page
+                    e = count + 1;
+                    s = e - max;
+                else
+                    e = find_coll(resset, before);
+                    if not e then -- not found
+                        origin.send(st.error_reply(stanza, "cancel", "item-not-found"));
+                        return true;
+                    end
+                    s = e - max;
+                end
+            elseif index then
+                s = tonumber(index:get_text()) + 1; -- 0-based
+                e = s + max;
             end
-        elseif index then
-            s = tonumber(index:get_text()) + 1; -- 0-based
-            e = s + max;
         end
         if s < 1 then s = 1; end
         if e > count + 1 then e = count + 1; end
@@ -538,37 +542,42 @@ local function retrieve_handler(event)
     local reply = st.reply(stanza):tag('chat', collection.attr);
     local count = table.getn(resset);
     if count > 0 then
-        local max = elem.tags[1]:child_with_name("max");
-        if max then
-            max = tonumber(max:get_text()) or DEFAULT_MAX;
-        else max = DEFAULT_MAX; end
-        local after = elem.tags[1]:child_with_name("after");
-        local before = elem.tags[1]:child_with_name("before");
-        local index = elem.tags[1]:child_with_name("index");
-        local s, e = 1, 1+max;
-        if after then
-            after = tonumber(after:get_text());
-            if not after or after < 1 or after > count then -- not found
-                origin.send(st.error_reply(stanza, "cancel", "item-not-found"));
-                return true;
+        local s, e = 1, 1+DEFAULT_MAX;
+        local rsmset = elem:child_with_name("set")
+        if rsmset then
+            local max = elem.tags[1]:child_with_name("max");
+            if max then
+                max = tonumber(max:get_text()) or DEFAULT_MAX;
+            else max = DEFAULT_MAX; end
+            e = 1+max
+            local after = elem.tags[1]:child_with_name("after");
+            local before = elem.tags[1]:child_with_name("before");
+            local index = elem.tags[1]:child_with_name("index");
+            --local s, e = 1, 1+max;
+            if after then
+                after = tonumber(after:get_text());
+                if not after or after < 1 or after > count then -- not found
+                    origin.send(st.error_reply(stanza, "cancel", "item-not-found"));
+                    return true;
+                end
+                s = after + 1;
+                e = s + max;
+            elseif before then
+                before = tonumber(before:get_text());
+                if not before then -- the last page
+                    e = count + 1;
+                    s = e - max;
+                elseif before < 1 or before > count then
+                    origin.send(st.error_reply(stanza, "cancel", "item-not-found"));
+                    return true;
+                else
+                    e = before;
+                    s = e - max;
+                end
+            elseif index then
+                s = tonumber(index:get_text()) + 1; -- 0-based
+                e = s + max;
             end
-            s = after + 1;
-            e = s + max;
-        elseif before then
-            before = tonumber(before:get_text());
-            if not before then -- the last page
-                e = count + 1;
-                s = e - max;
-            elseif before < 1 or before > count then
-                origin.send(st.error_reply(stanza, "cancel", "item-not-found"));
-                return true;
-            else
-                e = before;
-                s = e - max;
-            end
-        elseif index then
-            s = tonumber(index:get_text()) + 1; -- 0-based
-            e = s + max;
         end
         if s < 1 then s = 1; end
         if e > count + 1 then e = count + 1; end
