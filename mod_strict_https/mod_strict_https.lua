@@ -5,7 +5,7 @@ module:set_global();
 
 local http_server = require "net.http.server";
 
-local hsts_header = module:get_option_string("hsts_header", "max_age=31556952"); -- This means "Don't even try to access without HTTPS for a year"
+local hsts_header = module:get_option_string("hsts_header", "max-age=31556952"); -- This means "Don't even try to access without HTTPS for a year"
 
 local _old_send_response;
 local _old_fire_event;
