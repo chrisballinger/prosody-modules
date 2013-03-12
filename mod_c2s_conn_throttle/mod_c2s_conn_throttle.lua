@@ -1,9 +1,5 @@
 -- Clients Connection Throttler.
--- Usage:
--- Add the module into modules loaded into the virtual host section
---
--- cthrottler_logins_count = 3 -> number of logins attempt allowed
--- cthrottler_time = 120 -> in x seconds
+-- (C) 2012-2013, Marco Cirillo (LW.Org)
 
 local time = os.time
 local in_count = {}
