@@ -106,7 +106,7 @@ function generate_page(event, display_options)
 	})
 end
 
-function register_user(form)
+function register_user(form, origin)
 	local prepped_username = nodeprep(form.username);
 	if not prepped_username then
 		return nil, "Username contains forbidden characters";
@@ -137,7 +137,8 @@ function register_user(form)
 		module:fire_event("user-registered", {
 			username = prepped_username,
 			host = module.host,
-			source = module.name
+			source = module.name,
+			ip = origin.conn:ip(),
 		});
 	end
 	return ok, err;
@@ -161,7 +162,7 @@ function handle_form(event)
 	local form = http.formdecode(request.body);
 	verify_captcha(request, form, function (ok, err)
 		if ok then
-			local register_ok, register_err = register_user(form);
+			local register_ok, register_err = register_user(form, request);
 			response:send(generate_register_response(event, form, register_ok, register_err));
 		else
 			response:send(generate_page(event, { register_error = err }));
