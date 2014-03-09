@@ -35,7 +35,7 @@ local _try_connect = s2sout.try_connect;
 function s2sout.try_connect(host_session, connect_host, connect_port, err)
 	local srv_hosts = host_session.srv_hosts;
 	local srv_choice = host_session.srv_choice;
-	if srv_hosts and srv_hosts.answer.secure and not srv_hosts[srv_choice].dane then
+	if srv_hosts and srv_hosts.answer.secure and srv_hosts[srv_choice].dane == nil then
 		srv_hosts[srv_choice].dane = dns_lookup(function(answer)
 			if answer and ( #answer > 0 or answer.bogus ) then
 				srv_hosts[srv_choice].dane = answer;
@@ -128,6 +128,7 @@ function module.add_host(module)
 
 	-- DANE for s2sin
 	-- Looks for TLSA at the same QNAME as the SRV record
+	-- FIXME This has a race condition
 	module:hook("s2s-stream-features", function(event)
 		local origin = event.origin;
 		if not origin.from_host or origin.dane ~= nil then return end
@@ -138,8 +139,7 @@ function module.add_host(module)
 			else
 				origin.dane = false;
 			end
-			-- "blocking" until TLSA reply, but no race condition
-		end, ("_xmpp-server._tcp.%s"):format(origin.from_host), "TLSA");
+		end, ("_xmpp-server._tcp.%s."):format(origin.from_host), "TLSA");
 	end, 1);
 end
 
