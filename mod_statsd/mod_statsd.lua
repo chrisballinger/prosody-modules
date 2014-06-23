@@ -15,7 +15,7 @@ local sock = socket.udp()
 sock:setpeername(options.hostname or "127.0.0.1", options.port or 8125)
 
 -- Metrics are namespaced by ".", and seperated by newline
-function clean(s) return (s:gsub("[%.\n]", "_")) end
+function clean(s) return (s:gsub("[%.:\n]", "_")) end
 
 -- A 'safer' send function to expose
 function send(s) return sock:send(s) end
