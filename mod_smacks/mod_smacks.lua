@@ -72,7 +72,6 @@ local function outgoing_stanza_filter(stanza, session)
 	local is_stanza = stanza.attr and not stanza.attr.xmlns;
 	if is_stanza and not stanza._cached then -- Stanza in default stream namespace
 		local queue = session.outgoing_stanza_queue;
-		module:log("debug", "st.clone( %s ) -- %s a stanza", tostring(stanza), is_stanza and "is" or "is not");
 		local cached_stanza = st.clone(stanza);
 		cached_stanza._cached = true;
 
@@ -82,6 +81,10 @@ local function outgoing_stanza_filter(stanza, session)
 
 		queue[#queue+1] = cached_stanza;
 		session.log("debug", "#queue = %d", #queue);
+		if session.hibernating then
+			session.log("debug", "hibernating, stanza queued");
+			return ""; -- Hack to make session.send() not return nil
+		end
 		if #queue > max_unacked_stanzas then
 			module:add_timer(0, function ()
 				if not session.awaiting_ack then
@@ -90,12 +93,6 @@ local function outgoing_stanza_filter(stanza, session)
 				end
 			end);
 		end
-	end
-	if session.hibernating then
-		session.log("debug", "hibernating, stanza queued")
-		-- The session is hibernating, no point in sending the stanza
-		-- over a dead connection.  It will be delivered upon resumption.
-		return nil; -- or empty string?
 	end
 	return stanza;
 end
@@ -109,7 +106,6 @@ local function count_incoming_stanzas(stanza, session)
 end
 
 local function wrap_session(session, resume)
-	-- Overwrite process_stanza() and send()
 	local queue;
 	if not resume then
 		queue = {};
