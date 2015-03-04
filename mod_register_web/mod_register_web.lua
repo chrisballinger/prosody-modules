@@ -3,6 +3,8 @@ local nodeprep = require "util.encodings".stringprep.nodeprep;
 local usermanager = require "core.usermanager";
 local http = require "net.http";
 local path_sep = package.config:sub(1,1);
+local json = require "util.json".decode;
+local t_concat = table.concat;
 
 module:depends"http";
 
@@ -47,19 +49,18 @@ if next(captcha_options) ~= nil then
 		}));
 	end
 	function verify_captcha(request, form, callback)
-		http.request("https://www.google.com/recaptcha/api/verify", {
+		http.request("https://www.google.com/recaptcha/api/siteverify", {
 			body = http.formencode {
-				privatekey = captcha_options.recaptcha_private_key;
+				secret = captcha_options.recaptcha_private_key;
 				remoteip = request.conn:ip();
-				challenge = form.recaptcha_challenge_field;
-				response = form.recaptcha_response_field;
+				response = form["g-recaptcha-response"];
 			};
 		}, function (verify_result, code)
-			local verify_ok, verify_err = verify_result:match("^([^\n]+)\n([^\n]+)");
-			if verify_ok == "true" then
+			local result = json(verify_result);
+			if result.success == true then
 				callback(true);
 			else
-				callback(false, verify_err)
+				callback(false, t_concat(result["error-codes"]));
 			end
 		end);
 	end
