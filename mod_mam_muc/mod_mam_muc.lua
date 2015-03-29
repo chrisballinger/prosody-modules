@@ -274,10 +274,10 @@ module:hook("muc-get-history", function (event)
 		item:tag("delay", { xmlns = "urn:xmpp:delay", from = room_jid, stamp = timestamp(when) }):up(); -- XEP-0203
 		if maxchars then
 			chars = #tostring(item);
-			if chars + charcount > maxchars then
+			if maxchars - chars < 0 then
 				break
 			end
-			charcount = charcount + chars;
+			charcount = maxchars - chars;
 		end
 		history[i], i = item, i+1;
 		-- module:log("debug", tostring(item));
