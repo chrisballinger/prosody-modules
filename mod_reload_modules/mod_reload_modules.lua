@@ -26,7 +26,7 @@ function reload_all()
 
 	for module_name in set.intersection(modules,configured_modules) do
 		module:log("debug", "Reloading %s", module_name);
-		mm.reload(module_name);
+		mm.reload(module.host, module_name);
 	end
 end
 
