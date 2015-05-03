@@ -52,16 +52,18 @@ module:hook("iq/self/"..xmlns_mam..":prefs", function(event)
 	if stanza.attr.type == "get" then
 		local prefs = prefs_to_stanza(get_prefs(user));
 		local reply = st.reply(stanza):add_child(prefs);
-		return origin.send(reply);
+		origin.send(reply);
 	else -- type == "set"
 		local new_prefs = stanza:get_child("prefs", xmlns_mam);
 		local prefs = prefs_from_stanza(new_prefs);
 		local ok, err = set_prefs(user, prefs);
 		if not ok then
-			return origin.send(st.error_reply(stanza, "cancel", "internal-server-error", "Error storing preferences: "..tostring(err)));
+			origin.send(st.error_reply(stanza, "cancel", "internal-server-error", "Error storing preferences: "..tostring(err)));
+		else
+			origin.send(st.reply(stanza));
 		end
-		return origin.send(st.reply(stanza));
 	end
+	return true;
 end);
 
 local query_form = dataform {
@@ -74,7 +76,8 @@ local query_form = dataform {
 -- Serve form
 module:hook("iq-get/self/"..xmlns_mam..":query", function(event)
 	local origin, stanza = event.origin, event.stanza;
-	return origin.send(st.reply(stanza):add_child(query_form:form()));
+	origin.send(st.reply(stanza):add_child(query_form:form()));
+	return true;
 end);
 
 -- Handle archive queries
@@ -90,7 +93,8 @@ module:hook("iq-set/self/"..xmlns_mam..":query", function(event)
 		local err;
 		form, err = query_form:data(form);
 		if err then
-			return origin.send(st.error_reply(stanza, "modify", "bad-request", select(2, next(err))))
+			origin.send(st.error_reply(stanza, "modify", "bad-request", select(2, next(err))))
+			return true;
 		end
 		qwith, qstart, qend = form["with"], form["start"], form["end"];
 		qwith = qwith and jid_bare(qwith); -- dataforms does jidprep
@@ -127,7 +131,8 @@ module:hook("iq-set/self/"..xmlns_mam..":query", function(event)
 	});
 
 	if not data then
-		return origin.send(st.error_reply(stanza, "cancel", "internal-server-error", err));
+		origin.send(st.error_reply(stanza, "cancel", "internal-server-error", err));
+		return true;
 	end
 	local count = err;
 
@@ -157,10 +162,11 @@ module:hook("iq-set/self/"..xmlns_mam..":query", function(event)
 	module:log("debug", "Archive query %s completed", tostring(qid));
 
 	if reverse then first, last = last, first; end
-	return origin.send(st.message(msg_reply_attr)
+	origin.send(st.message(msg_reply_attr)
 		:tag("fin", { xmlns = xmlns_mam, queryid = qid })
 			:add_child(rsm.generate {
 				first = first, last = last, count = count }));
+	return true;
 end);
 
 local function has_in_roster(user, who)
