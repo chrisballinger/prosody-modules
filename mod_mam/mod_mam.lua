@@ -41,7 +41,7 @@ if not archive or archive.name == "null" then
 	module:log("error", "Could not open archive storage");
 	return;
 elseif not archive.find then
-	module:log("error", "mod_%s does not support archiving, switch to mod_storage_sql2", archive._provided_by);
+	module:log("error", "mod_%s does not support archiving", archive._provided_by);
 	return;
 end
 
