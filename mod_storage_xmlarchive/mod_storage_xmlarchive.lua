@@ -129,16 +129,18 @@ function archive:find(username, query)
 				end
 			end
 
+			local q_with, q_start, q_end = query.with, query.start, query["end"];
 			for i = first_item, last_item, step do
 				local item = items[i];
+				local i_when, i_with = item.when, item.with;
 				if not item then
 					module:log("warn", "data[%q][%d] is nil", dates[d], i);
 					break;
 				end
 				if xmlfile and in_range
-				and (not query.with or item.with == query.with)
-				and (not query.start or item.when >= query.start)
-				and (not query["end"] or item.when <= query["end"]) then
+				and (not q_with or i_with == q_with)
+				and (not q_start or i_when >= q_start)
+				and (not q_end or i_when <= q_end) then
 					count = count + 1;
 					first_item = i + step;
 
