@@ -24,6 +24,7 @@ local archive_mt = { __index = archive };
 
 function archive:append(username, _, when, with, data)
 	if getmetatable(data) ~= st.stanza_mt then
+		module:log("error", "Attempt to store non-stanza object, traceback: %s", debug.traceback());
 		return nil, "unsupported-datatype";
 	end
 	username = username or "@";
