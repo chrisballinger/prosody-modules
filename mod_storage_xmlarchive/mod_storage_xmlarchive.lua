@@ -12,8 +12,7 @@ local function fallocate(f, offset, len)
 	if not ok then
 		return ok, msg;
 	end
-	f:seek("set", offset);
-	return true;
+	return f:seek("set", offset);
 end;
 pcall(function()
 	local pposix = require "util.pposix";
