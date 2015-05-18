@@ -14,6 +14,7 @@ local function fallocate(f, offset, len)
 	end
 	return f:seek("set", offset);
 end;
+
 pcall(function()
 	local pposix = require "util.pposix";
 	fallocate = pposix.fallocate or fallocate;
@@ -27,26 +28,27 @@ function archive:append(username, _, when, with, data)
 		module:log("error", "Attempt to store non-stanza object, traceback: %s", debug.traceback());
 		return nil, "unsupported-datatype";
 	end
+
 	username = username or "@";
 	data = tostring(data) .. "\n";
+
 	local day = dt.date(when);
 	local filename = dm.getpath(username.."@"..day, module.host, self.store, "xml", true);
+
 	local ok, err;
 	local f = io.open(filename, "r+");
 	if not f then
-		f, err = io.open(filename, "w");
-		if not f then return nil, err; end
+		f, err = io.open(filename, "w");     if not f then return nil, err; end
 		ok, err = dm.list_append(username, module.host, self.store, day);
 		if not ok then return nil, err; end
 	end
-	local offset = f and f:seek("end");
-	ok, err = fallocate(f, offset, #data);
-	if not ok then return nil, err; end
-	f:seek("set", offset);
-	ok, err = f:write(data);
-	if not ok then return nil, err; end
-	ok, err = f:close();
-	if not ok then return nil, err; end
+
+	local offset = f:seek("end"); -- Seek to the end and collect current file length
+	-- then make sure there is enough free space for what we're about to add
+	ok, err = fallocate(f, offset, #data); if not ok then return nil, err; end
+	ok, err = f:write(data);               if not ok then return nil, err; end
+	ok, err = f:close();                   if not ok then return nil, err; end
+
 	local id = day .. "-" .. hmac_sha256(username.."@"..day.."+"..offset, data, true):sub(-16);
 	ok, err = dm.list_append(username.."@"..day, module.host, self.store, { id = id, when = when, with = with, offset = offset, length = #data });
 	if not ok then return nil, err; end
