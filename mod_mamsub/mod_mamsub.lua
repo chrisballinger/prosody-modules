@@ -47,7 +47,8 @@ module:hook("iq-set/self/"..xmlns_mamsub..":unsubscribe", function (event)
 end);
 
 module:hook("archive-message-added", function (event)
-	local mamsub_sessions = host_sessions[event.for_user].mamsub_sessions;
+	local user_session = host_sessions[event.for_user];
+	local mamsub_sessions = user_session and user_session.mamsub_sessions;
 	if not mamsub_sessions then return end;
 
 	local for_broadcast = st.message():tag("mamsub", { xmlns = xmlns_mamsub })
