@@ -92,13 +92,16 @@ local function handle_get(event)
 		data = legacy_storage:get(username);
 		data = data and st.deserialize(data);
 		if data then
-			return origin.send(st.reply(stanza):add_child(data));
+			origin.send(st.reply(stanza):add_child(data));
+			return true;
 		end
 	end
 	if not data then
-		return origin.send(st.error_reply(stanza, "cancel", "item-not-found"));
+		origin.send(st.error_reply(stanza, "cancel", "item-not-found"));
+		return true;
 	end
-	return origin.send(st.reply(stanza):add_child(vcard.to_xep54(data)));
+	origin.send(st.reply(stanza):add_child(vcard.to_xep54(data)));
+	return true;
 end
 
 local function handle_set(event)
@@ -108,20 +111,23 @@ local function handle_set(event)
 	local to = stanza.attr.to;
 	if to then
 		if not is_admin(jid_bare(stanza.attr.from), module.host) then
-			return origin.send(st.error_reply(stanza, "auth", "forbidden"));
+			origin.send(st.error_reply(stanza, "auth", "forbidden"));
+			return true;
 		end
 		username = jid_split(to);
 	end
 	local ok, err = storage:set(username, data);
 	if not ok then
-		return origin.send(st.error_reply(stanza, "cancel", "internal-server-error", err));
+		origin.send(st.error_reply(stanza, "cancel", "internal-server-error", err));
+		return true;
 	end
 
 	if pep_plus and username then
 		update_pep(username, data);
 	end
 
-	return origin.send(st.reply(stanza));
+	origin.send(st.reply(stanza));
+	return true;
 end
 
 module:hook("iq-get/bare/vcard-temp:vCard", handle_get);
@@ -186,9 +192,11 @@ if vcard.to_vcard4 then
 		local username = jid_split(stanza.attr.to) or origin.username;
 		local data = storage:get(username);
 		if not data then
-			return origin.send(st.error_reply(stanza, "cancel", "item-not-found"));
+			origin.send(st.error_reply(stanza, "cancel", "item-not-found"));
+			return true;
 		end
-		return origin.send(st.reply(stanza):add_child(vcard.to_vcard4(data)));
+		origin.send(st.reply(stanza):add_child(vcard.to_vcard4(data)));
+		return true;
 	end);
 
 	if vcard.from_vcard4 then
@@ -196,14 +204,17 @@ if vcard.to_vcard4 then
 			local origin, stanza = event.origin, event.stanza;
 			local ok, err = storage:set(origin.username, vcard.from_vcard4(stanza.tags[1]));
 			if not ok then
-				return origin.send(st.error_reply(stanza, "cancel", "internal-server-error", err));
+				origin.send(st.error_reply(stanza, "cancel", "internal-server-error", err));
+				return true;
 			end
-			return origin.send(st.reply(stanza));
+			origin.send(st.reply(stanza));
+			return true;
 		end);
 	else
 		module:hook("iq-set/self/urn:ietf:params:xml:ns:vcard-4.0:vcard", function(event)
 			local origin, stanza = event.origin, event.stanza;
-			return origin.send(st.error_reply(stanza, "cancel", "feature-not-implemented"));
+			origin.send(st.error_reply(stanza, "cancel", "feature-not-implemented"));
+			return true;
 		end);
 	end
 end
