@@ -87,8 +87,12 @@ local function handle_get(event)
 	local username = origin.username;
 	local to = stanza.attr.to;
 	if to then username = jid_split(to); end
-	local data = storage:get(username);
+	local data, err = storage:get(username);
 	if not data then
+		if err then
+			origin.send(st.error_reply(stanza, "cancel", "internal-server-error", err));
+			return true;
+		end
 		data = legacy_storage:get(username);
 		data = data and st.deserialize(data);
 		if data then
