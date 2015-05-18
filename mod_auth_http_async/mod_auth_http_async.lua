@@ -7,7 +7,6 @@
 -- COPYING file in the source package for more information.
 --
 
-local usermanager = require "core.usermanager";
 local new_sasl = require "util.sasl".new;
 local base64 = require "util.encodings".base64.encode;
 local waiter =require "util.async".waiter;
@@ -66,7 +65,7 @@ end
 function provider.get_sasl_handler()
 	return new_sasl(host, {
 		plain_test = function(sasl, username, password, realm)
-			return usermanager.test_password(username, realm, password), true;
+			return provider.test_password(username, realm, password), true;
 		end
 	});
 end
