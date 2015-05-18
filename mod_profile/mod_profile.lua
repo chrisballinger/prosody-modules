@@ -1,7 +1,8 @@
 -- mod_profile
 
 local st = require"util.stanza";
-local jid_split, jid_bare = import("util.jid", "split", "bare");
+local jid_split = require"util.jid".split;
+local jid_bare = require"util.jid".bare;
 local is_admin = require"core.usermanager".is_admin;
 local vcard = require"util.vcard";
 local base64 = require"util.encodings".base64;
