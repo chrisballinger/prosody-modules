@@ -50,7 +50,7 @@ function archive:append(username, _, when, with, data)
 	ok, err = f:close();                   if not ok then return nil, err; end
 
 	local id = day .. "-" .. hmac_sha256(username.."@"..day.."+"..offset, data, true):sub(-16);
-	ok, err = dm.list_append(username.."@"..day, module.host, self.store, { id = id, when = when, with = with, offset = offset, length = #data });
+	ok, err = dm.list_append(username.."@"..day, module.host, self.store, { id = id, when = dt.datetime(when), with = with, offset = offset, length = #data });
 	if not ok then return nil, err; end
 	return id;
 end
@@ -133,6 +133,13 @@ function archive:find(username, query)
 			for i = first_item, last_item, step do
 				local item = items[i];
 				local i_when, i_with = item.when, item.with;
+				if type(i_when) == "string" then
+					i_when = dt.parse(i_when);
+				end
+				if type(i_when) ~= "number" then
+					module:log("warn", "data[%q][%d].when is invalid", dates[d], i);
+					break;
+				end
 				if not item then
 					module:log("warn", "data[%q][%d] is nil", dates[d], i);
 					break;
