@@ -152,7 +152,7 @@ function open(_, store, typ)
 		db = assert(gdbm.open(db_path, "c"));
 		cache[db_path] = db;
 	end
-	return setmetatable({ _db = db; _path = db_path; store = store, typ = type }, driver_mt);
+	return setmetatable({ _db = db; _path = db_path; store = store, type = typ }, driver_mt);
 end
 
 function purge(_, user)
