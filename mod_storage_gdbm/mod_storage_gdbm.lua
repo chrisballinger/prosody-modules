@@ -170,6 +170,7 @@ end
 function module.unload()
 	for db_path, db in pairs(cache) do
 		module:log("debug", "Closing db at %q", db_path);
+		gdbm.reorganize(db);
 		gdbm.sync(db);
 		gdbm.close(db);
 	end
