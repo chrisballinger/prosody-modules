@@ -44,7 +44,7 @@ li:hover .time{opacity:1;}
 <header>
 <h1 title="xmpp:{jid?}">{title}</h1>
 <nav>{links#
-<a class="{rel?}" href="{href}" rel="{rel?}">{text}</a>}
+<a class="{item.rel?}" href="{item.href}" rel="{item.rel?}">{item.text}</a>}
 </nav>
 </header>
 <hr>
@@ -52,33 +52,33 @@ li:hover .time{opacity:1;}
 <nav>
 <dl class="room-list">
 {rooms#
-<dt class="name"><a href="{href}">{name}</a></dt>
-<dd class="description">{description?}</dd>}
+<dt class="name"><a href="{item.href}">{item.name}</a></dt>
+<dd class="description">{item.description?}</dd>}
 </dl>
 {years#
-<h2 id="{year}">{year}</h2>
-{months#
-<table id="{month}-{year}">
-<caption>{month}</caption>
-<tr><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th><th>Sun</th></tr>{weeks#
-<tr>{days#<td>{href&<a href="{href}">}{day?&nbsp;}{href&</a>}</td>}</tr>}
+<h2 id="{item.year}">{item.year}</h2>
+{item.months#
+<table id="{item.month}-{item.year}">
+<caption>{item.month}</caption>
+<tr><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th><th>Sun</th></tr>{item.weeks#
+<tr>{item.days#<td>{item.href&<a href="{item.href}">}{item.day?&nbsp;}{item.href&</a>}</td>}</tr>}
 </table>
 }
 }
 </nav>
 <ol class="chat-logs">{lines#
-<li class="{st_name} {st_type?}" id="{key}">
-<a class="time" href="#{key}"><time datetime="{datetime}">{time}</time></a>
-<b class="nick">{nick}</b>
-<em class="verb">{verb?}</em>
-<q class="body">{body?}</q>
+<li class="{item.st_name} {item.st_type?}" id="{item.key}">
+<a class="time" href="#{item.key}"><time datetime="{item.datetime}">{item.time}</time></a>
+<b class="nick">{item.nick}</b>
+<em class="verb">{item.verb?}</em>
+<q class="body">{item.body?}</q>
 </li>}
 </ol>
 </div>
 <hr>
 <footer>
 <nav>{links#
-<a class="{rel?}" href="{href}" rel="{rel?}">{text}</a>}
+<a class="{item.rel?}" href="{item.href}" rel="{item.rel?}">{item.text}</a>}
 </nav>
 <br>
 <div class="powered-by">Prosody</div>
