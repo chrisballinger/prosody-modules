@@ -1,4 +1,3 @@
-local st = require "util.stanza";
 local mt = require"util.multitable";
 local datetime = require"util.datetime";
 local jid_split = require"util.jid".split;
@@ -7,9 +6,8 @@ local uuid = require"util.uuid".generate;
 local it = require"util.iterators";
 local gettime = require"socket".gettime;
 local url = require"socket.url";
-local xml_escape = st.xml_escape;
-local t_concat = table.concat;
 local os_time, os_date = os.time, os.date;
+local render = require"util.interpolation".new("%b{}", require"util.stanza".xml_escape);
 
 local archive = module:open_store("muc_log", "archive");
 
@@ -32,45 +30,6 @@ local function get_room(name)
 end
 
 module:depends"http";
-
-local function render(template, values)
-	-- This function takes a string template and a table of values.
-	-- Sequences like {name} in the template string are substituted
-	-- with values from the table, optionally depending on a modifier
-	-- symbol.
-	--
-	-- Variants are:
-	-- {name} is substituted for values["name"] and is XML escaped
-	-- {name? sub-template } renders a sub-template if values["name"] is false-ish
-	-- {name& sub-template } renders a sub-template if values["name"] is true-ish
-	-- {name# sub-template } renders a sub-template using an array of values
-	-- {name!} is substituted *without* XML escaping
-	return (template:gsub("%b{}", function (block)
-		local name, opt, e = block:sub(2, -2):match("^([%a_][%w_]*)(%p?)()");
-		local value = values[name];
-		if opt == '#' then
-			if not value or not value[1] then return ""; end
-			local out, subtpl = {}, block:sub(e+1, -2);
-			for i=1, #value do
-				out[i] = render(subtpl, value[i]);
-			end
-			return t_concat(out);
-		elseif opt == '&' then
-			if not value then return ""; end
-			return render(block:sub(e+1, -2), values);
-		elseif opt == '?' and not value then
-			return render(block:sub(e+1, -2), values);
-		elseif value ~= nil then
-			if type(value) ~= "string" then
-				value = tostring(value);
-			end
-			if opt ~= '!' then
-				return xml_escape(value);
-			end
-			return value;
-		end
-	end));
-end
 
 local template;
 do
