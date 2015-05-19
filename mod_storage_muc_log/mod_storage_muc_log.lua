@@ -48,7 +48,10 @@ local function st_with(tag)
 	return with and tag.name .. "<" .. with or tag.name;
 end
 
-function driver:append(node, key, when, with, stanza)
+function driver:append(node, key, stanza, when, with)
+	if type(when) ~= "number" then
+		value, when, with = when, with, value;
+	end
 	local today = os_date(datef, when);
 	local now = os_date(timef, when);
 	local data = data_load(node, host, datastore .. "/" .. today) or {};

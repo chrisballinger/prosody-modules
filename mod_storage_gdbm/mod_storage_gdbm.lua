@@ -73,7 +73,11 @@ local archive_mt = { __index = archive, suffix = ".adb" };
 archive.get = keyval.get;
 archive.set = keyval.set;
 
-function archive:append(username, key, when, with, value)
+function archive:append(username, key, value, when, with)
+	if type(when) ~= "number" then
+		value, when, with = when, with, value;
+	end
+
 	key = key or uuid();
 	local meta = self:get(username);
 	if not meta then

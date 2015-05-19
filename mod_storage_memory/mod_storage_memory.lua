@@ -42,7 +42,10 @@ end
 local archive_store = {};
 archive_store.__index = archive_store;
 
-function archive_store:append(username, key, when, with, value)
+function archive_store:append(username, key, value, when, with)
+	if type(when) ~= "number" then
+		value, when, with = when, with, value;
+	end
 	local a = self.store[username];
 	if not a then
 		a = {};
@@ -116,7 +119,7 @@ function archive_store:delete(username, query)
 		i = old[i];
 		t = i.when;
 		if not(qstart >= t and qend <= t and (not qwith or i.with == qwith)) then
-			self:append(username, i.key, t, i.with, i.value);
+			self:append(username, i.key, i.value, t, i.with);
 		end
 	end
 	if #new == 0 then
