@@ -161,7 +161,7 @@ function archive:find(username, query)
 					if result then
 						local stanza = result;
 						result = nil;
-						return item.id, stanza, item.when, item.with;
+						return item.id, stanza, i_when, i_with;
 					end
 				end
 				if (rev and item.id == query.after) or
