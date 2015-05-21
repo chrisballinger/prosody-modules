@@ -294,7 +294,10 @@ module:hook("s2s-check-certificate", function(event)
 							log("info", "DANE validated ok for %s using %s", host, tlsa:getUsage());
 							if use == 2 then -- DANE-TA
 								session.cert_identity_status = "valid";
-								session.cert_chain_status = "valid";
+								if cert_verify_identity(host, "xmpp-server", cert) then
+									session.cert_chain_status = "valid";
+									-- else -- TODO Check against SRV target?
+								end
 								-- for usage 0, PKIX-CA, identity and chain has to be valid already
 							end
 							match_found = true;
