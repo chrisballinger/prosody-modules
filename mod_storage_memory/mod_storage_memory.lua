@@ -44,7 +44,7 @@ archive_store.__index = archive_store;
 
 function archive_store:append(username, key, value, when, with)
 	if type(when) ~= "number" then
-		value, when, with = when, with, value;
+		when, with, value = value, when, with;
 	end
 	local a = self.store[username];
 	if not a then
