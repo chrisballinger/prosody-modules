@@ -75,7 +75,7 @@ archive.set = keyval.set;
 
 function archive:append(username, key, value, when, with)
 	if type(when) ~= "number" then
-		value, when, with = when, with, value;
+		when, with, value = value, when, with;
 	end
 
 	key = key or uuid();

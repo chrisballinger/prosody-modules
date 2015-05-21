@@ -23,9 +23,10 @@ end);
 local archive = {};
 local archive_mt = { __index = archive };
 
+local s = require"util.serialization".new("debug").serialize;
 function archive:append(username, _, data, when, with)
 	if type(when) ~= "number" then
-		data, when, with = when, with, data;
+		when, with, data = data, when, with;
 	end
 	if getmetatable(data) ~= st.stanza_mt then
 		module:log("error", "Attempt to store non-stanza object, traceback: %s", debug.traceback());

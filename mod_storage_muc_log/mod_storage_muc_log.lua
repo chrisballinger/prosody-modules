@@ -50,7 +50,7 @@ end
 
 function driver:append(node, key, stanza, when, with)
 	if type(when) ~= "number" then
-		stanza, when, with = when, with, stanza;
+		when, with, stanza = stanza, when, with;
 	end
 	local today = os_date(datef, when);
 	local now = os_date(timef, when);
