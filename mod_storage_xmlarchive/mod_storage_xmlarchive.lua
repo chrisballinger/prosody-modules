@@ -25,7 +25,7 @@ local archive_mt = { __index = archive };
 
 function archive:append(username, _, data, when, with)
 	if type(when) ~= "number" then
-		value, when, with = when, with, value;
+		data, when, with = when, with, data;
 	end
 	if getmetatable(data) ~= st.stanza_mt then
 		module:log("error", "Attempt to store non-stanza object, traceback: %s", debug.traceback());
