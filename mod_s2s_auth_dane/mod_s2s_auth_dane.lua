@@ -14,6 +14,8 @@
 -- No encryption offered
 -- Different hostname before and after STARTTLS - mod_s2s should complain
 -- Interaction with Dialback
+--
+-- luacheck: ignore module
 
 module:set_global();
 
