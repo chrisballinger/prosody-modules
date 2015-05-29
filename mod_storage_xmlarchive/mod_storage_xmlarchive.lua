@@ -1,3 +1,10 @@
+-- mod_storage_xmlarchive
+-- Copyright (C) 2014-2015 Kim Alvefur
+--
+-- This file is MIT/X11 licensed.
+--
+-- luacheck: ignore unused self
+
 local dm = require "core.storagemanager".olddm;
 local hmac_sha256 = require"util.hashes".hmac_sha256;
 local st = require"util.stanza";
