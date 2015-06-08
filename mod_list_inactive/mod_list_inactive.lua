@@ -19,6 +19,15 @@ local output_formats = {
 }
 
 function module.command(arg)
+	if #arg < 2 then
+		print("usage: prosodyctl mod_list_inactive example.net time [format]");
+		print("time is a number followed by 'day', 'week', 'month' or 'year'");
+		print("formats are:");
+		for name, fmt in pairs(output_formats) do
+			print(name, fmt:format("user@example.com", "last action"))
+		end
+		return;
+	end
 	local items = {};
 	local host = arg[1];
 	assert(hosts[host], "Host "..tostring(host).." does not exist");
