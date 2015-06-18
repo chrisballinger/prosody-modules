@@ -1,8 +1,8 @@
 
-local rooms = module:shared "muc/rooms";
+local mod_muc = module:depends"muc";
+local rooms = rawget(mod_muc, "rooms"); -- Old MUC API
 if not rooms then
-	module:log("error", "This module only works on MUC components!");
-	return;
+	rooms = module:shared"muc/rooms"; -- New MUC API
 end
 
 local jid_split, jid_bare = require "util.jid".split, require "util.jid".bare;
