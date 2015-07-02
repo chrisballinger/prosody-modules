@@ -231,7 +231,7 @@ local function message_handler(event, c2s)
 	or not stanza:get_child("body")
 	-- or if hints suggest we shouldn't
 	or stanza:get_child("no-permanent-storage", "urn:xmpp:hints")
-	or stanza:get_child("no-store", "urn:xmpp:hints") then
+	or stanza:get_child("no-storage", "urn:xmpp:hints") then
 		module:log("debug", "Not archiving stanza: %s (content)", stanza:top_tag());
 		return;
 	end
