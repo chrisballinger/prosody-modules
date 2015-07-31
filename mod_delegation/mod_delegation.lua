@@ -185,7 +185,7 @@ local function managing_ent_result(event)
 	local iq = forwarded.tags[1]
 	if #forwarded ~= 1 or iq.name ~= "iq" or
         iq.attr.xmlns ~= 'jabber:client' or
-		(iq.attr.type =='result' and #iq ~= 1) or
+		(iq.attr.type =='result' and #iq > 1) or
 		(iq.attr.type == 'error' and #iq > 2) then
 		module:log("warn", "ignoring invalid iq result from managing entity %s", stanza.attr.from)
 		stanza_cache[stanza.attr.from][stanza.attr.id] = nil
