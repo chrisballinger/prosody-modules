@@ -143,7 +143,9 @@ local function on_component_auth(event)
 	end
 end
 
-connected_cb:add(on_component_connected)
+if module:get_host_type() ~= "component" then
+    connected_cb:add(on_component_connected)
+end
 module:hook('component-authenticated', on_component_auth)
 module:hook('presence/initial', on_presence)
 
