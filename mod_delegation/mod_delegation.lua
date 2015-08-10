@@ -143,7 +143,9 @@ local function on_component_auth(event)
 	end
 end
 
-connected_cb:add(on_component_connected)
+if module:get_host_type() ~= "component" then
+    connected_cb:add(on_component_connected)
+end
 module:hook('component-authenticated', on_component_auth)
 module:hook('presence/initial', on_presence)
 
@@ -185,7 +187,7 @@ local function managing_ent_result(event)
 	local iq = forwarded.tags[1]
 	if #forwarded ~= 1 or iq.name ~= "iq" or
         iq.attr.xmlns ~= 'jabber:client' or
-		(iq.attr.type =='result' and #iq ~= 1) or
+		(iq.attr.type =='result' and #iq > 1) or
 		(iq.attr.type == 'error' and #iq > 2) then
 		module:log("warn", "ignoring invalid iq result from managing entity %s", stanza.attr.from)
 		stanza_cache[stanza.attr.from][stanza.attr.id] = nil
