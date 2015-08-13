@@ -28,6 +28,7 @@ local proxy_ip = module:get_option("onions_socks5_host") or "127.0.0.1";
 local proxy_port = module:get_option("onions_socks5_port") or 9050;
 local forbid_else = module:get_option("onions_only") or false;
 local torify_all = module:get_option("onions_tor_all") or false;
+local onions_map = module:get_option("onions_map") or {};
 
 local sessions = module:shared("sessions");
 
@@ -185,7 +186,7 @@ local function connect_socks5(host_session, connect_host, connect_port)
 
 	module:log("debug", "Connecting to " .. connect_host .. ":" .. connect_port);
 
-	-- this is not necessarily the same as .to_host (it can be that this is a SRV record)
+	-- this is not necessarily the same as .to_host (it can be that this is from the onions_map)
 	host_session.socks5_to = connect_host;
 	host_session.socks5_port = connect_port;
 
@@ -231,9 +232,19 @@ end
 -- Try to intercept anything to *.onion
 local function route_to_onion(event)
 	local stanza = event.stanza;
+	local to_host = event.to_host;
+	local onion_host = nil;
+	local onion_port = nil;
 
-	if not event.to_host:find(".onion(.?)$") then
-		if forbid_else then
+	if not to_host:find(".onion(.?)$") then
+		if onions_map[to_host] then
+			if type(onions_map[to_host]) == "string" then
+				onions_host = onions_map[to_host];
+			else
+				onion_host = onions_map[to_host].host;
+				onion_port = onions_map[to_host].port;
+			end
+		elseif forbid_else then
 			module:log("debug", event.to_host .. " is not an onion. Blocking it.");
 			return false;
 		elseif not torify_all then
@@ -241,20 +252,20 @@ local function route_to_onion(event)
 		end
 	end
 
-	module:log("debug", "Onion routing something to ".. event.to_host);
+	module:log("debug", "Onion routing something to ".. to_host);
 
-	if hosts[event.from_host].s2sout[event.to_host] then
+	if hosts[event.from_host].s2sout[to_host] then
 		return;
 	end
 
-	local host_session = s2s_new_outgoing(event.from_host, event.to_host);
+	local host_session = s2s_new_outgoing(event.from_host, to_host);
 
 	host_session.bounce_sendq = bounce_sendq;
 	host_session.sendq = { {tostring(stanza), stanza.attr and stanza.attr.type ~= "error" and stanza.attr.type ~= "result" and st.reply(stanza)} };
 
-	hosts[event.from_host].s2sout[event.to_host] = host_session;
+	hosts[event.from_host].s2sout[to_host] = host_session;
 
-	connect_socks5(host_session, event.to_host, 5269);
+	connect_socks5(host_session, onion_host or to_host, onion_port or 5269);
 
 	return true;
 end
