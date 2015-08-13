@@ -10,7 +10,8 @@ local xmlns_saslcert = "urn:xmpp:saslcert:1";
 local dm_load = require "util.datamanager".load;
 local dm_store = require "util.datamanager".store;
 local dm_table = "client_certs";
-local x509 = require "ssl.x509";
+local ssl_x509 = require "ssl.x509";
+local util_x509 = require "util.x509";
 local id_on_xmppAddr = "1.3.6.1.5.5.7.8.5";
 local id_ce_subjectAltName = "2.5.29.17";
 local digest_algo = "sha1";
@@ -119,7 +120,7 @@ module:hook("iq/self/"..xmlns_saslcert..":items", function(event)
 		for digest,info in pairs(certs) do
 			reply:tag("item")
 				:tag("name"):text(info.name):up()
-				:tag("x509cert"):text(info.x509cert)
+				:tag("x509cert"):text(info.x509cert):up()
 			:up();
 		end
 
@@ -144,11 +145,7 @@ module:hook("iq/self/"..xmlns_saslcert..":append", function(event)
 		local can_manage = append:get_child("no-cert-management", xmlns_saslcert) ~= nil;
 		x509cert = x509cert:gsub("^%s*(.-)%s*$", "%1");
 
-		local cert = x509.load(
-		"-----BEGIN CERTIFICATE-----\n"
-		.. x509cert ..
-		"\n-----END CERTIFICATE-----\n");
-
+		local cert = ssl_x509.load(util_x509.der2pem(base64.decode(x509cert)));
 
 		if not cert then
 			origin.send(st.error_reply(stanza, "modify", "not-acceptable", "Could not parse X.509 certificate"));
@@ -302,10 +299,7 @@ local function adhoc_handler(self, data, state)
 		local name = fields.name;
 		local x509cert = fields.cert:gsub("^%s*(.-)%s*$", "%1");
 
-		local cert = x509.load(
-		"-----BEGIN CERTIFICATE-----\n"
-		.. x509cert ..
-		"\n-----END CERTIFICATE-----\n");
+		local cert = ssl_x509.load(util_x509.der2pem(base64.decode(x509cert)));
 
 		if not cert then
 			return { status = "completed", error = { message = "Could not parse X.509 certificate" } };
@@ -427,3 +421,4 @@ module:hook("stanza/urn:ietf:params:xml:ns:xmpp-sasl:auth", function(event)
 	end
 end, 1);
 
+module:add_feature(xmlns_saslcert);
