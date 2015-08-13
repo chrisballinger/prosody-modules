@@ -1,3 +1,6 @@
+local prosody = prosody;
+local core_process_stanza = prosody.core_process_stanza;
+
 local wrapclient = require "net.server".wrapclient;
 local s2s_new_outgoing = require "core.s2smanager".new_outgoing;
 local initialize_filters = require "util.filters".initialize;
@@ -197,10 +200,11 @@ local function connect_socks5(host_session, connect_host, connect_port)
 	host_session.conn = conn;
 end
 
+local bouncy_stanzas = { message = true, presence = true, iq = true };
 local function bounce_sendq(session, reason)
 	local sendq = session.sendq;
 	if not sendq then return; end
-	session.log("info", "sending error replies for "..#sendq.." queued stanzas because of failed outgoing connection to "..tostring(session.to_host));
+	session.log("info", "Sending error replies for "..#sendq.." queued stanzas because of failed outgoing connection to "..tostring(session.to_host));
 	local dummy = {
 		type = "s2sin";
 		send = function(s)
@@ -210,13 +214,13 @@ local function bounce_sendq(session, reason)
 	};
 	for i, data in ipairs(sendq) do
 		local reply = data[2];
-		if reply and not(reply.attr.xmlns) then
+		if reply and not(reply.attr.xmlns) and bouncy_stanzas[reply.name] then
 			reply.attr.type = "error";
 			reply:tag("error", {type = "cancel"})
 				:tag("remote-server-not-found", {xmlns = "urn:ietf:params:xml:ns:xmpp-stanzas"}):up();
 			if reason then
 				reply:tag("text", {xmlns = "urn:ietf:params:xml:ns:xmpp-stanzas"})
-						:text("Server-to-server connection failed: "..reason):up();
+					:text("Server-to-server connection failed: "..reason):up();
 			end
 			core_process_stanza(dummy, reply);
 		end
@@ -224,14 +228,13 @@ local function bounce_sendq(session, reason)
 	end
 	session.sendq = nil;
 end
-
 -- Try to intercept anything to *.onion
 local function route_to_onion(event)
 	local stanza = event.stanza;
 
 	if not event.to_host:find(".onion(.?)$") then
 		if forbid_else then
-	                module:log("debug", event.to_host .. " is not an onion. Blocking it.");
+			module:log("debug", event.to_host .. " is not an onion. Blocking it.");
 			return false;
 		elseif not torify_all then
 			return;
