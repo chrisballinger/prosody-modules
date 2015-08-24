@@ -1,0 +1,17 @@
+#summary XML archive storage
+#labels Stage-Beta,Type-Storage,ArchiveStorage
+
+= Introduction =
+
+This module implements stanza archives using files, similar to the default "internal" storage.
+
+= Details =
+
+Refer to [https://prosody.im/doc/storage Prosodys data storage documentation].
+
+Note that this module does not implement the "keyval" storage method and 
+can't be used by anything other than archives, eg MAM and MUC logs.
+
+= Compatibility =
+
+|| >=0.10 || Should work ||
