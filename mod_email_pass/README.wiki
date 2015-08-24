@@ -1,0 +1,27 @@
+#labels Stage-Beta
+= Introduction =
+
+This module aims to help in the procedure of user password restoration. To start the restoration, the user must go to an URL provided by this module, fill the JID and email and submit the request.
+
+The module will generate a token valid for 24h and send an email with a specially crafted url to the vCard email address. If the user goes to this url, will be able to change his password.
+
+= Usage =
+Simply add "email_pass" to your modules_enabled list and copy files "*mod_email_pass.lua*" and "*vcard.lib.lua*" to prosody modules folder.
+This module need to that *https_host* or *http_host* must be configured. This parameter is necessary to construct the URL that has been sended to the user.
+
+This module only send emails to the vCard user email address, then the user must set this address in order to be capable of do the restoration.
+
+= Configuration =
+
+|| smtp_server || The Host/ip of your SMTP server ||
+|| smtp_port || Port used by your SMTP server. Default 25 ||
+|| smtp_ssl || Use of SMTP SSL legacy (No STARTTLS) ||
+|| smtp_user || Username used to do SMTP auth ||
+|| smtp_pass || Password used to do SMTP auth ||
+|| smtp_address || EMail address that will be apears as From in mails ||
+|| msg_subject || Subject used for messages/mails ||
+|| msg_body || Message send when password has been changed ||
+|| url_path || Path where the module will be visible. Default /resetpass/ ||
+
+= Compatibility =
+||0.9||Works||

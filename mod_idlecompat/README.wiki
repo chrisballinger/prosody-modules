@@ -1,0 +1,13 @@
+#summary XEP-0319 compatibility module
+#labels Stage-Beta
+
+= Introduction =
+
+This module adds [http://xmpp.org/extensions/xep-0319.html XEP-0319] idle tags to presence stanzas containing [http://xmpp.org/extensions/xep-0012.html XEP-0012: Last Activity] tags for idle indication (e.g. supported by libpurple clients). It works on outgoing and incoming presence stanzas.
+
+Install and enable it like any other module.  It has no configuration.
+
+= Compatibility =
+
+||trunk||Works||
+||0.9||Works||

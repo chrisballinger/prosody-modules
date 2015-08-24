@@ -1,0 +1,42 @@
+#summary Prevent communication between hosts
+#labels Stage-Beta
+
+= Introduction =
+
+In some environments it is desirable to isolate one or more hosts, and prevent communication with external, or even other internal domains.
+
+Loading mod_isolate_host on a host will prevent all communication with JIDs outside of the current domain, though it is possible to configure exceptions.
+
+*Note:* if you just want to prevent communication with external domains, this is possible without a plugin. See [http://prosody.im/doc/s2s#disabling Prosody: Disabling s2s] for more information.
+
+This module was sponsored by [http://exa-networks.co.uk/ Exa Networks].
+
+= Configuration =
+
+To isolate all hosts by default, add the module to your global modules_enabled:
+
+{{{
+    modules_enabled = {
+        ...
+        "isolate_host";
+        ...
+    }
+}}}
+
+Alternatively you can isolate a single host by putting a modules_enabled line under the VirtualHost directive:
+
+{{{
+    VirtualHost "example.com"
+        modules_enabled = { "isolate_host" }
+}}}
+
+After enabling the module, you can add further options to add exceptions for the isolation:
+
+|| *Option* || *Description* ||
+|| isolate_except_domains || A list of domains to allow communication with. ||
+|| isolate_except_users || A list of user JIDs allowed to bypass the isolation and communicate with other domains. ||
+
+*Note:* Admins of hosts are always allowed to communicate with other domains
+
+= Compatibility =
+|| 0.9 || Works ||

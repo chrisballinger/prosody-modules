@@ -1,0 +1,25 @@
+#summary Simple incoming and outgoing stanza counter
+#labels Stage-Stable
+
+= Introduction =
+
+This module counts incoming and outgoing stanzas from when the instance started,
+and makes the data available to other modules by creating a global prosody. object
+
+= Details =
+
+The counter module is "stanza_counter", the example output module is stanza_counter_http.
+
+= Usage =
+
+Copy both files into prosody's module directory and place 'em into your enabled modules (stanza_counter_http requires to be loaded into the global section!)
+
+Config for stanza_counter_http:
+<code language="lua">
+stanza_counter_basepath = "/counter-path-custom/"
+</code>
+
+= Info =
+
+ * As of now to count components stanzas, it needs to be manually loaded (inserted into modules_enabled of the components' sections) on these.
+ * This version isn't compatible with previous versions of prosody (looks at 0.8-diverge branch for olders).

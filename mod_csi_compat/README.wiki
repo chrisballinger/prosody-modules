@@ -1,0 +1,14 @@
+#summary Implement the google:queue protocol and map to mod_csi events
+
+= Introduction =
+
+This module implements the google:queue protocol and maps it to [mod_csi] events.
+
+= Configuration =
+
+There is no configuration for this module, just add it to modules_enabled as normal.
+
+= Compatibility =
+
+||0.9||Works||
+
