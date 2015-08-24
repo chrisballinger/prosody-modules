@@ -66,10 +66,10 @@ module:hook("message/offline/handle", function(event)
 	local origin, stanza = event.origin, event.stanza;
 	local to = stanza.attr.to;
 	local node = to and jid.split(to) or origin.username;
-	local user_push_services = push_enabled[origin.username];
+	local user_push_services = push_enabled[node];
 	if not user_push_services then return end
 
-	for _, push_info in pairs(push_info) do
+	for _, push_info in pairs(user_push_services) do
 		push_info.count = push_info.count + 1;
 		local push_jid, push_node = push_info.jid, push_info.node;
 		local push_publish = st.iq({ to = push_jid, from = module.host, type = "set", id = "push" })
@@ -89,10 +89,10 @@ module:hook("message/offline/handle", function(event)
 end, 1);
 
 module:hook("message/offline/broadcast", function(event)
-	local user_push_services = push_enabled[origin.username];
+	local user_push_services = push_enabled[event.origin.username];
 	if not user_push_services then return end
 
-	for _, push_info in pairs(push_info) do
+	for _, push_info in pairs(user_push_services) do
 		if push_info then
 			push_info.count = 0;
 		end
