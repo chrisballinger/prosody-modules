@@ -28,5 +28,6 @@ If you want to keep track of how many times, and when a certificate is seen add
 = Compatibility =
 
 ||trunk||Works||
+||0.10||Works||
 ||0.9||Works||
 ||0.8||Doesn't work||
