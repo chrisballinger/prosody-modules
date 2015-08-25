@@ -38,7 +38,17 @@ local function note_cert_digest(event)
 	end
 end
 
-module:hook("s2s-check-certificate", note_cert_digest, 1000);
+if module.wrap_event then
+	-- 0.10
+	module:wrap_event("s2s-check-certificate", function (handlers, event_name, event_data)
+		local ret = handlers(event_name, event_data);
+		note_cert_digest(event_data);
+		return ret;
+	end);
+else
+	-- 0.9
+	module:hook("s2s-check-certificate", note_cert_digest, 1000);
+end
 --[[
 function module.add_host(module)
 	module:hook("s2s-check-certificate", note_cert_digest, 1000);
