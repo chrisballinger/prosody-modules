@@ -27,7 +27,7 @@ end
 
 for stanza_type in stanza_types do
 	for jid_type in jid_types do
-		module:hook("pre-"..stanza_type.."/"..jid_type, check_stanza);
+		module:hook("pre-"..stanza_type.."/"..jid_type, check_stanza, 1);
 	end
 end
 
