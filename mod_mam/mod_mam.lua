@@ -201,18 +201,18 @@ local function shall_store(user, who)
 	module:log("debug", "%s's rule for %s is %s", user, who, tostring(rule));
 	if rule ~= nil then
 		return rule;
-	else -- Below could be done by a metatable
-		local default = prefs[false];
-		module:log("debug", "%s's default rule is %s", user, tostring(default));
-		if default == nil then
-			default = global_default_policy;
-			module:log("debug", "Using global default rule, %s", tostring(default));
-		end
-		if default == "roster" then
-			return has_in_roster(user, who);
-		end
-		return default;
 	end
+	-- Below could be done by a metatable
+	local default = prefs[false];
+	module:log("debug", "%s's default rule is %s", user, tostring(default));
+	if default == nil then
+		default = global_default_policy;
+		module:log("debug", "Using global default rule, %s", tostring(default));
+	end
+	if default == "roster" then
+		return has_in_roster(user, who);
+	end
+	return default;
 end
 
 -- Handle messages
