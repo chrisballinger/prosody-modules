@@ -1,8 +1,7 @@
 local rostermanager = require"core.rostermanager";
 local jid_join = require"util.jid".join;
-local jid_split = require"util.jid".split;
 local host = module.host;
-local sessions = hosts[host].sessions;
+local sessions = prosody.hosts[host].sessions;
 
 -- Make a *one-way* subscription. User will see when contact is online,
 -- contact will not see when user is online.
@@ -18,6 +17,7 @@ local function subscribe(user, contact)
 	-- Update user's roster to say subscription request approved...
 	rostermanager.process_inbound_subscription_approval(user, host, contact_jid);
 
+	-- Push updates to both rosters
 	rostermanager.roster_push(user, host, contact_jid);
 	rostermanager.roster_push(contact, host, user_jid);
 end
@@ -25,13 +25,11 @@ end
 
 module:hook("resource-bind", function(event)
 	local session = event.session;
-	local roster = session.roster;
 	local user = session.username;
 	local user_jid = jid_join(user, host);
-	local contact_jid;
-	for contact, contact_session in pairs(sessions) do
+	for contact in pairs(sessions) do
 		if contact ~= user then
-			contact_jid = jid_join(contact, host);
+			local contact_jid = jid_join(contact, host);
 			if not rostermanager.is_contact_subscribed(user, host, contact_jid) then
 				subscribe(contact, user);
 			end
