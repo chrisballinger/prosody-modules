@@ -1,5 +1,6 @@
 local jid_split = require "util.jid".split;
 local st = require "util.stanza";
+local datamanager = require"util.datamanager";
 
 local xmlns_blocking = "urn:xmpp:blocking";
 
