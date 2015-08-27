@@ -29,6 +29,13 @@ mod_mam uses the store "archive2".
 See [https://prosody.im/doc/storage Prosodys data storage documentation]
 for information on how to configure storage.
 
+For example, to use mod_storage_sql2:
+{{{
+storage = {
+	archive2 = "sql2";
+}
+}}}
+
 = Configuration =
 
 The MAM protocol includes a method of changing preferences regarding what
