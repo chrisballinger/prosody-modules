@@ -54,11 +54,6 @@ function keyval:get(user)
 	return deserialize(data);
 end
 
-local drivers = {
-	keyval = keyval_mt;
-}
-
-
 function provider:init(config)
 	if config.base_path then
 		lfs.mkdir(config.base_path);
