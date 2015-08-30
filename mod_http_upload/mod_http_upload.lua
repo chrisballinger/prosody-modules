@@ -15,6 +15,7 @@ local uuid = require"util.uuid".generate;
 
 -- depends
 module:depends("http");
+module:depends("disco");
 
 -- namespace
 local xmlns_http_upload = "eu:siacs:conversations:http:upload";
