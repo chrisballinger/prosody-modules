@@ -51,19 +51,18 @@ archiving by default, and set rules for specific contacts. This module
 will log no messages by default, for privacy concerns. If you decide to
 change this, you should inform your users.
 
-        default_archive_policy = false -- other options are true or "roster";
+    default_archive_policy = false -- other options are true or "roster";
 
 This controls what messages are archived if the user hasn't set a
 matching rule, or another personal default.
 
--   `false` means to store no messages. This is the default.
--   `"roster"` means to store messages to/from contacts in the users
-    roster.
--   `true` means is to store all messages.
+  ------------ ------------------------------------------------------
+  `false`      Store no messages. This is the default.
+  `"roster"`   Store messages to/from contacts in the users roster.
+  `true`       Store all messages.
+  ------------ ------------------------------------------------------
 
-<!-- -->
-
-        max_archive_query_results = 20;
+    max_archive_query_results = 20;
 
 This is the largest number of messages that are allowed to be retrieved
 in one request.
