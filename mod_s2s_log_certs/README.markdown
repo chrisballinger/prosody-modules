@@ -13,7 +13,7 @@ optionally store this in persistant storage.
 11:C2:3D:87:3F:95:F8:13:F8:CA:81:33:71:36:A7:00:E0:01:95:ED
 
 Fingerprints could then be added to
-[mod\_s2s\_auth\_fingerprint](mod_s2s_auth_fingerprint.md).
+[mod\_s2s\_auth\_fingerprint](mod_s2s_auth_fingerprint.html).
 
 Configuration
 =============
