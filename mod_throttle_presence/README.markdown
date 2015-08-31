@@ -12,7 +12,7 @@ the traffic received by their client. However much of the time it is not
 essential to have highly accurate presence information.
 
 This module automatically cuts down on presence traffic when clients
-indicate they are inactive (using the [CSI protocol](mod_csi.md).
+indicate they are inactive (using the [CSI protocol](mod_csi.md)).
 
 This is extremely valuable for mobile clients that wish to save battery
 power while in the background.
