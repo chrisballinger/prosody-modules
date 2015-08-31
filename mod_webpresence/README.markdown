@@ -30,7 +30,7 @@ Usage
 Once loaded you can embed the icon into a page using a simple `<img>`
 tag, as follows:
 
-`<img src="http://prosody.example.com:5280/status/john.smith" />`
+    <img src="http://prosody.example.com:5280/status/john.smith" />
 
 Alternatively, it can be used to get status name as plaint text, status
 message as plain text or html-code for embedding on web-pages.
