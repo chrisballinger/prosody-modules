@@ -1,5 +1,7 @@
 module:set_global();
 
+local hostmanager = require"core.hostmanager";
+
 local array = require "util.array";
 local set = require "util.set";
 local it = require "util.iterators";
