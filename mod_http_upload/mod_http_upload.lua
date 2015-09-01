@@ -10,8 +10,11 @@
 -- imports
 local st = require"util.stanza";
 local lfs = require"lfs";
-local join_path = require"util.paths".join;
 local uuid = require"util.uuid".generate;
+
+local function join_path(a, b)
+return a .. package.confg:sub(1,1) .. b;
+end
 
 -- depends
 module:depends("http");
