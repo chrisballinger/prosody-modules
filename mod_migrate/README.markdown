@@ -2,15 +2,16 @@
 summary: prosodyctl cross storage driver migration tool
 ...
 
-Description
-===========
+Introduction
+============
 
 This module adds a command to `prosodyctl` for copying data between
 storage drivers.
 
-Usage:
+Usage
+=====
 
-    Usage: prosodyctl mod_migrate example.com <source-store>[-<store-type>] <target-driver> [users]*
+    prosodyctl mod_migrate example.com <source-store>[-<store-type>] <target-driver> [users]*
 
 `<source-store>` would be e.g. `accounts` or `private`. To migrate
 archives, the optional suffix `<store-type>` would be set to `archive`,
