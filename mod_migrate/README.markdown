@@ -10,7 +10,7 @@ This module adds a command to `prosodyctl` for copying data between
 storage drivers.
 
 Usage:
-`prosodyctl mod_migrate example.com <source-store> <targer-driver> [users]*`
+`prosodyctl mod_migrate example.com <source-store> <target-driver> [users]*`
 
 `<source-store>` would be e.g. `accounts` or `private`
 

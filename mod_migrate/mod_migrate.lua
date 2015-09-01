@@ -7,7 +7,7 @@ local mm = require"core.modulemanager";
 function module.command(arg)
 	local host, source_store, migrate_to, user = unpack(arg);
 	if not migrate_to then
-		return print("Usage: prosodyctl mod_migrate example.com <source-store> <targer-driver> [users]*");
+		return print("Usage: prosodyctl mod_migrate example.com <source-store> <target-driver> [users]*");
 	end
 	sm.initialize_host(host);
 	um.initialize_host(host);
