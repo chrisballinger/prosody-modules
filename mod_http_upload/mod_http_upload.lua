@@ -13,7 +13,7 @@ local lfs = require"lfs";
 local uuid = require"util.uuid".generate;
 
 local function join_path(a, b)
-return a .. package.confg:sub(1,1) .. b;
+return a .. package.config:sub(1,1) .. b;
 end
 
 -- depends
