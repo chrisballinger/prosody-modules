@@ -23,11 +23,13 @@ First copy the module to the prosody plugins directory.
 
 Then add "mam" to your modules\_enabled list:
 
-    modules_enabled = {
-        -- ...
-        "mam",
-        -- ...
-    }
+``` {.lua}
+modules_enabled = {
+    -- ...
+    "mam",
+    -- ...
+}
+```
 
 Storage backend
 ===============
@@ -38,9 +40,11 @@ configure storage.
 
 For example, to use mod\_storage\_sql2:
 
-    storage = {
-        archive2 = "sql2";
-    }
+``` {.lua}
+storage = {
+  archive2 = "sql2";
+}
+```
 
 Configuration
 =============
@@ -51,7 +55,9 @@ archiving by default, and set rules for specific contacts. This module
 will log no messages by default, for privacy concerns. If you decide to
 change this, you should inform your users.
 
-    default_archive_policy = false -- other options are true or "roster";
+``` {.lua}
+default_archive_policy = false -- other options are true or "roster";
+```
 
 This controls what messages are archived if the user hasn't set a
 matching rule, or another personal default.

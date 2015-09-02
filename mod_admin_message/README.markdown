@@ -21,7 +21,7 @@ check for plugins (cf. [Installing
 modules](http://prosody.im/doc/installing_modules)) and set up a
 component:
 
-     Component "console@example.com" "admin_message"
+    Component "console@example.com" "admin_message"
 
 "console@example.com" is the identifier of the XMPP console.
 

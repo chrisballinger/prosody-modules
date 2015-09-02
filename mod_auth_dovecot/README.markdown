@@ -18,7 +18,7 @@ As with all auth modules, there is no need to add this to
 modules\_enabled. Simply add in the global section, or for the relevant
 hosts:
 
-        authentication = "dovecot"
+    authentication = "dovecot"
 
 These options are used by mod\_auth\_dovecot:
 

@@ -8,7 +8,7 @@ Introduction
 ============
 
 This is an implementation of the server bits of [XEP-357:
-Push](http://xmpp.org/extensions/xep-357.html). It allows clients to
+Push](http://xmpp.org/extensions/xep-0357.html). It allows clients to
 register an "app server" which is notified about new messages while the
 user is offline or disconnected. Implementation of the "app server",
 which is expected to forward notifications to something like Google

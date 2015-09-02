@@ -1,5 +1,4 @@
 ---
-labels:
 summary: Collect statistics on rate of log messages
 ...
 
@@ -16,11 +15,14 @@ After [installing the module](https://prosody.im/doc/installing_modules)
 and adding it to modules\_enabled as most other modules, you also need
 to add it to your logging config:
 
-    log = {
-        -- your other log sinks
-        info = "/var/log/prosody/prosody.log"
-        -- add this:
-        { to = "measure" }
+``` {.lua}
+log = {
+  -- your other log sinks
+  info = "/var/log/prosody/prosody.log"
+  -- add this:
+  { to = "measure" };
+}
+```
 
 Then log messages will be counted by
 [statsmanager](https://prosody.im/doc/developers/core/statsmanager).

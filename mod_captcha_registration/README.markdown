@@ -19,11 +19,11 @@ First of all you should build and install lua bindings for libgd —
 
 Then clone repsository lua-captcha:
 
-**`$ git clone https://github.com/mrDoctorWho/lua-captcha`**
+    $ git clone https://github.com/mrDoctorWho/lua-captcha
 
 install it:
 
-**`$ make install`**
+    $ make install
 
 Configuration
 =============

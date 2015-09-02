@@ -19,17 +19,19 @@ Details
 
 Replace mod\_muc\_log (and mod\_muc\_log\_http) in your config with
 
-    Component "conference.example.org" "muc"
-        modules_enabled = {
-            -- "muc_log"; -- functionality replaced by mod_mam_muc + mod_storage_muc_log
-            "mam_muc"; -- Does logging to storage backend configured below
+``` {.lua}
+Component "conference.example.org" "muc"
+modules_enabled = {
+  -- "muc_log"; -- functionality replaced by mod_mam_muc + mod_storage_muc_log
+    "mam_muc"; -- Does logging to storage backend configured below
 
-            -- "muc_log_http"; -- Replaced by the mod_http_muc_log
-            "http_muc_log";
-        }
-        storage = {
-            muc_log = "muc_log";
-        }
+    -- "muc_log_http"; -- Replaced by the mod_http_muc_log
+    "http_muc_log";
+}
+storage = {
+  muc_log = "muc_log";
+}
+```
 
 Compatibility
 =============

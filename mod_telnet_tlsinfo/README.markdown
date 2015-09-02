@@ -15,10 +15,10 @@ Configuration
 Just add the module to the `modules_enabled` list. There is no other
 configuration.
 
-        modules_enabled = {
-            ...
-                "telnet_tlsinfo";
-        }
+    modules_enabled = {
+        ...
+        "telnet_tlsinfo";
+    }
 
 Usage
 =====

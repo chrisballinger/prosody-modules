@@ -39,11 +39,11 @@ need to make a text file in this format:
 
 Add "group\_bookmarks" to your modules\_enabled list:
 
-        modules_enabled = {
-                   -- ...other modules here... --
-                   "group_bookmarks";
-                   -- ...maybe some more here... --
-        }
+    modules_enabled = {
+               -- ...other modules here... --
+               "group_bookmarks";
+               -- ...maybe some more here... --
+    }
 
 Configuration
 =============

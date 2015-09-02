@@ -38,7 +38,6 @@ section.
 Optional configuration directives:
 
 ``` {.lua}
-
 incidents_expire_time = 86400 -- Expiral of "closed" incidents in seconds.
 ```
 

@@ -16,13 +16,14 @@ which message.
 Configuration
 =============
 
-
-        modules_enabled = {
-            -- other modules
-                "motd_sequential";
-        }
-        motd_sequential_messages = {
-            "Hello and welcome to our service!", -- First login
-            "Lorem ipsum dolor sit amet", -- Second time they login
-            -- Add more messages here.
-        }
+``` lua
+modules_enabled = {
+  -- other modules
+    "motd_sequential";
+}
+motd_sequential_messages = {
+  "Hello and welcome to our service!", -- First login
+  "Lorem ipsum dolor sit amet", -- Second time they login
+  -- Add more messages here.
+}
+```

@@ -17,7 +17,7 @@ mod\_auth\_external depends on a Lua module called
 [lpty](http://www.tset.de/lpty/). You can install it on many platforms
 using [LuaRocks](http://luarocks.org/), for example:
 
-       sudo luarocks install lpty
+    sudo luarocks install lpty
 
 Note: Earlier versions of the module did not depend on lpty. While using
 the newer version is strongly recommended, you can find the [older
@@ -32,7 +32,7 @@ As with all auth modules, there is no need to add this to
 modules\_enabled. Simply add in the global section, or for the relevant
 hosts:
 
-        authentication = "external"
+    authentication = "external"
 
 These options are specific to mod\_auth\_external:
 
