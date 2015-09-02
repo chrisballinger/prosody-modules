@@ -7,7 +7,7 @@ Introduction
 ============
 
 This module implements the google:queue protocol and maps it to
-[mod\_csi](mod_csi.md) events.
+[mod\_csi](mod_csi.html) events.
 
 Configuration
 =============

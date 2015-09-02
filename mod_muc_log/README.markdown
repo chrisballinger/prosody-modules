@@ -9,7 +9,7 @@ Introduction
 
 This module logs the conversation of chatrooms running on the server to
 Prosody's data store. To view them you will need a module such as
-[mod\_muc\_log\_http](mod_muc_log_http.md).
+[mod\_muc\_log\_http](mod_muc_log_http.html).
 
 Details
 =======

@@ -23,7 +23,7 @@ It is no longer maintained and is unlikely to work with modern clients.
 Details
 =======
 
-See [mod\_mam](mod_mam.md) for details.
+See [mod\_mam](mod_mam.html) for details.
 
 Usage
 =====
@@ -83,7 +83,7 @@ Configuration
 =============
 
 This module uses the same configuration settings that
-[mod\_mam](mod_mam.md) does, in addition to the [SQL storage
+[mod\_mam](mod_mam.html) does, in addition to the [SQL storage
 settings](http://prosody.im/doc/modules/mod_storage_sql). You may also
 name the SQL connection settings 'mam\_sql' if you want.
 

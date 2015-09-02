@@ -8,7 +8,7 @@ Introduction
 ============
 
 This module provides a built-in web interface to view chatroom logs
-stored by [mod\_mam\_muc](mod_mam_muc.md).
+stored by [mod\_mam\_muc](mod_mam_muc.html).
 
 Installation
 ============

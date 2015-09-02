@@ -9,8 +9,8 @@ Introduction
 This module is used by other modules to access an LDAP server. It's
 pretty useless on its own; you should use it if you want to write your
 own LDAP-related module, or if you want to use one of mine
-([mod\_auth\_ldap2](mod_auth_ldap2.md),
-[mod\_storage\_ldap](mod_storage_ldap.md)).
+([mod\_auth\_ldap2](mod_auth_ldap2.html),
+[mod\_storage\_ldap](mod_storage_ldap.html)).
 
 Installation
 ============
@@ -72,5 +72,5 @@ together).
 More Information
 ================
 
-For more information, please consult the README.md file under
+For more information, please consult the README.html file under
 prosody-modules/mod\_lib\_ldap.

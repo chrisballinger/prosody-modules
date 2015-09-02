@@ -18,7 +18,7 @@ Details
 
 Because the accounts store will always begin empty, it is mostly useful
 combined with an authentication plugin which doesn't use Prosody's
-storage API, or with [mod\_auth\_any](mod_auth_any.md), or you can
+storage API, or with [mod\_auth\_any](mod_auth_any.html), or you can
 create user accounts manually each time the server starts.
 
 Compatibility
