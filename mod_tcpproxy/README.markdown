@@ -36,14 +36,16 @@ Protocol
 
 A new stream is opened like this:
 
-    <iq type="set" id="newconn1" to="tcp.example.com">
-        <open xmlns='http://jabber.org/protocol/ibb'
-            sid='connection1'
-            stanza='message'
-            xmlns:tcp='http://prosody.im/protocol/tcpproxy'
-            tcp:host='example.com'
-            tcp:port='80' />
-    </iq>
+``` {.xml}
+<iq type="set" id="newconn1" to="tcp.example.com">
+  <open xmlns='http://jabber.org/protocol/ibb'
+        sid='connection1'
+        stanza='message'
+        xmlns:tcp='http://prosody.im/protocol/tcpproxy'
+        tcp:host='example.com'
+        tcp:port='80' />
+</iq>
+```
 
 The stanza attribute (currently) MUST be 'message', and a block-size, if
 given, is (currently) ignored.

@@ -24,9 +24,11 @@ First copy the module to the prosody plugins directory.
 
 Then add "mam\_adhoc" to your modules\_enabled list:
 
-        modules_enabled = {
-                        -- ...
-                        "mam",
-                        "mam_adhoc",
-                        -- ...
-            }
+``` {.lua}
+modules_enabled = {
+  -- ...
+    "mam",
+  "mam_adhoc",
+  -- ...
+}
+```

@@ -44,12 +44,14 @@ Configuration
 Enable the plugin on a MUC host (do not put it in your global
 modules\_enabled list):
 
-        Component "conference.example.com" "muc"
-            modules_enabled = { "muc_config_restrict" }
-            muc_config_restricted = {
-                "muc#roomconfig_persistentroom"; -- Prevent non-admins from changing a room's persistence setting
-                "muc#roomconfig_membersonly"; -- Prevent non-admins from changing whether rooms are members-only
-            }
+``` {.lua}
+Component "conference.example.com" "muc"
+modules_enabled = { "muc_config_restrict" }
+muc_config_restricted = {
+  "muc#roomconfig_persistentroom"; -- Prevent non-admins from changing a room's persistence setting
+  "muc#roomconfig_membersonly"; -- Prevent non-admins from changing whether rooms are members-only
+}
+```
 
 Compatibility
 =============

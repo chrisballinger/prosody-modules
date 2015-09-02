@@ -16,12 +16,6 @@ Configuration
 As with all modules, you enable it by adding it to the modules\_enabled
 list.
 
-        modules_enabled = {
-            ...
-            "seclabels";
-            ...
-        }
-
 These options exist:
 
   Name                      Description             Default
@@ -32,28 +26,30 @@ These options exist:
 You can then add your labels in a table called security\_labels. They
 can be both orderd and unorderd, but ordered comes first.
 
-        security_labels = {
-            { -- This label will come first
-                name = "Public",
-                label = true, -- This is a label, but without the actual label.
-                default = true -- This is the default label.
-            },
-            {
-                name = "Private",
-                label = "PRIVATE",
-                color = "white",
-                bgcolor = "blue"
-            },
-            Sensitive = { -- A Sub-selector
-                SECRET = { -- The index is used as name
-                    label = true
-                },
-                TOPSECRET = { -- The order of this and the above is not guaranteed.
-                    color = "red",
-                    bgcolor = "black",
-                }
-            }
-        }
+``` {.lua}
+security_labels = {
+  { -- This label will come first
+    name = "Public",
+    label = true, -- This is a label, but without the actual label.
+      default = true -- This is the default label.
+  },
+  {
+    name = "Private",
+    label = "PRIVATE",
+    color = "white",
+    bgcolor = "blue"
+  },
+  Sensitive = { -- A Sub-selector
+    SECRET = { -- The index is used as name
+      label = true
+    },
+    TOPSECRET = { -- The order of this and the above is not guaranteed.
+      color = "red",
+      bgcolor = "black",
+    }
+  }
+}
+```
 
 Each label can have the following properties:
 

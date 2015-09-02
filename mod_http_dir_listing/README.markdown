@@ -1,5 +1,4 @@
 ---
-labels:
 summary: HTTP directory listing
 ...
 
@@ -8,7 +7,7 @@ Introduction
 
 This module generates directory listings when invoked by
 `mod_http_files`. See [documentation on
-`mod\_http\_files`](http://prosody.im/doc/modules/mod_http_files).
+`mod_http_files`](http://prosody.im/doc/modules/mod_http_files).
 
 Configuration
 =============

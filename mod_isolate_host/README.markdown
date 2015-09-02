@@ -26,17 +26,21 @@ Configuration
 To isolate all hosts by default, add the module to your global
 modules\_enabled:
 
-        modules_enabled = {
-            ...
-            "isolate_host";
-            ...
-        }
+``` {.lua}
+modules_enabled = {
+  ...
+    "isolate_host";
+  ...
+}
+```
 
 Alternatively you can isolate a single host by putting a
 modules\_enabled line under the VirtualHost directive:
 
-        VirtualHost "example.com"
-            modules_enabled = { "isolate_host" }
+``` {.lua}
+VirtualHost "example.com"
+modules_enabled = { "isolate_host" }
+```
 
 After enabling the module, you can add further options to add exceptions
 for the isolation:

@@ -22,7 +22,7 @@ Copy the module to the prosody modules/plugins directory.
 
 In Prosody's configuration file, set:
 
-        storage = "mongodb"
+    storage = "mongodb"
 
 MongoDB options are:
 

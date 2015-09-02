@@ -26,6 +26,6 @@ documentation](https://prosody.im/doc/storage).
 Compatibility
 =============
 
-  ---------- -------------
-  '\>=0.9'   Should work
-  ---------- -------------
+  -------- -------------
+  \>=0.9   Should work
+  -------- -------------

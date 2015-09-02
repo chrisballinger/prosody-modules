@@ -34,16 +34,18 @@ connection types are:
 The limits are specified like so in the **global** section of your
 config (they cannot be per-host):
 
-        limits = {
-            c2s = {
-                rate = "3kb/s";
-                burst = "2s";
-            };
-            s2sin = {
-                rate = "10kb/s";
-                burst = "5s";
-            };
-         }
+``` {.lua}
+limits = {
+  c2s = {
+    rate = "3kb/s";
+    burst = "2s";
+  };
+  s2sin = {
+    rate = "10kb/s";
+    burst = "5s";
+  };
+}
+```
 
 All units are in terms of *bytes*, not *bits*, so that "kb/s" is
 interpreted as "kilobytes per second", where a kilobyte is 1000 bytes.
@@ -53,10 +55,10 @@ Compatibility
 
   ----- -------------------
   0.9   Works
-  0.8   Doesn't work(`*`)
+  0.8   Doesn't work(\*)
   ----- -------------------
 
-(`*`) This module can be made to work in 0.8 if you do two things:
+(\*) This module can be made to work in 0.8 if you do two things:
 
 1.  Install
     [util.throttle](http://hg.prosody.im/0.9/raw-file/d46948d3018a/util/throttle.lua)

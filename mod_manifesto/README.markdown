@@ -1,5 +1,4 @@
 ---
-labels:
 summary: Module for raising awareness about the Security Test Days
 ...
 
@@ -13,10 +12,12 @@ https://stpeter.im/journal/1496.html
 Configuration
 =============
 
-    manifesto_contact_encryption_warning = [[
-        Your rant about security here
-    ]]
-    admin_contact_address = "mailto:xmpp@example.com"
+``` lua
+manifesto_contact_encryption_warning = [[
+    Your rant about security here
+]]
+admin_contact_address = "mailto:xmpp@example.com"
+```
 
 `admin_contact_address` can be a JID or a `mailto:` URI.
 

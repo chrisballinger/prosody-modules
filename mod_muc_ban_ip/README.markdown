@@ -44,9 +44,11 @@ There is no extra configuration for this module except for loading it.
 Remember... do not load it on the MUC host, simply add it to your global
 `modules_enabled` list, or under a specific host like:
 
-    VirtualHost "anon.example.com"
-        authentication = "anonymous"
-        modules_enabled = { "muc_ban_ip" }
+``` lua
+VirtualHost "anon.example.com"
+  authentication = "anonymous"
+  modules_enabled = { "muc_ban_ip" }
+```
 
 Compatibility
 =============

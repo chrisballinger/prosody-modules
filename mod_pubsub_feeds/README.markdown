@@ -19,13 +19,15 @@ Configuration
 This module must be loaded on a Prosody pubsub component. Add it to
 `modules_enabled` and configure like so:
 
-    Component "pubsub.example.com" "pubsub"
-        modules_enabled = { "pubsub_feeds" }
+``` lua
+Component "pubsub.example.com" "pubsub"
+modules_enabled = { "pubsub_feeds" }
 
-        feeds = {
-              planet_jabber = "http://planet.jabber.org/atom.xml";
-              prosody_blog = "http://blog.prosody.im/feed/atom.xml";
-            }
+feeds = {
+  planet_jabber = "http://planet.jabber.org/atom.xml";
+  prosody_blog = "http://blog.prosody.im/feed/atom.xml";
+}
+```
 
 This example creates two nodes, 'planet\_jabber' and 'prosody\_blog'
 that clients can subscribe to using
