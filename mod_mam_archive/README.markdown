@@ -9,17 +9,17 @@ Introduction
 
 Implementation of [XEP-0136: Message
 Archiving](http://xmpp.org/extensions/xep-0136.html) for
-[mod\_mam](mod_mam.md).
+[mod\_mam](mod_mam.html).
 
 Details
 =======
 
-See [mod\_mam](mod_mam.md) for details.
+See [mod\_mam](mod_mam.html) for details.
 
 Usage
 =====
 
-First configure mod\_mam as specified in it's [wiki](mod_mam.md). Make
+First configure mod\_mam as specified in it's [wiki](mod_mam.html). Make
 sure it uses sql2 storage backend.
 
 Then add "mam\_archive" to your modules\_enabled list:
