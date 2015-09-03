@@ -5,10 +5,6 @@ labels:
 summary: LDAP authentication module
 ...
 
-***Note:** A modified version of this module is available, but is not
-yet committed here. The plan is to merge them, for more info see [this
-thread](http://groups.google.com/group/prosody-dev/browse_thread/thread/282e876116ae4177/906121492495ad35#906121492495ad35).*
-
 Introduction
 ============
 
