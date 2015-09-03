@@ -20,27 +20,16 @@ footer{font-size:smaller;color:#babdb6;}
 .content{background-color:white;padding:1em;list-style-position:inside;}
 nav{font-size:large;margin:1ex 1ex;clear:both;line-height:1.5em;}
 nav a{padding: 1ex;text-decoration:none;}
-nav a[rel="up"]{font-size:smaller;}
-nav a[rel="prev"]{float:left;}
-nav a[rel="next"]{float:right;}
-nav a[rel="next::after"]{content:" →";}
-nav a[rel="prev::before"]{content:"← ";}
-nav a:empty::after,nav a:empty::before{content:""}
 @media screen and (min-width: 460px) {
 nav{font-size:x-large;margin:1ex 1em;}
 }
 a:link,a:visited{color:#2e3436;text-decoration:none;}
 a:link:hover,a:visited:hover{color:#3465a4;}
-ul,ol{padding:0;}
+ul{padding:0;}
 li{list-style:none;}
 hr{visibility:hidden;clear:both;}
 br{clear:both;}
-li time{float:right;font-size:small;opacity:0.2;}
 li:hover time{opacity:1;}
-.room-list .description{font-size:smaller;}
-q.body::before,q.body::after{content:"";}
-.presence .verb{font-style:normal;color:#30c030;}
-.presence.unavailable .verb{color:#c03030;}
 </style>
 </head>
 <body>
