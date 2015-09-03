@@ -12,7 +12,7 @@ local function filter_chatstates(stanza)
 			end
 		end);
 		if #stanza.tags == 0 then
-			return nil;
+			return "";
 		end
 	end
 	return stanza;
