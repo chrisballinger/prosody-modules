@@ -1,35 +1,10 @@
-local st = require "util.stanza";
 local url = require"socket.url";
+local render = require"util.interpolation".new("%b{}", require"util.stanza".xml_escape);
 
 module:depends"http";
 
--- local dump = require"util.serialization".new"dump".serialize;
-
-local function template(data)
-	--[[ DOC
-	Like util.template, but deals with plain text
-	Returns a closure that is called with a table of values
-	{name} is substituted for values["name"] and is XML escaped
-	{name!} is substituted without XML escaping
-	{name?} is optional and is replaced with an empty string if no value exists
-	]]
-	return function(values)
-		return (data:gsub("{([^}]-)(%p?)}", function (name, opt)
-			local value = values[name];
-			if value then
-				if opt ~= "!" then
-					return st.xml_escape(value);
-				end
-				return value;
-			elseif opt == "?" then
-				return "";
-			end
-		end));
-	end
-end
-
 -- TODO Move templates into files
-local base = template(template[[
+local base_template = [[
 <!DOCTYPE html>
 <html>
 <head>
@@ -71,39 +46,25 @@ q.body::before,q.body::after{content:"";}
 <body>
 <header>
 <h1>{title}</h1>
-{header!}
 </header>
 <hr>
 <div class="content">
-{body!}
+<nav>
+<ul>{items#
+<li><a href="{item.url}" title="{item.module}">{item.name}</a></li>}
+</ul>
+</nav>
 </div>
 <hr>
 <footer>
-{footer!}
 <br>
 <div class="powered-by">Prosody {prosody_version?}</div>
 </footer>
 </body>
 </html>
-]] { prosody_version = prosody.version, mod_name = module.name });
+]];
 
 local canonical = module:http_url(nil, "/");
-local page_template = template(base{
-	canonical = canonical;
-	title = "HTTP stuff";
-	header = "";
-	body = [[
-<nav>
-<ul>
-{lines!}
-</ul>
-</nav>
-]];
-	footer = "";
-});
-local line_template = template[[
-<li><a href="{url}" title="{module}">{name}</a></li>
-]];
 
 local function relative(base, link)
 	base = url.parse(base);
@@ -117,24 +78,25 @@ local function relative(base, link)
 end
 
 local function handler(event)
-	local items = module:get_host_items("http-provider");
-	local item;
-	for i = 1, #items do
-		item = items[i];
+	local host_items = module:get_host_items("http-provider");
+	local http_apps = {}
+	for _, item in ipairs(host_items) do
 		if module.name ~= item._provided_by then
-			items[i] = line_template{
+			table.insert(http_apps, {
 				name = item.name;
 				module = "mod_" .. item._provided_by;
 				url = relative(canonical, module:http_url(item.name, item.default_path));
-			};
-		else
-			items[i] = "";
+			});
 		end
 	end
 	event.response.headers.content_type = "text/html";
-	return page_template{
-		lines = table.concat(items);
-	};
+	return render(base_template, {
+		title = "HTTP Apps";
+		items = http_apps;
+		prosody_version = prosody.version;
+		mod_name = module.name;
+		canonical = canonical;
+	});
 end
 
 module:provides("http", {
