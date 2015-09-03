@@ -41,7 +41,7 @@ Further LDAP options are:
   ldap\_tls        Enable TLS (StartTLS) to connect to LDAP (can be true or false). The non-standard 'LDAPS' protocol is not supported.   `false`
   ldap\_mode       How passwords are validated.                                                                                           `"bind"`
 
-**Note:** lua-ldap reads from /etc/ldap/ldap.conf and other files like
+**Note:** lua-ldap reads from `/etc/ldap/ldap.conf` and other files like
 `~prosody/.ldaprc` if they exist. Users wanting to use a particular TLS
 root certificate can specify it in the normal way using TLS\_CACERT in
 the OpenLDAP config file.
@@ -49,12 +49,13 @@ the OpenLDAP config file.
 Modes
 =====
 
-The "getpasswd" mode requires plain text access to passwords in LDAP and
-feeds them into Prosodys authentication system. This enables more secure
-authentication mechanisms but does not work for all deployments.
+The `"getpasswd"` mode requires plain text access to passwords in LDAP
+and feeds them into Prosodys authentication system. This enables more
+secure authentication mechanisms but does not work for all deployments.
 
-The "bind" performs an LDAP bind, does not require plain text access to
-passwords but limits you to the PLAIN authentication mechanism.
+The `"bind"` mode performs an LDAP bind, does not require plain text
+access to passwords but limits you to the PLAIN authentication
+mechanism.
 
 Compatibility
 =============
