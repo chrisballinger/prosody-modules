@@ -84,16 +84,25 @@ local function years_page(event, path)
 	local room = nodeprep(path:match("^(.*)/$"));
 	if not room or not public_room(room) then return end
 
+	local date_list = archive.dates and archive:dates(room);
 	local dates = mt.new();
-	module:log("debug", "Find all dates with messages");
-	local next_day;
-	repeat
-		local when = find_once(room, { start = next_day; with = "message<groupchat"; }, 3);
-		if not when then break; end
-		local t = os_date("!*t", when);
-		dates:set(t.year, t.month, t.day, when );
-		next_day = when + (86400 - (when % 86400));
-	until not next_day;
+	if date_list then
+		for _, date in ipairs(date_list) do
+			local when = datetime.parse(date.."T00:00:00Z");
+			local t = os_date("!*t", when);
+			dates:set(t.year, t.month, t.day, when);
+		end
+	else
+		module:log("debug", "Find all dates with messages");
+		local next_day;
+		repeat
+			local when = find_once(room, { start = next_day; with = "message<groupchat"; }, 3);
+			if not when then break; end
+			local t = os_date("!*t", when);
+			dates:set(t.year, t.month, t.day, when );
+			next_day = when + (86400 - (when % 86400));
+		until not next_day;
+	end
 
 	local years = {};
 
