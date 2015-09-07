@@ -65,12 +65,12 @@ the user the MUC is overactive, and asking them to try again.
 Compatibility
 =============
 
-  ------- -----------------
+  ------- ------------------
   Trunk   Works
-  0.8     Doesn't work`*`
-  ------- -----------------
+  0.8     Doesn't work[^1]
+  ------- ------------------
 
-`*` This module can be made to work in 0.8 (and *maybe* previous
-versions) of Prosody by copying the new
-[util.throttle](http://hg.prosody.im/trunk/raw-file/fc8a22936b3c/util/throttle.lua)
-into your Prosody source directory (into the util/ subdirectory).
+[^1]: This module can be made to work in 0.8 (and *maybe* previous
+    versions) of Prosody by copying the new
+    [util.throttle](http://hg.prosody.im/trunk/raw-file/fc8a22936b3c/util/throttle.lua)
+    into your Prosody source directory (into the util/ subdirectory).
