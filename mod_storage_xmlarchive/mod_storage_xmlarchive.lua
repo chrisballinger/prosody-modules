@@ -218,6 +218,10 @@ function archive:delete(username, query)
 	return true;
 end
 
+function archive:dates(username)
+	return dm.list_load(username, module.host, self.store);
+end
+
 local provider = {};
 function provider:open(store, typ)
 	if typ ~= "archive" then return nil, "unsupported-store"; end
