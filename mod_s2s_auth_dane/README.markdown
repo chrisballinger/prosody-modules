@@ -16,13 +16,12 @@ Associations](http://tools.ietf.org/html/draft-miller-xmpp-dnssec-prooftype).
 Dependencies
 ============
 
-This module requires a DNSSEC aware DNS resolver. Prosodys internal
-DNSmodule does not support DNSSEC. Therefore, to use this module,
-areplacement is needed, such as [this
+This module requires a DNSSEC aware DNS resolver. Prosodys internal DNS
+module does not support DNSSEC. Therefore, to use this module, a
+replacement is needed, such as [this
 one](https://www.zash.se/luaunbound.html).
 
-More installation instructions can be found at [Prosody with
-DANE](https://www.zash.se/prosody-dane.html).
+LuaSec 0.5 or later is also required.
 
 Configuration
 =============
@@ -53,10 +52,10 @@ By default, only DANE uses are enabled.
 DNS Setup
 =========
 
-In order for other services to verify your site using using this
-plugin,you need to publish TLSA records (and they need to have this
-plugin). Here's an example using `DANE-EE Cert SHA2-256` for a host
-named `xmpp.example.com` serving the domain `example.com`.
+In order for other services to verify your site using using this plugin,
+you need to publish TLSA records (and they need to have this plugin).
+Here's an example using `DANE-EE Cert SHA2-256` for a host named
+`xmpp.example.com` serving the domain `example.com`.
 
     $ORIGIN example.com.
     ; Your standard SRV record
