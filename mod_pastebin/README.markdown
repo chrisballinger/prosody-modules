@@ -38,34 +38,45 @@ For example:
         modules_enabled = { "pastebin" }
 
 Pastes will be available by default at
-`http://<your-prosody>:5280/pastebin/` by default. This can be changed
-with `pastebin_ports` (see below), or you can forward another external
-URL from your web server to Prosody, use `pastebin_url` to set that URL.
+`http://<your-prosody>:5280/pastebin/` by default.
+
+In Prosody 0.9 and later this can be changed with [HTTP
+settings](https://prosody.im/doc/http).
+
+In 0.8 and older this can be changed with `pastebin_ports` (see below),
+or you can forward another external URL from your web server to Prosody,
+use `pastebin_url` to set that URL.
 
 Configuration
 =============
 
+  Option                      Description
   --------------------------- -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-  pastebin\_ports             List of ports to run the HTTP server on, same format as mod\_httpserver's http\_ports
   pastebin\_threshold         Maximum length (in characters) of a message that is allowed to skip the pastebin. (default 500 characters)
   pastebin\_line\_threshold   The maximum number of lines a message may have before it is sent to the pastebin. (default 4 lines)
   pastebin\_trigger           A string of characters (e.g. "!paste ") which if detected at the start of a message, always sends the message to the pastebin, regardless of length. (default: not set)
-  pastebin\_url               Base URL to display for pastebin links, must end with / and redirect to Prosody's built-in HTTP server
   pastebin\_expire\_after     Number of hours after which to expire (remove) a paste, defaults to 24. Set to 0 to store pastes permanently on disk.
-  --------------------------- -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  pastebin\_ports             List of ports to run the HTTP server on, same format as mod\_httpserver's http\_ports[^1]
+  pastebin\_url               Base URL to display for pastebin links, must end with / and redirect to Prosody's built-in HTTP server[^2]
 
 Compatibility
 =============
 
-  ----- --------------------------------------------------------------------------------
-  0.9   Works, but pastebin\_ports does not exist anymore, see the 0.9.0 release notes
+  ----- -------
+  0.9   Works
   0.8   Works
   0.7   Works
   0.6   Works
-  ----- --------------------------------------------------------------------------------
+  ----- -------
 
 Todo
 ====
 
 -   Maximum paste length
 -   Web interface to submit pastes?
+
+[^1]: As of Prosody 0.9, `pastebin_ports` is replaced by `http_ports`,
+    see [Prosody HTTP server documentation](https://prosody.im/doc/http)
+
+[^2]: See also
+    [http\_external\_url](https://prosody.im/doc/http#external_url)
