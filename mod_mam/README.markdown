@@ -31,14 +31,17 @@ modules_enabled = {
 }
 ```
 
-Storage backend
-===============
+Configuration
+=============
 
-mod\_mam uses the store "archive2". See [Prosodys data storage
+Storage backend
+---------------
+
+mod\_mam uses the store "archive2"[^1]. See [Prosodys data storage
 documentation](https://prosody.im/doc/storage) for information on how to
 configure storage.
 
-For example, to use mod\_storage\_sql2:
+For example, to use mod\_storage\_sql2[^2]:
 
 ``` {.lua}
 storage = {
@@ -46,39 +49,50 @@ storage = {
 }
 ```
 
-Configuration
-=============
-
-The MAM protocol includes a method of changing preferences regarding
-what messages should be stored. This allows users to enable or disable
-archiving by default, and set rules for specific contacts. This module
-will log no messages by default, for privacy concerns. If you decide to
-change this, you should inform your users.
-
-``` {.lua}
-default_archive_policy = false -- other options are true or "roster";
-```
-
-This controls what messages are archived if the user hasn't set a
-matching rule, or another personal default.
-
-  ------------ ------------------------------------------------------
-  `false`      Store no messages. This is the default.
-  `"roster"`   Store messages to/from contacts in the users roster.
-  `true`       Store all messages.
-  ------------ ------------------------------------------------------
+Query size limits
+-----------------
 
     max_archive_query_results = 20;
 
 This is the largest number of messages that are allowed to be retrieved
-in one request.
+in one request *page*. A query that does not fit in one page will
+include a reference to the next page, letting clients page through the
+result set. Setting large number is not recomended, as Prosody will be
+blocked while processing the request and will not be able to do anything
+else.
+
+Message matching policy
+-----------------------
+
+The MAM protocol includes a way for clients to control what messages
+should be stored. This allows users to enable or disable archiving by
+default or for specific contacts. This module will log no messages by
+default, for privacy concerns. If you decide to change this, you should
+inform your users.
+
+``` {.lua}
+default_archive_policy = false
+```
+
+  `default_archive_policy =`   Meaning
+  ---------------------------- ------------------------------------------------------
+  `false`                      Store no messages. This is the default.
+  `"roster"`                   Store messages to/from contacts in the users roster.
+  `true`                       Store all messages.
 
 Compatibility
 =============
 
-  ------- --------------------------------------------------------------------------------------
+  ------- ---------------
   trunk   Works
-  0.10    Works, requires a storage driver with archive support, eg mod\_storage\_sql2 in 0.10
+  0.10    Works [^3]
   0.9     Unsupported
   0.8     Does not work
-  ------- --------------------------------------------------------------------------------------
+  ------- ---------------
+
+[^1]: Might be changed to "mam" at some point
+
+[^2]: mod\_storage\_sql2 will replace mod\_storage\_sql at some point
+
+[^3]: requires a storage driver with archive support, eg
+    mod\_storage\_sql2 in 0.10
