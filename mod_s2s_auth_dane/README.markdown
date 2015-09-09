@@ -36,6 +36,20 @@ module](https://prosody.im/doc/installing_modules), just add it to
      "s2s_auth_dane";
     }
 
+DANE Uses
+---------
+
+By default, only DANE uses are enabled.
+
+    dane_uses = { "DANE-EE", "DANE-TA" }
+
+  Use flag    Description
+  ----------- -------------------------------------------------------------------------------------------------------
+  `DANE-EE`   Most simple use, usually a fingerprint of the full certificate or public key used the service
+  `DANE-TA`   Fingerprint of a certificate or public key that has been used to issue the service certificate
+  `PKIX-EE`   Like `DANE-EE` but the certificate must also pass normal PKIX trust checks (ie standard certificates)
+  `PKIX-TA`   Like `DANE-TA` but must also pass normal PKIX trust checks (ie standard certificates)
+
 DNS Setup
 =========
 
