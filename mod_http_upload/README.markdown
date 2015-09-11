@@ -10,6 +10,11 @@ Configuration
 The module can either be configured as a component or added to an
 existing host or component.
 
+mod\_http\_upload relies on Prosodys HTTP server and mod\_http for
+serving HTTP requests. See [Prosodys HTTP server
+documentation](https://prosody.im/doc/http) for information about how to
+configure ports, HTTP Host names etc.
+
 Component
 ---------
 
