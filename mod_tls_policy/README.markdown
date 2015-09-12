@@ -2,16 +2,16 @@
 
 # Introduction
 
-This module arose from discussions at the XMPP Summit about enforcing 
-better ciphers in TLS.  It may seem attractive to disallow some 
-insecure ciphers or require forward secrecy, but doing this at the TLS 
-level would the user with an unhelpful "Encryption failed" message.  
-This module does this enforcing at the application level, allowing 
-better error messages.
+This module arose from discussions at the XMPP Summit about enforcing
+better ciphers in TLS. It may seem attractive to disallow some insecure
+ciphers or require forward secrecy, but doing this at the TLS level
+would the user with an unhelpful "Encryption failed" message. This
+module does this enforcing at the application level, allowing better
+error messages.
 
 # Configuration
 
-First, download and add the module to `module_enabled`.  Then you can 
+First, download and add the module to `module_enabled`.  Then you can
 decide on what policy you want to have.
 
 Requiring ciphers with forward secrecy is the most simple to set up.
