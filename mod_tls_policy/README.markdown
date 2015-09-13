@@ -1,4 +1,6 @@
-% Cipher policy enforcement with application level error reporting
+---
+summary: Cipher policy enforcement with application level error reporting
+...
 
 # Introduction
 
