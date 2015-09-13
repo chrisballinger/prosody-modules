@@ -1,5 +1,4 @@
 ---
-labels:
 summary: 'Dialback-without-Dialback'
 ...
 
@@ -22,7 +21,8 @@ Simply add the module to the `modules_enabled` list.
 Compatibility
 =============
 
-  0.10               Built into mod\_dialback
   ------------------ --------------------------
+  0.10               Built into mod\_dialback
   0.9 + LuaSec 0.5   Works
   0.8                Doesn't work
+  ------------------ --------------------------
