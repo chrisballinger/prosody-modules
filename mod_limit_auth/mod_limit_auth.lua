@@ -46,4 +46,12 @@ module:hook("authentication-failure", function (event)
 	get_throttle(event.session.ip):poll(1);
 end);
 
--- TODO remove old throttles after some time
+module:add_timer(14400, function (now)
+	local old = now - 86400;
+	for ip, throttle in pairs(throttles) do
+		if throttle.t < old then
+			throttles[ip] = nil;
+		end
+	end
+end);
+
