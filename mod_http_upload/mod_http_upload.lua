@@ -16,6 +16,9 @@ local function join_path(a, b)
 return a .. package.config:sub(1,1) .. b;
 end
 
+-- config
+local file_size_limit = module:get_option_number(module.name .. "_file_size_limit", 10 * 1024 * 1024); -- 10 MB
+
 -- depends
 module:depends("http");
 module:depends("disco");
@@ -46,6 +49,16 @@ module:hook("iq/host/"..xmlns_http_upload..":request", function (event)
 		origin.send(st.error_reply(stanza, "modify", "bad-request", "Invalid filename"));
 		return true;
 	end
+	local filesize = tonumber(request:get_child_text("size"));
+	if not filesize then
+		origin.send(st.error_reply(stanza, "modify", "bad-request", "Missing or invalid file size"));
+		return true;
+	elseif filesize > file_size_limit then
+		origin.send(st.error_reply(stanza, "modify", "not-acceptable", "File too large",
+			st.stanza("file-too-large", {xmlns=xmlns_http_upload})
+				:tag("max-size"):text(tostring(file_size_limit))));
+		return true;
+	end
 	local reply = st.reply(stanza);
 	reply:tag("slot", { xmlns = xmlns_http_upload });
 	local random = uuid();
@@ -64,6 +77,10 @@ local function upload_data(event, path)
 	end
 	local random, filename = path:match("^([^/]+)/([^/]+)$");
 	if not random then
+		return 400;
+	end
+	if #event.request.body > file_size_limit then
+		module:log("error", "Uploaded file too large %d bytes", #event.request.body);
 		return 400;
 	end
 	local dirname = join_path(storage_path, random);
