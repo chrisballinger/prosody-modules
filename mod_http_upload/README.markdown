@@ -39,6 +39,15 @@ On VirtualHosts
       "http_upload";
     }
 
+Limits
+------
+
+A maximum file size can be set by:
+
+``` {.lua}
+http_upload_file_size_limit = 10 * 1024 * 1024 -- this is 10MB in bytes
+```
+
 Compatibility
 =============
 
