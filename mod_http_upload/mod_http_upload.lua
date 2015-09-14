@@ -34,13 +34,14 @@ lfs.mkdir(storage_path);
 -- hooks
 module:hook("iq/host/"..xmlns_http_upload..":request", function (event)
 	local stanza, origin = event.stanza, event.origin;
+	local request = stanza.tags[1];
 	-- local clients only
 	if origin.type ~= "c2s" then
 		origin.send(st.error_reply(stanza, "cancel", "not-authorized"));
 		return true;
 	end
 	-- validate
-	local filename = stanza.tags[1]:get_child_text("filename");
+	local filename = request:get_child_text("filename");
 	if not filename or filename:find("/") then
 		origin.send(st.error_reply(stanza, "modify", "bad-request"));
 		return true;
