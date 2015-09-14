@@ -11,8 +11,7 @@ This is an implementation of the server bits of [XEP-0357: Push
 Notifications](http://xmpp.org/extensions/xep-0357.html). It allows
 clients to register an "app server" which is notified about new messages
 while the user is offline or disconnected. Implementation of the "app
-server", which is expected to forward notifications to something like
-Google Cloud Messaging or Apple Notification Service.
+server" is not included[^1].
 
 Details
 =======
@@ -35,3 +34,6 @@ Future
 Adding support for sending notifications for users who are online but
 not currently connected, such as when `mod_smacks` is keeping their
 session alive, should be added.
+
+[^1]: The service which is expected to forward notifications to
+    something like Google Cloud Messaging or Apple Notification Service
