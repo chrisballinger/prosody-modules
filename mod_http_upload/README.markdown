@@ -38,3 +38,8 @@ On VirtualHosts
       -- other modules
       "http_upload";
     }
+
+Compatibility
+=============
+
+Works with Prosody 0.9.x and later.
