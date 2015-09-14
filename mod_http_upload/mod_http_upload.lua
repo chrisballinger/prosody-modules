@@ -113,3 +113,5 @@ module:provides("http", {
 		["PUT /*"] = upload_data;
 	};
 });
+
+module:log("info", "URL: <%s>; Storage path: %s", module:http_url(), storage_path);
