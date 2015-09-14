@@ -15,11 +15,12 @@ Usage
 As with all modules, copy it to your plugins directory and then add it
 to the modules\_enabled list:
 
-        modules_enabled = {
-                        -- ...
-                        "lastlog",
-                        -- ...
-            }
+``` lua
+modules_enabled = {
+  -- other modules
+  "lastlog",
+}
+```
 
 Configuration
 =============
@@ -36,7 +37,7 @@ Usage
 
 You can check a user's last activity by running:
 
-      prosodyctl mod_lastlog username@example.com
+    prosodyctl mod_lastlog username@example.com
 
 Compatibility
 =============
