@@ -43,7 +43,7 @@ module:hook("iq/host/"..xmlns_http_upload..":request", function (event)
 	-- validate
 	local filename = request:get_child_text("filename");
 	if not filename or filename:find("/") then
-		origin.send(st.error_reply(stanza, "modify", "bad-request"));
+		origin.send(st.error_reply(stanza, "modify", "bad-request", "Invalid filename"));
 		return true;
 	end
 	local reply = st.reply(stanza);
