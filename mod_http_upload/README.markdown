@@ -13,7 +13,7 @@ documentation](https://prosody.im/doc/http) for information about how to
 configure ports, HTTP Host names etc.
 
 The module can either be configured as a component or added to an
-existing host or component. Possible configurration variants are as
+existing host or component. Possible configuration variants are as
 follows:
 
 Component
