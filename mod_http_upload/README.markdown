@@ -19,12 +19,14 @@ follows:
 Component
 ---------
 
-Standalone component:
+You can configure it as a standalone component:
 
     Component "upload.example.org" "http_upload"
 
 Existing component
 ------------------
+
+Or add it to an existing component:
 
     Component "proxy.example.org" "proxy65"
     modules_enabled = {
@@ -33,6 +35,8 @@ Existing component
 
 On VirtualHosts
 ---------------
+
+Or load it directly on hosts:
 
     -- In the Global section or under a specific VirtualHosts line
     modules_enabled = {
