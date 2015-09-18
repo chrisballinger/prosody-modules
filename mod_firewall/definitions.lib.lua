@@ -1,6 +1,7 @@
 
 local definition_handlers = {};
 
+local set = require"util.set";
 local new_throttle = require "util.throttle".create;
 
 function definition_handlers.ZONE(zone_name, zone_members)
