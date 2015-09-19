@@ -1,8 +1,5 @@
 -- mod_candy.lua
 -- Copyright (C) 2013 Kim Alvefur
---
--- Run this in www_files
--- curl -L http://github.com/candy-chat/candy/tarball/master | tar xzfv - --strip-components=1
 
 local json_encode = require"util.json".encode;
 

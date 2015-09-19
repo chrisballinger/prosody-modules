@@ -20,7 +20,9 @@ directory needs to be in the same place as the module.
 You then need to download Candy and unpack it into the www\_files
 directory, for example with curl:
 
-    curl -L http://github.com/candy-chat/candy/tarball/master | tar xzfv - --strip-components=1
+    cd www_files
+    curl -OL https://github.com/candy-chat/candy/releases/download/v2.0.0/candy-2.0.0.zip
+    unzip www_files
 
 After the module has been loaded, Candy will by default be reachable
 from `http://example.com:5280/candy/`
