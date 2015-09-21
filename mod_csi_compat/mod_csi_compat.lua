@@ -14,5 +14,6 @@ module:hook("iq-set/self/google:queue:query", function(event)
 		module:fire_event("csi-client-active", event);
 	end
 	-- <flush/> is implemented as a noop, any IQ stanza would flush the queue anyways.
-	return origin.send(st.reply(stanza));
+	origin.send(st.reply(stanza));
+	return true;
 end, 10);

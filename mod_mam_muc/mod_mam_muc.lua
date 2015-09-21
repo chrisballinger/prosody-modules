@@ -153,7 +153,8 @@ module:hook("iq-set/bare/"..xmlns_mam..":query", function(event)
 
 	local room_obj = get_room_from_jid(room);
 	if not room_obj then
-		return origin.send(st.error_reply(stanza, "cancel", "item-not-found"))
+		origin.send(st.error_reply(stanza, "cancel", "item-not-found"))
+		return true;
 	end
 	local from = jid_bare(orig_from);
 
@@ -161,7 +162,8 @@ module:hook("iq-set/bare/"..xmlns_mam..":query", function(event)
 	local from_affiliation = room_obj:get_affiliation(from);
 	if from_affiliation == "outcast" -- banned
 		or room_obj:get_members_only() and not from_affiliation then -- members-only, not a member
-		return origin.send(st.error_reply(stanza, "auth", "forbidden"))
+		origin.send(st.error_reply(stanza, "auth", "forbidden"))
+		return true;
 	end
 
 	local qid = query.attr.queryid;
@@ -207,7 +209,8 @@ module:hook("iq-set/bare/"..xmlns_mam..":query", function(event)
 	});
 
 	if not data then
-		return origin.send(st.error_reply(stanza, "cancel", "internal-server-error"));
+		origin.send(st.error_reply(stanza, "cancel", "internal-server-error"));
+		return true;
 	end
 	local total = err;
 
