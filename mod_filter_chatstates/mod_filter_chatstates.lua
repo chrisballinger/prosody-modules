@@ -14,7 +14,7 @@ local function filter_chatstates(stanza)
 		stanza = st.clone(stanza);
 		stanza:maptags(chatstate_tag_filter);
 		if #stanza.tags == 0 then
-			return "";
+			return nil;
 		end
 	end
 	return stanza;
