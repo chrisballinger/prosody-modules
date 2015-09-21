@@ -271,7 +271,8 @@ function module.add_host(module)
 			local node = action.attr.node;
 			local ok, ret = service[module.host]:get_items(node, stanza.attr.from);
 			if not ok then
-				return origin.send(st.error_reply(stanza, "cancel", ret));
+				origin.send(st.error_reply(stanza, "cancel", ret));
+				return true;
 			end
 
 			local data = st.stanza("items", { node = node });
@@ -298,7 +299,8 @@ function module.add_host(module)
 		else
 			reply = st.error_reply(stanza, "feature-not-implemented");
 		end
-		return origin.send(reply);
+		origin.send(reply);
+		return true;
 	end);
 
 	-- Add/remove c2s sessions

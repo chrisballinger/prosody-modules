@@ -46,21 +46,26 @@ function proxy_component(origin, stanza)
 		local to_host, to_port = ibb_tag.attr[host_attr], ibb_tag.attr[port_attr];
 		local jid, sid = stanza.attr.from, ibb_tag.attr.sid;
 		if not (to_host and to_port) then
-			return origin.send(st.error_reply(stanza, "modify", "bad-request", "No host/port specified"));
+			origin.send(st.error_reply(stanza, "modify", "bad-request", "No host/port specified"));
+			return true;
 		elseif not sid or sid == "" then
-			return origin.send(st.error_reply(stanza, "modify", "bad-request", "No sid specified"));
+			origin.send(st.error_reply(stanza, "modify", "bad-request", "No sid specified"));
+			return true;
 		elseif ibb_tag.attr.stanza ~= "message" then
-			return origin.send(st.error_reply(stanza, "modify", "bad-request", "Only 'message' stanza transport is supported"));
+			origin.send(st.error_reply(stanza, "modify", "bad-request", "Only 'message' stanza transport is supported"));
+			return true;
 		end
 		local conn, err = socket.tcp();
 		if not conn then
-			return origin.send(st.error_reply(stanza, "wait", "resource-constraint", err));
+			origin.send(st.error_reply(stanza, "wait", "resource-constraint", err));
+			return true;
 		end
 		conn:settimeout(0);
 
 		local success, err = conn:connect(to_host, to_port);
 		if not success and err ~= "timeout" then
-			return origin.send(st.error_reply(stanza, "wait", "remote-server-not-found", err));
+			origin.send(st.error_reply(stanza, "wait", "remote-server-not-found", err));
+			return true;
 		end
 
 		local listener,seq = {}, 0;
@@ -88,18 +93,21 @@ function proxy_component(origin, stanza)
 			if data then
 				conn:write(data);
 			else
-				return origin.send(
+				origin.send(
 					st.error_reply(stanza, "modify", "bad-request", "Invalid data (base64?)")
 				);
+				return true;
 			end
 		else
-			return origin.send(st.error_reply(stanza, "cancel", "item-not-found"));
+			origin.send(st.error_reply(stanza, "cancel", "item-not-found"));
+			return true;
 		end
 	elseif ibb_tag.name == "close" then
 		if close_session(stanza.attr.from, ibb_tag.attr.sid) then
 			origin.send(st.reply(stanza));
 		else
-			return origin.send(st.error_reply(stanza, "cancel", "item-not-found"));
+			origin.send(st.error_reply(stanza, "cancel", "item-not-found"));
+			return true;
 		end
 	end
 end
