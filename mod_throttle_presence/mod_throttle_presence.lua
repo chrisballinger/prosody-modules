@@ -4,6 +4,9 @@ local st = require "util.stanza";
 module:depends("csi");
 
 local function presence_filter(stanza, session)
+	if getmetatable(stanza) ~= st.stanza_mt then
+		return stanza; -- Things we don't want to touch
+	end
 	if stanza._flush then
 		stanza._flush = nil;
 		return stanza;
