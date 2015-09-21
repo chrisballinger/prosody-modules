@@ -3,14 +3,16 @@ local st = require "util.stanza";
 
 module:depends("csi");
 
+local function chatstate_tag_filter(tag)
+	if tag.attr.xmlns ~= "http://jabber.org/protocol/chatstates" then
+		return tag;
+	end
+end
+
 local function filter_chatstates(stanza)
 	if stanza.name == "message" then
 		stanza = st.clone(stanza);
-		stanza:maptags(function (tag)
-			if tag.attr.xmlns ~= "http://jabber.org/protocol/chatstates" then
-				return tag
-			end
-		end);
+		stanza:maptags(chatstate_tag_filter);
 		if #stanza.tags == 0 then
 			return "";
 		end
