@@ -24,7 +24,7 @@ module:depends("http");
 module:depends("disco");
 
 -- namespace
-local xmlns_http_upload = "eu:siacs:conversations:http:upload";
+local xmlns_http_upload = "urn:xmpp:http:upload";
 
 module:add_feature(xmlns_http_upload);
 
