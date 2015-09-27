@@ -64,4 +64,5 @@ module:add_timer(14400, function (now)
 			notified_about_already[host] = nil;
 		end
 	end
+	return 14400;
 end)
