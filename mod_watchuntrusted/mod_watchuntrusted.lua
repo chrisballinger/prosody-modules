@@ -43,7 +43,11 @@ module:hook_global("s2s-check-certificate", function (event)
 			error_message = error_message .. "This certificate is " .. session.cert_identity_status .. " for " .. host .. ".";
 		end
 
-		local replacements = { sha1 = event.cert and event.cert:digest("sha1"), errors = error_message };
+		local replacements = {
+			sha1 = event.cert and event.cert:digest("sha1"),
+			sha256 = event.cert and event.cert:digest("sha256"),
+			errors = error_message
+		};
 
 		local message = st.message{ type = "chat", from = local_host }
 			:tag("body")
