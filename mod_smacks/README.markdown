@@ -41,10 +41,11 @@ Configuration
 Compatibility
 =============
 
-  ----- --------------------------------------------------------------------------------------------------------------------------------------------------------
+  ----- -----------------------------------
   0.9   Works
-  0.8   Works, use version [7693724881b3](http://prosody-modules.googlecode.com/hg-history/7693724881b3f3cdafa35763f00dd040d02313bf/mod_smacks/mod_smacks.lua)
-  ----- --------------------------------------------------------------------------------------------------------------------------------------------------------
+  0.8   Works, use version [7693724881b3]
+  ----- -----------------------------------
+
 
 Clients
 =======
@@ -55,3 +56,5 @@ Clients that support XEP-0198:
 -   Swift (but not resumption, as of version 2.0 and alphas of 3.0)
 -   Psi (in an unreleased branch)
 -   Yaxim
+
+[7693724881b3]: //hg.prosody.im/prosody-modules/raw-file/7693724881b3/mod_smacks/mod_smacks.lua
