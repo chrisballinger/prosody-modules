@@ -12,7 +12,7 @@ local function hashprep(h)
 end
 
 local function hashfmt(h)
-	return h:gsub("..",":%0"):sub(2):upper();
+	return h:gsub("..","%0:", #h/2-1):upper();
 end
 
 for host, set in pairs(module:get_option("s2s_trusted_fingerprints", {})) do
