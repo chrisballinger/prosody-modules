@@ -50,15 +50,18 @@ local function check_certs_validity()
 	end
 
 	local certfile = ssl_config.certificate;
-	local fh = io.open(certfile); -- Load the file.
-	cert = fh and fh:read"*a";
-	fh = fh and fh:close();
-	local cert = cert and load_cert(cert); -- And parse
-
-	if not cert then
-		module:log("warn", "No certificate configured for this host, please fix this and reload this module to check expiry");
-		return
+	local fh, ferr = io.open(certfile); -- Load the file.
+	if not fh then
+		log("warn", "Could not open certificate %s", ferr);
+		return;
 	end
+	local cert, lerr = load_cert(fh:read("*a")); -- And parse
+	fh:close();
+	if not cert then
+		log("warn", "Could not parse certificate %s: %s", certfile, lerr or "");
+		return;
+	end
+
 	local expires_at = parse_x509_datetime(cert:notafter());
 	local expires_in = os.difftime(expires_at, now);
 	local fmt =  "Certificate %s expires in %s"
