@@ -31,6 +31,7 @@ local sm3_attr = { xmlns = xmlns_sm3 };
 
 local resume_timeout = module:get_option_number("smacks_hibernation_time", 300);
 local s2s_smacks = module:get_option_boolean("smacks_enabled_s2s", false);
+local s2s_resend = module:get_option_boolean("smacks_s2s_resend", false);
 local max_unacked_stanzas = module:get_option_number("smacks_max_unacked_stanzas", 0);
 local core_process_stanza = prosody.core_process_stanza;
 local sessionmanager = require"core.sessionmanager";
@@ -303,7 +304,14 @@ local function handle_s2s_destroyed(event)
 	local queue = session.outgoing_stanza_queue;
 	if queue and #queue > 0 then
 		session.log("warn", "Destroying session with %d unacked stanzas", #queue);
-		handle_unacked_stanzas(session);
+		if s2s_resend then
+			for i = 1, #queue do
+				module:send(queue[i]);
+			end
+			session.outgoing_stanza_queue = nil;
+		else
+			handle_unacked_stanzas(session);
+		end
 	end
 end
 
