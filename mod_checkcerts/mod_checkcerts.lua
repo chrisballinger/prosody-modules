@@ -38,42 +38,46 @@ local function check_certs_validity()
 
 	-- First, let's find out what certificate this host uses.
 	local ssl_config = config.rawget(module.host, "ssl");
-	if not ssl_config then
-		local base_host = module.host:match("%.(.*)");
-		ssl_config = config.get(base_host, "ssl");
+	if not ssl_config or not ssl_config.certificate then
+		ssl_config = config.get(module.host:match("%.(.*)"), "ssl");
+	end
+	if not ssl_config or not ssl_config.certificate then
+		ssl_config = config.get("*", "ssl");
+	end
+	if not ssl_config or not ssl_config.certificate then
+		log("warn", "Could not find a certificate to check");
+		return;
 	end
 
-	if ssl_config and ssl_config.certificate then
-		local certfile = ssl_config.certificate;
-		local fh = io.open(certfile); -- Load the file.
-		cert = fh and fh:read"*a";
-		fh = fh and fh:close();
-		local cert = cert and load_cert(cert); -- And parse
+	local certfile = ssl_config.certificate;
+	local fh = io.open(certfile); -- Load the file.
+	cert = fh and fh:read"*a";
+	fh = fh and fh:close();
+	local cert = cert and load_cert(cert); -- And parse
 
-		if not cert then
-			module:log("warn", "No certificate configured for this host, please fix this and reload this module to check expiry");
-			return
-		end
-		local expires_at = parse_x509_datetime(cert:notafter());
-		local expires_in = os.difftime(expires_at, now);
-		local fmt =  "Certificate %s expires in %s"
-		local nag_admin = expires_in < nag_time;
-		local log_warn = expires_in < nag_time * 2;
-		local timediff = expires_in;
-		if expires_in < 0 then
-			fmt =  "Certificate %s expired %s ago";
-			timediff = -timediff;
-		end
-		timediff = humantime(timediff);
-		module:log(log_warn and "warn" or "info", fmt, certfile, timediff);
-		if nag_admin then
-			local body = fmt:format("for host ".. module.host, timediff);
-			for _,admin in ipairs(module:get_option_array("admins", {})) do
-				module:send(st.message({ from = module.host, to = admin, type = "chat" }, body));
-			end
-		end
-		return math.max(86400, expires_in / 3);
+	if not cert then
+		module:log("warn", "No certificate configured for this host, please fix this and reload this module to check expiry");
+		return
 	end
+	local expires_at = parse_x509_datetime(cert:notafter());
+	local expires_in = os.difftime(expires_at, now);
+	local fmt =  "Certificate %s expires in %s"
+	local nag_admin = expires_in < nag_time;
+	local log_warn = expires_in < nag_time * 2;
+	local timediff = expires_in;
+	if expires_in < 0 then
+		fmt =  "Certificate %s expired %s ago";
+		timediff = -timediff;
+	end
+	timediff = humantime(timediff);
+	module:log(log_warn and "warn" or "info", fmt, certfile, timediff);
+	if nag_admin then
+		local body = fmt:format("for host ".. module.host, timediff);
+		for _,admin in ipairs(module:get_option_array("admins", {})) do
+			module:send(st.message({ from = module.host, to = admin, type = "chat" }, body));
+		end
+	end
+	return math.max(86400, expires_in / 3);
 end
 
 module:add_timer(1, check_certs_validity);
