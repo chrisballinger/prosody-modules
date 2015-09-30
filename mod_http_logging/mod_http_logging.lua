@@ -2,6 +2,9 @@
 --
 -- Copyright (C) 2015 Kim Alvefur
 --
+-- This project is MIT/X11 licensed. Please see the
+-- COPYING file in the source package for more information.
+--
 -- Produces HTTP logs in the style of Apache
 --
 -- TODO
