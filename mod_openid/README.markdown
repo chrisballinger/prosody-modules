@@ -52,60 +52,53 @@ The following is a list of the pending tasks which would have to be done
 to make mod\_openid fully featured. They are generally ranked in order
 of most importance with an estimated degree of difficulty.
 
-1.  Support Prosody 0.6.x series
-    (<font color='blue'><i>Medium</i></font>)
-2.  Refactor code (<font color='blue'><i>Medium</i></font>)
+1.  Support Prosody 0.6.x series (**Medium**)
+2.  Refactor code (**Medium**)
     -   The code is pretty messy at the moment, it should be refactored
         to be more easily understood.
 
-3.  Disable use of "user@domain" OpenID identifier form
-    (<font color='green'><i>Easy</i></font>)
+3.  Disable use of "user@domain" OpenID identifier form (*Easy*)
     -   This is a vestigial feature from the early design, allowing
         explicit specification of the JID. However the JID can be
         inferred from the simpler OpenID identifier form.
 
 4.  Use a cryptographically secure Pseudo Random Number Generator (PRNG)
-    (<font color='blue'><i>Medium</i></font>)
+    (**Medium**)
     -   This would likely be accomplished using luacrypto which provides
         a Lua binding to the OpenSSL PRNG.
 
 5.  Make sure OpenID key-value pairs get signed in the right order
-    (<font color='red'><i>Hard</i></font>)
+    (***Hard***)
     -   It is important that the OpenID key-value responses be signed in
         the proper order so that the signature can be properly verified
         by the receiving party. This may be complicated by the fact that
         the iterative ordering of keys in a Lua table is not guaranteed
         for non-integer keys.
 
-6.  Do an actual match on the OpenID realm
-    (<font color='blue'><i>Medium</i></font>)
+6.  Do an actual match on the OpenID realm (**Medium**)
     -   The code currently always returns true for matches against an
         OpenID realm, posing a security risk.
 
-7.  Don't use plain text authentication over HTTP
-    (<font color='red'><i>Hard</i></font>)
+7.  Don't use plain text authentication over HTTP (***Hard***)
     -   This would require some Javascript to perform a digest.
 
-8.  Return meaningful error responses
-    (<font color='blue'><i>Medium</i></font>)
+8.  Return meaningful error responses (**Medium**)
     -   Most error responses are an HTTP 404 File Not Found, obviously
         something more meaningful could be returned.
 
-9.  Enable Association (<font color='red'><i>Hard</i></font>)
+9.  Enable Association (***Hard***)
     -   Association is a feature of the OpenID specification which
         reduces the number of round-trips needed to perform
         authentication.
 
-10. Support HTTPS (<font color='blue'><i>Medium</i></font>)
+10. Support HTTPS (**Medium**)
     -   With option to only allow authentication through HTTPS
 
-11. Enable OpenID 1.1 compatibility
-    (<font color='blue'><i>Medium</i></font>)
+11. Enable OpenID 1.1 compatibility (**Medium**)
     -   mod\_openid is designed from the OpenID 2.0 specification, which
         has an OpenID 1.1 compatibility mode.
 
-12. Check specification compliance
-    (<font color='blue'><i>Medium</i></font>)
+12. Check specification compliance (**Medium**)
     -   Walk through the code and make sure it complies with the OpenID
         specification. Comment code as necessary with the relevant
         sections in the specification.
@@ -114,22 +107,18 @@ Once all these steps are done, mod\_openid could be considered to have
 reached "beta" status and ready to real world use. The following are
 features that would be nice to have in a stable release:
 
-1.  Allow users to always trust realms
-    (<font color='red'><i>Hard</i></font>)
-2.  Allow users to remain logged in with a cookie
-    (<font color='red'><i>Hard</i></font>)
-3.  Enable simple registration using a user's vCard
-    (<font color='blue'><i>Medium</i></font>)
-4.  More useful user identity page
-    (<font color='red'><i>Hard</i></font>)
+1.  Allow users to always trust realms (***Hard***)
+2.  Allow users to remain logged in with a cookie (***Hard***)
+3.  Enable simple registration using a user's vCard (**Medium**)
+4.  More useful user identity page (***Hard***)
     -   Allow users to alter what realms they trust and what simple
         registration information gets sent to relaying parties by
         default.
 
-5.  OpenID Bot (<font color='red'><i>Hard</i></font>)
+5.  OpenID Bot (***Hard***)
     -   Offers all functionality of the user identity page management
 
-6.  Better designed pages (<font color='green'>Easy</font>)
+6.  Better designed pages (*Easy*)
     -   Use semantic XHTML and CSS to allow for custom styling.
     -   Use the Prosody favicon.
 
