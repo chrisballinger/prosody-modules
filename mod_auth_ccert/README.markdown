@@ -20,17 +20,16 @@ Configuration
     certificate_match = "xmppaddr" -- or "email"
 
     c2s_ssl = {
-        capath = "/path/to/dir/with/your/ca"
+        cacert = "/path/to/your/ca.pem";
+        capath = false; -- Disable capath inherited from built-in default
     }
 
-`capath` should be pointed to a directory with your own CA certificate.
-You will need to run `c_rehash` in it.
 
 Compatibility
 =============
 
   ----------------- --------------
   trunk             Works
-  0.9 and earlier   Doesn't work
   0.10 and later    Works
+  0.9 and earlier   Doesn't work
   ----------------- --------------
