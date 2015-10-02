@@ -4,7 +4,7 @@ assert(require"ssl.core".info, "Incompatible LuaSec version");
 local function hook(event_name, typ, policy)
 	if not policy then return end
 	if policy == "FS" then
-		policy = { key = "DH$" };
+		policy = { cipher = "^E?C?DHE%-" };
 	elseif type(policy) == "string" then
 		policy = { cipher = policy };
 	end
