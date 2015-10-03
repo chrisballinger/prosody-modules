@@ -16,8 +16,11 @@ feed publishers.
 Configuration
 =============
 
-This module must be loaded on a Prosody pubsub component. Add it to
-`modules_enabled` and configure like so:
+This module needs to be be loaded together with
+[mod\_pubsub][doc:modules:mod\_pubsub].
+
+For example, this is how you could add it to an existing pubsub
+component:
 
 ``` lua
 Component "pubsub.example.com" "pubsub"
