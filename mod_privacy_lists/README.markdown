@@ -4,8 +4,6 @@ labels:
 summary: 'Privacy lists (XEP-0016) support'
 ...
 
-summary: Privacy lists (XEP-0016) support labels: Stage-Beta
-
 Introduction
 ------------
 
