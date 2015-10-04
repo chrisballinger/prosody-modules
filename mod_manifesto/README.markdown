@@ -7,7 +7,7 @@ Introduction
 
 This module informs users about the XMPP Test day and whether their
 contacts are affected. For mor info about the test day, see
-https://stpeter.im/journal/1496.html
+<https://stpeter.im/journal/1496.html>
 
 Configuration
 =============
