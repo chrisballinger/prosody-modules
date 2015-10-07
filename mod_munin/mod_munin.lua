@@ -93,6 +93,11 @@ module:hook("stats-updated", function (event)
 			elseif host == "*" then
 				host = nil;
 			end
+			if sect:find"^mod_measure_.") then
+				sect = sect:sub(13);
+			elseif sect:find"^mod_statistics_.") then
+				sect = sect:sub(16);
+			end
 			key = clean_fieldname(s_format("%s_%s_%s", host or "global", sect, typ));
 
 			if not meta:get(key) then
