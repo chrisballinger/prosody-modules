@@ -14,12 +14,12 @@ Archiving](http://xmpp.org/extensions/xep-0136.html) for
 Details
 =======
 
-See [mod\_mam](mod_mam.html) for details.
+See [mod\_mam] for details.
 
 Usage
 =====
 
-First configure mod\_mam as specified in it's [wiki](mod_mam.html). Make
+First configure mod\_mam as specified in it's [wiki][mod\_mam]. Make
 sure it uses sql2 storage backend.
 
 Then add "mam\_archive" to your modules\_enabled list:
@@ -33,11 +33,9 @@ Then add "mam\_archive" to your modules\_enabled list:
 Configuration
 =============
 
-Because of the fact that
-[XEP-0136](http://xmpp.org/extensions/xep-0136.html) defines a
-'conversation' concept not present in
-[XEP-0313](http://xmpp.org/extensions/xep-0313.html), we have to assume
-some periods of chat history as 'conversations'.
+Because of the fact that [XEP-0136] defines a 'conversation' concept not
+present in [XEP-0313], we have to assume some periods of chat history as
+'conversations'.
 
 Conversation interval defaults to one day, to provide for a convenient
 usage.
