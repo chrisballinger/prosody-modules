@@ -20,7 +20,7 @@ Configuration
     certificate_match = "xmppaddr" -- or "email"
 
     c2s_ssl = {
-        cacert = "/path/to/your/ca.pem";
+        cafile = "/path/to/your/ca.pem";
         capath = false; -- Disable capath inherited from built-in default
     }
 
