@@ -112,14 +112,17 @@ local function upload_data(event, path)
 end
 
 local serve_uploaded_files = module:depends("http_files").serve(storage_path);
+local http_server = require"net.http.server";
 
-local function size_only(request, data)
-	request.headers.content_size = #data;
-	return 200;
+local function size_only(response, data)
+	if data then
+		response.headers.content_size = #data;
+	end
+	return http_server.send_response(response);
 end
 
 local function serve_head(event, path)
-	event.send = size_only;
+	event.response.send = size_only;
 	return serve_uploaded_files(event, path);
 end
 
