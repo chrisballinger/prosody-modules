@@ -9,6 +9,10 @@ local dataform = require"util.dataforms".new;
 
 local xmlns_push = "urn:xmpp:push:0";
 
+-- configuration
+local include_body = module:get_option("push_notification_with_body", true);
+local include_sender = module:get_option("push_notification_with_sender", true);
+
 -- For keeping state across reloads
 local push_enabled = module:shared("push-enabled-users");
 
@@ -86,11 +90,16 @@ module:hook("message/offline/handle", function(event)
 		local push_publish = st.iq({ to = push_jid, from = module.host, type = "set", id = "push" })
 			:tag("pubsub", { xmlns = "http://jabber.org/protocol/pubsub" })
 				:tag("publish", { node = push_node });
-		push_publish:add_child(push_form:form({
+		local form_data = {
 			["message-count"] = tostring(push_info.count);
-			["last-message-sender"] = stanza.attr.from;
-			["last-message-body"] = stanza:get_child_text("body");
-		}));
+		};
+		if include_sender then
+			form_data["last-message-sender"] = stanza.attr.from;
+		end
+		if include_body then
+			form_data["last-message-body"] = stanza:get_child_text("body");
+		end
+		push_publish:add_child(push_form:form(form_data));
 		push_publish:up(); -- / publish
 		if push_info.options then
 			push_publish:tag("publish-options"):add_child(push_info.options);
