@@ -239,7 +239,7 @@ local function route_to_onion(event)
 	if not to_host:find(".onion(.?)$") then
 		if onions_map[to_host] then
 			if type(onions_map[to_host]) == "string" then
-				onions_host = onions_map[to_host];
+				onion_host = onions_map[to_host];
 			else
 				onion_host = onions_map[to_host].host;
 				onion_port = onions_map[to_host].port;
