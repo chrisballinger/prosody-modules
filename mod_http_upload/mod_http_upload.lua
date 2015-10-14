@@ -114,9 +114,9 @@ end
 local serve_uploaded_files = module:depends("http_files").serve(storage_path);
 local http_server = require"net.http.server";
 
-local function size_only(response, data)
-	if data then
-		response.headers.content_size = #data;
+local function size_only(response, body)
+	if body then
+		response.headers.content_length = #body;
 	end
 	return http_server.send_response(response);
 end
