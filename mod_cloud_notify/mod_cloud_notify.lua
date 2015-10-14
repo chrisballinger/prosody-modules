@@ -9,9 +9,11 @@ local dataform = require"util.dataforms".new;
 
 local xmlns_push = "urn:xmpp:push:0";
 
-module:add_feature(xmlns_push);
-
+-- For keeping state across reloads
 local push_enabled = module:shared("push-enabled-users");
+
+-- http://xmpp.org/extensions/xep-0357.html#disco
+module:add_feature(xmlns_push);
 
 -- http://xmpp.org/extensions/xep-0357.html#enabling
 module:hook("iq-set/self/"..xmlns_push..":enable", function (event)
