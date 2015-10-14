@@ -13,11 +13,15 @@ module:add_feature(xmlns_push);
 
 local push_enabled = module:shared("push-enabled-users");
 
+-- http://xmpp.org/extensions/xep-0357.html#enabling
 module:hook("iq-set/self/"..xmlns_push..":enable", function (event)
 	local origin, stanza = event.origin, event.stanza;
-	local push_jid, push_node = stanza.tags[1].attr.jid, stanza.tags[1].attr.node;
-	if not push_jid or not push_node then
-		origin.send(st.error_reply(stanza, "modify", "bad-request", "Missing jid or node"));
+	-- MUST contain a 'jid' attribute of the XMPP Push Service being enabled
+	local push_jid = stanza.tags[1].attr.jid;
+	-- SHOULD contain a 'node' attribute
+	local push_node = stanza.tags[1].attr.node;
+	if not push_jid then
+		origin.send(st.error_reply(stanza, "modify", "bad-request", "Missing jid"));
 		return true;
 	end
 	local publish_options = stanza.tags[1].tags[1];
@@ -29,7 +33,7 @@ module:hook("iq-set/self/"..xmlns_push..":enable", function (event)
 	if not user_push_services then
 		user_push_services = {};
 	end
-	user_push_services[push_jid .. "<" .. push_node] = {
+	user_push_services[push_jid .. "<" .. (push_node or "")] = {
 		jid = push_jid;
 		node = push_node;
 		count = 0;
@@ -39,16 +43,20 @@ module:hook("iq-set/self/"..xmlns_push..":enable", function (event)
 	return true;
 end);
 
+-- http://xmpp.org/extensions/xep-0357.html#disabling
 module:hook("iq-set/self/"..xmlns_push..":disable", function (event)
 	local origin, stanza = event.origin, event.stanza;
-	local push_jid, push_node = stanza.tags[1].attr.jid, stanza.tags[1].attr.node;
-	if not push_jid or not push_node then
-		origin.send(st.error_reply(stanza, "modify", "bad-request", "Missing jid or node"));
+	local push_jid = stanza.tags[1].attr.jid; -- MUST include a 'jid' attribute
+	local push_node = stanza.tags[1].attr.node; -- A 'node' attribute MAY be included
+	if not push_jid then
+		origin.send(st.error_reply(stanza, "modify", "bad-request", "Missing jid"));
 		return true;
 	end
 	local user_push_services = push_enabled[origin.username];
-	if user_push_services then
-		user_push_services[push_jid .. "<" .. push_node] = nil;
+	for key, push_info in pairs(user_push_services) do
+		if push_info.jid == push_jid and (not push_node or push_info.node == push_node) then
+			user_push_services[key] = nil;
+		end
 	end
 	origin.send(st.reply(stanza));
 	return true;
@@ -62,6 +70,7 @@ local push_form = dataform {
 	{ name = "last-message-body"; type = "text-single"; };
 };
 
+-- http://xmpp.org/extensions/xep-0357.html#publishing
 module:hook("message/offline/handle", function(event)
 	local origin, stanza = event.origin, event.stanza;
 	local to = stanza.attr.to;
