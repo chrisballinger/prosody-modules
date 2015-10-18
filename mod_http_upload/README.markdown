@@ -1,8 +1,13 @@
+---
+labels: Stage-Alpha
+description: HTTP File Upload
+...
+
 Introduction
 ============
 
-This module provides a space for clients to upload files over HTTP, as
-used by [Conversations](http://conversations.im/).
+This module implements [XEP-0363], which lets clients upload files over
+HTTP.
 
 Configuration
 =============
