@@ -11,6 +11,8 @@
 local st = require"util.stanza";
 local lfs = require"lfs";
 local uuid = require"util.uuid".generate;
+local t_concat = table.concat;
+local t_insert = table.insert;
 
 local function join_path(a, b)
 return a .. package.config:sub(1,1) .. b;
@@ -111,18 +113,50 @@ local function upload_data(event, path)
 	return 200;
 end
 
-local serve_uploaded_files = module:depends("http_files").serve(storage_path);
-local http_server = require"net.http.server";
+-- FIXME Duplicated from net.http.server
 
-local function size_only(response, body)
-	if body then
-		response.headers.content_length = #body;
+local codes = require "net.http.codes";
+local headerfix = setmetatable({}, {
+	__index = function(t, k)
+		local v = "\r\n"..k:gsub("_", "-"):gsub("%f[%w].", s_upper)..": ";
+		t[k] = v;
+		return v;
 	end
-	return http_server.send_response(response);
+});
+
+local function send_response_sans_body(response, body)
+	if response.finished then return; end
+	response.finished = true;
+	response.conn._http_open_response = nil;
+	
+	local status_line = "HTTP/"..response.request.httpversion.." "..(response.status or codes[response.status_code]);
+	local headers = response.headers;
+	body = body or response.body or "";
+	headers.content_length = #body;
+
+	local output = { status_line };
+	for k,v in pairs(headers) do
+		t_insert(output, headerfix[k]..v);
+	end
+	t_insert(output, "\r\n\r\n");
+	-- Here we *don't* add the body to the output
+
+	response.conn:write(t_concat(output));
+	if response.on_destroy then
+		response:on_destroy();
+		response.on_destroy = nil;
+	end
+	if response.persistent then
+		response:finish_cb();
+	else
+		response.conn:close();
+	end
 end
 
+local serve_uploaded_files = module:depends("http_files").serve(storage_path);
+
 local function serve_head(event, path)
-	event.response.send = size_only;
+	event.response.send = send_response_sans_body;
 	return serve_uploaded_files(event, path);
 end
 
