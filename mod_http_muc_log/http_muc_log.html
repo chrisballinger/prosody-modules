@@ -94,7 +94,7 @@ while(timeTags[i]) {
 tag = timeTags[i++];
 if(date = tag.getAttribute("datetime")) {
 date = new Date(date);
-tag.textContent = date.toLocaleTimeString();
+tag.textContent = date.toLocaleTimeString(navigator.language);
 tag.setAttribute("title", date.toString());
 }
 }
