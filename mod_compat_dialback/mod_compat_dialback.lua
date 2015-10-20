@@ -8,7 +8,7 @@
 
 module:set_global();
 
-module:global("s2s-stream-features-legacy", function (data)
+module:hook("s2s-stream-features-legacy", function (data)
 	if data.origin.type == "s2sin_unauthed" then
 		data.features:tag("dialback", { xmlns='urn:xmpp:features:dialback' }):up();
 	end
