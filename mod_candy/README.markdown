@@ -1,5 +1,4 @@
 ---
-labels:
 summary: Serve Candy from prosody
 ...
 
@@ -31,6 +30,7 @@ Compatibility
 =============
 
   ------- -------
-  trunk   Works
-  0.9     Works
+    trunk Works
+     0.10 Works
+      0.9 Works
   ------- -------
