@@ -12,10 +12,10 @@ app from prosody.
 Installation
 ============
 
-[Install](http://prosody.im/doc/installing_modules) and
-[enable](http://prosody.im/doc/modules_enabled) the module just like any
-other. Note the included HTML file in the www\_files directory, this
-directory needs to be in the same place as the module.
+[Install][doc:installing\_modules] and [enable][doc:modules\_enabled]
+the module just like any other. Note the included HTML file in the
+www\_files directory, this directory needs to be in the same place as
+the module.
 
 You then need to download Candy and unpack it into the www\_files
 directory, for example with curl:
