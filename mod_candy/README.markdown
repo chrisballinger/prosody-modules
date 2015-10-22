@@ -22,7 +22,7 @@ directory, for example with curl:
 
     cd www_files
     curl -OL https://github.com/candy-chat/candy/releases/download/v2.0.0/candy-2.0.0.zip
-    unzip www_files
+    unzip candy-2.0.0.zip
 
 After the module has been loaded, Candy will by default be reachable
 from `http://example.com:5280/candy/`
