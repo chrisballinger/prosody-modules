@@ -30,6 +30,9 @@ directory, for example with curl:
 After the module has been loaded, Candy will by default be reachable
 from `http://example.com:5280/candy/`
 
+It may be helpful to also enable [mod\_default\_bookmarks] so that Candy
+users always have some room(s) to join, or it will show an empty screen.
+
 Compatibility
 =============
 
