@@ -16,6 +16,10 @@ the module just like any other. Note the included HTML file in the
 www\_files directory, this directory needs to be in the same place as
 the module.
 
+mod\_candy will automatically configure Candy for username and password
+or anonymous login depending on the `authentication` option on the
+current VirtualHost.
+
 You then need to download Candy and unpack it into the www\_files
 directory, for example with curl:
 
