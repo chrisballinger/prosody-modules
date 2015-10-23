@@ -11,6 +11,9 @@ function check_subscribed(event)
 		if to_resource and stanza.attr.type == "groupchat" then
 			return nil; -- Pass through
 		end
+		if stanza.name == "iq" and ( stanza.attr.type == "get" or stanza.attr.type == "set" ) then
+			event.origin.send(st.error_reply(stanza, "cancel", "service-unavailable"));
+		end
 		return true; -- Drop stanza
 	end
 end
