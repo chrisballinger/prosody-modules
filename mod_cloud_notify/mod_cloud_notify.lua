@@ -38,6 +38,7 @@ module:hook("iq-set/self/"..xmlns_push..":enable", function (event)
 	local user_push_services = push_enabled[origin.username];
 	if not user_push_services then
 		user_push_services = {};
+		push_enabled[origin.username] = user_push_services;
 	end
 	user_push_services[push_jid .. "<" .. (push_node or "")] = {
 		jid = push_jid;
