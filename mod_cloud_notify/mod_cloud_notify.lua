@@ -88,7 +88,7 @@ module:hook("message/offline/handle", function(event)
 	for _, push_info in pairs(user_push_services) do
 		push_info.count = push_info.count + 1;
 		local push_jid, push_node = push_info.jid, push_info.node;
-		local push_publish = st.iq({ to = push_jid, from = module.host, type = "set", id = "push" })
+		local push_publish = st.iq({ to = push_jid, from = node .. "@" .. module.host, type = "set", id = "push" })
 			:tag("pubsub", { xmlns = "http://jabber.org/protocol/pubsub" })
 				:tag("publish", { node = push_node });
 		local form_data = {
