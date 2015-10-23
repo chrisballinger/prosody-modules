@@ -18,25 +18,28 @@ local host = module.host;
 local api_base = module:get_option_string("http_auth_url",  ""):gsub("$host", host);
 if api_base == "" then error("http_auth_url required") end
 
+local function async_http_request(url, ex);
+	local wait, done = waiter();
+
+	local content, code, request, response;
+	local ret;
+	function cb(content_, code_, request_, response_)
+		content, code, request, response = content_, code_, request_, response_;
+		done();
+	end
+	wait();
+	return content, code, request, response;
+end
+
 local provider = {};
 
 function provider.test_password(username, password)
 	log("debug", "test password for user %s at host %s", username, host);
 
-	local wait, done = waiter();
 
-	local code = -1;
-	http.request(api_base:gsub("$user", username), {
-		headers = {
-			Authorization = "Basic "..base64(username..":"..password);
-		};
-	},
-	function(body, _code)
-		code = _code;
-		done();
-	end);
-
-	wait();
+	local _, code = async_http_request(api_base:gsub("$user", username), {
+		headers = { Authorization = "Basic "..base64(username..":"..password); };
+	});
 
 	if code >= 200 and code <= 299 then
 		return true;
