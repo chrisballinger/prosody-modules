@@ -1,4 +1,5 @@
 
+local st = require"util.stanza";
 local jid_split = require "util.jid".split;
 local jid_bare = require "util.jid".bare;
 local is_contact_subscribed = require "core.rostermanager".is_contact_subscribed;
