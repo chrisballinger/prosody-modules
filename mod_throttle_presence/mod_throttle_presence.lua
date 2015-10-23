@@ -13,7 +13,11 @@ local function presence_filter(stanza, session)
 	end
 	local buffer = session.presence_buffer;
 	local from = stanza.attr.from;
-	if stanza.name ~= "presence" or (stanza.attr.type and stanza.attr.type ~= "unavailable") then
+	if stanza.name == "presence" and (stanza.attr.type == nil or stanza.attr.type == "unavailable") then
+		module:log("debug", "Buffering presence stanza from %s to %s", stanza.attr.from, session.full_jid);
+		buffer[stanza.attr.from] = st.clone(stanza);
+		return nil; -- Drop this stanza (we've stored it for later)
+	else
 		local cached_presence = buffer[stanza.attr.from];
 		if cached_presence then
 			module:log("debug", "Important stanza for %s from %s, flushing presence", session.full_jid, from);
@@ -22,10 +26,6 @@ local function presence_filter(stanza, session)
 			session.send(cached_presence);
 			buffer[stanza.attr.from] = nil;
 		end
-	else
-		module:log("debug", "Buffering presence stanza from %s to %s", stanza.attr.from, session.full_jid);
-		buffer[stanza.attr.from] = st.clone(stanza);
-		return nil; -- Drop this stanza (we've stored it for later)
 	end
 	return stanza;
 end
