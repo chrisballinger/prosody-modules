@@ -44,8 +44,8 @@ module:hook_global("s2s-check-certificate", function (event)
 		end
 
 		local replacements = {
-			sha1 = event.cert and event.cert:digest("sha1"),
-			sha256 = event.cert and event.cert:digest("sha256"),
+			sha1 = event.cert and event.cert:digest("sha1") or "(No certificate)",
+			sha256 = event.cert and event.cert:digest("sha256") or "(No certificate)",
 			errors = error_message
 		};
 
