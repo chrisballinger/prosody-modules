@@ -23,7 +23,7 @@ local function async_http_request(url, ex);
 
 	local content, code, request, response;
 	local ret;
-	function cb(content_, code_, request_, response_)
+	local function cb(content_, code_, request_, response_)
 		content, code, request, response = content_, code_, request_, response_;
 		done();
 	end
