@@ -22,7 +22,6 @@ local function async_http_request(url, ex);
 	local wait, done = waiter();
 
 	local content, code, request, response;
-	local ret;
 	local function cb(content_, code_, request_, response_)
 		content, code, request, response = content_, code_, request_, response_;
 		done();
