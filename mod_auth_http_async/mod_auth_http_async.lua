@@ -27,6 +27,7 @@ local function async_http_request(url, ex);
 		content, code, request, response = content_, code_, request_, response_;
 		done();
 	end
+	http.request(url, ex, cb);
 	wait();
 	return content, code, request, response;
 end
