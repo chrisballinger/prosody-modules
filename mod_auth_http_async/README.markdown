@@ -1,3 +1,8 @@
+---
+labels:
+- Stage-Alpha
+...
+
 Introduction
 ============
 
@@ -14,9 +19,13 @@ authentication][rfc7617] to the configured `http_auth_url`.
 Configuration
 =============
 
-``` {.lua}
+``` lua
 VirtualHost "example.com"
 authentication = "http_async"
 http_auth_url = "http://example.com/auth"
 ```
 
+Compatibility
+=============
+
+Requires 0.10+
