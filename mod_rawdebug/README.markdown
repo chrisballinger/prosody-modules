@@ -6,7 +6,7 @@ summary: Telnet command for raw stanza logging
 # Summary
 
 Sometimes it is useful to get the raw XML logs from clients for
-debugging purpouses, but some cliens don't expose this. This command
+debugging purposes, but some clients don't expose this. This command
 lets you activate this on specific sessions.
 
 # Usage
