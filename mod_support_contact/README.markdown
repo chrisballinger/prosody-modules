@@ -28,10 +28,16 @@ Configuration
 Compatibility
 =============
 
-  ----- -------
-  0.7   Works
-  0.6   Works
-  ----- -------
+  ------ -------
+  0.10   Works
+  0.9    Works
+  0.8    Works
+  0.7    Works
+  0.6    Works
+  ------ -------
+
+**For 0.8 and older** use [version
+999a4b3e699b](http://hg.prosody.im/prosody-modules/file/999a4b3e699b/mod_support_contact/mod_support_contact.lua).
 
 Caveats/Todos/Bugs
 ==================
