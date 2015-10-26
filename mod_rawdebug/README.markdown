@@ -3,15 +3,13 @@ labels:
 summary: Telnet command for raw stanza logging
 ...
 
-Summary
--------
+# Summary
 
 Sometimes it is useful to get the raw XML logs from clients for
 debugging purpouses, but some cliens don't expose this. This command
 lets you activate this on specific sessions.
 
-Usage
------
+# Usage
 
 In the telnet console:
 
