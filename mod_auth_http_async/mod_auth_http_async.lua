@@ -68,7 +68,7 @@ end
 function provider.get_sasl_handler()
 	return new_sasl(host, {
 		plain_test = function(sasl, username, password, realm)
-			return provider.test_password(username, realm, password), true;
+			return provider.test_password(username, password), true;
 		end
 	});
 end
