@@ -18,7 +18,7 @@ local host = module.host;
 local api_base = module:get_option_string("http_auth_url",  ""):gsub("$host", host);
 if api_base == "" then error("http_auth_url required") end
 
-local function async_http_request(url, ex);
+local function async_http_request(url, ex)
 	local wait, done = waiter();
 
 	local content, code, request, response;
