@@ -161,8 +161,15 @@ local function serve_head(event, path)
 	return serve_uploaded_files(event, path);
 end
 
+local function serve_hello(event)
+	event.response.headers.content_type = "text/html;charset=utf-8"
+	return "<!DOCTYPE html>\n<h1>Hello from mod_"..module.name.."!</h1>\n";
+end
+
 module:provides("http", {
 	route = {
+		["GET"] = serve_hello;
+		["GET /"] = serve_hello;
 		["GET /*"] = serve_uploaded_files;
 		["HEAD /*"] = serve_head;
 		["PUT /*"] = upload_data;
