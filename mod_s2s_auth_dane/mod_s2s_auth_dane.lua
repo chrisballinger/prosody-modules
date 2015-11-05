@@ -98,12 +98,12 @@ local function dane_lookup(host_session, cb)
 
 			local n = answer.n or #answer;
 			if n == 0 then
-				-- No SRV records, we could proceed with the domainname and
-				-- default port but that will currently not work properly since
-				-- mod_s2s doesn't keep the answer around for that
-				return cb(host_session);
-			end
-			if n == 1 and answer[1].srv.target == '.' then
+				-- No SRV records, synthesize fallback host and port
+				-- this may behave oddly for connections in the other direction if
+				-- mod_s2s doesn't keep the answer around
+				answer[1] = { srv = { target = name, port = 5269 } };
+				n = 1;
+			elseif n == 1 and answer[1].srv.target == '.' then
 				return cb(host_session); -- No service ... This shouldn't happen?
 			end
 			local srv_hosts = { answer = answer };
@@ -162,9 +162,10 @@ local function dane_lookup(host_session, cb)
 		local srv_hosts = host_session.srv_hosts;
 		if not ( srv_hosts and srv_hosts.answer and srv_hosts.answer.secure ) then
 			return; -- No secure SRV records, fall back to non-DANE mode
+			-- Empty response were not kept by older mod_s2s/s2sout
 		end
 		-- Do TLSA lookup for currently selected SRV record
-		local srv_choice = srv_hosts[host_session.srv_choice];
+		local srv_choice = srv_hosts[host_session.srv_choice or 0] or { target = idna_to_ascii(host_session.to_host), port = 5269 };
 		host_session.dane = dns_lookup(function(answer)
 			if answer and ((answer.secure and #answer > 0) or answer.bogus) then
 				srv_choice.dane = answer;
