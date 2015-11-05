@@ -267,8 +267,8 @@ module:hook("s2s-check-certificate", function(event)
 			local use = tlsa.use;
 
 			if enabled_uses:contains(use) then
-				-- PKIX-EE or DANE-EE
-				if use == 1 or use == 3 then
+				-- DANE-EE or PKIX-EE
+				if use == 3 or (use == 1 and session.cert_chain_status == "valid") then
 					-- Should we check if the cert subject matches?
 					local is_match = one_dane_check(tlsa, cert);
 					if is_match ~= nil then
@@ -284,7 +284,8 @@ module:hook("s2s-check-certificate", function(event)
 						match_found = true;
 						break;
 					end
-				elseif use == 0 or use == 2 then
+				-- DANE-TA or PKIX-CA
+				elseif use == 2 or (use == 0 and session.cert_chain_status == "valid") then
 					supported_found = true;
 					local chain = session.conn:socket():getpeerchain();
 					for c = 1, #chain do
