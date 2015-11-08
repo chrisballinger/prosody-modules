@@ -29,7 +29,7 @@ module:hook("iq/bare/urn:xmpp:sic:1:address", function(event)
 		if stanza.attr.to then
 			origin.send(st.error_reply(stanza, "auth", "forbidden", "You can only ask about your own IP address"));
 		elseif origin.ip then
-			local reply = st.reply(stanza):tag("address", {xmlns='urn:xmpp:sic:0'})
+			local reply = st.reply(stanza):tag("address", {xmlns='urn:xmpp:sic:1'})
 				:tag("ip"):text(origin.ip):up()
 			if origin.conn and origin.conn.port then -- server_event
 				reply:tag("port"):text(tostring(origin.conn:port()))
