@@ -9,9 +9,8 @@
 -- COPYING file in the source package for more information.
 -----------------------------------------------------------
 
-if not rawget(_G, "prosodyctl") then
+if module.host ~= "*" then
 	module:log("error", "Do not load this module in Prosody, for correct usage see: https://modules.prosody.im/mod_roster_command.html");
-	module.host = "*";
 	return;
 end
 
@@ -19,10 +18,13 @@ end
 -- Workaround for lack of util.startup...
 _G.bare_sessions = _G.bare_sessions or {};
 
+local usermanager = require "core.usermanager";
 local rostermanager = require "core.rostermanager";
 local storagemanager = require "core.storagemanager";
 local jid = require "util.jid";
-local warn = prosodyctl.show_warning;
+local warn = require"util.prosodyctl".show_warning;
+local prosody = _G.prosody;
+local hosts = prosody.hosts;
 
 -- Make a *one-way* subscription. User will see when contact is online,
 -- contact will not see when user is online.
