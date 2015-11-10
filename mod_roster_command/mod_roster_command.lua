@@ -10,7 +10,7 @@
 -----------------------------------------------------------
 
 if not rawget(_G, "prosodyctl") then
-	module:log("error", "Do not load this module in Prosody, for correct usage see: http://code.google.com/p/prosody-modules/wiki/mod_roster_command");
+	module:log("error", "Do not load this module in Prosody, for correct usage see: https://modules.prosody.im/mod_roster_command.html");
 	module.host = "*";
 	return;
 end
