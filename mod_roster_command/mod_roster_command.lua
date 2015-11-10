@@ -16,15 +16,16 @@ end
 
 
 -- Workaround for lack of util.startup...
-_G.bare_sessions = _G.bare_sessions or {};
+local prosody = _G.prosody;
+local hosts = prosody.hosts;
+prosody.bare_sessions = prosody.bare_sessions or {};
+_G.bare_sessions = _G.bare_sessions or prosody.bare_sessions;
 
 local usermanager = require "core.usermanager";
 local rostermanager = require "core.rostermanager";
 local storagemanager = require "core.storagemanager";
 local jid = require "util.jid";
 local warn = require"util.prosodyctl".show_warning;
-local prosody = _G.prosody;
-local hosts = prosody.hosts;
 
 -- Make a *one-way* subscription. User will see when contact is online,
 -- contact will not see when user is online.
