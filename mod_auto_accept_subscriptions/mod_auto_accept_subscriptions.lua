@@ -26,7 +26,7 @@ local function handle_inbound_subscription_request(origin, stanza)
 				module:log("debug", "sent available presence of all resources");
 				-- Add return subscription from user to contact
 				local subscribe_stanza = st.reply(stanza);
-				subscribed_stanza.attr.type = "subscribe";
+				subscribe_stanza.attr.type = "subscribe";
 				if rostermanager.set_contact_pending_out(node, host, from_bare) then
 					rostermanager.roster_push(node, host, from_bare);
 				end
