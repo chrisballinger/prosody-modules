@@ -8,7 +8,7 @@ summary: S2S authentication using DANE
 Introduction
 ============
 
-This module implements DANE as described in[Using DNS Security
+This module implements DANE as described in [Using DNS Security
 Extensions (DNSSEC) and DNS-based Authentication of Named Entities
 (DANE) as a Prooftype for XMPP Domain Name
 Associations](http://tools.ietf.org/html/draft-miller-xmpp-dnssec-prooftype).
