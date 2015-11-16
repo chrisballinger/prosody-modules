@@ -268,24 +268,28 @@ module:hook("s2s-check-certificate", function(event)
 
 			if enabled_uses:contains(use) then
 				-- DANE-EE or PKIX-EE
-				if use == 3 or (use == 1 and session.cert_chain_status == "valid") then
+				if use == 3 or use == 1 then
 					-- Should we check if the cert subject matches?
 					local is_match = one_dane_check(tlsa, cert);
 					if is_match ~= nil then
 						supported_found = true;
+					end
+					if is_match and use == 1 and session.cert_chain_status ~= "valid" then
+						-- for usage 1, PKIX-EE, the chain has to be valid already
+						log("debug", "PKIX-EE TLSA matches untrusted certificate");
+						is_match = false;
 					end
 					if is_match then
 						log("info", "DANE validated ok for %s using %s", host, tlsa:getUsage());
 						session.cert_identity_status = "valid";
 						if use == 3 then -- DANE-EE, chain status equals DNSSEC chain status
 							session.cert_chain_status = "valid";
-							-- for usage 1, PKIX-EE, the chain has to be valid already
 						end
 						match_found = true;
 						break;
 					end
 				-- DANE-TA or PKIX-CA
-				elseif use == 2 or (use == 0 and session.cert_chain_status == "valid") then
+				elseif use == 2 or use == 0 then
 					supported_found = true;
 					local chain = session.conn:socket():getpeerchain();
 					for c = 1, #chain do
@@ -294,7 +298,14 @@ module:hook("s2s-check-certificate", function(event)
 						if is_match ~= nil then
 							supported_found = true;
 						end
-						if is_match and cacert:issued(cert, unpack(chain)) then
+						if is_match and not cacert:issued(cert, unpack(chain)) then
+							is_match = false;
+						end
+						if is_match and use == 0 and session.cert_chain_status ~= "valid" then
+							-- for usage 0, PKIX-CA, identity and chain has to be valid already
+							is_match = false;
+						end
+						if is_match then
 							log("info", "DANE validated ok for %s using %s", host, tlsa:getUsage());
 							if use == 2 then -- DANE-TA
 								session.cert_identity_status = "valid";
@@ -302,7 +313,6 @@ module:hook("s2s-check-certificate", function(event)
 									session.cert_chain_status = "valid";
 									-- else -- TODO Check against SRV target?
 								end
-								-- for usage 0, PKIX-CA, identity and chain has to be valid already
 							end
 							match_found = true;
 							break;
