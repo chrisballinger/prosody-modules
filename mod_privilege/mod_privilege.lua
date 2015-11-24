@@ -40,6 +40,7 @@ local _PRESENCE_MANAGED = set.new({'managed_entity', 'roster'})
 local _TO_CHECK = {roster=_ALLOWED_ROSTER, message=_ALLOWED_MESSAGE, presence=_ALLOWED_PRESENCE}
 local _PRIV_ENT_NS = 'urn:xmpp:privilege:1'
 local _FORWARDED_NS = 'urn:xmpp:forward:0'
+local _MODULE_HOST = module:get_host()
 
 
 module:log("debug", "Loading privileged entity module ");
@@ -48,6 +49,12 @@ module:log("debug", "Loading privileged entity module ");
 --> Permissions management <--
 
 local privileges = module:get_option("privileged_entities", {})
+
+local function get_session_privileges(session, host)
+    if not session.privileges then return nil end
+    return session.privileges[host]
+end
+
 
 local function advertise_perm(session, to_jid, perms)
 	-- send <message/> stanza to advertise permissions
@@ -120,6 +127,9 @@ local function on_auth(event)
 
 	local session = event.session
 	local bare_jid = jid.join(session.username, session.host)
+    if not session.privileges then
+        session.privileges = {}
+    end
 
 	local ent_priv = privileges[bare_jid]
 	if ent_priv ~= nil then
@@ -138,10 +148,10 @@ local function on_auth(event)
 			end
 		end
 		-- extra checks for presence permission
-		if ent_priv.permission == 'roster' and not _ROSTER_GET_PERM:contains(session.privileges.roster) then
+		if ent_priv.presence == 'roster' and not _ROSTER_GET_PERM:contains(ent_priv.roster) then
 			module:log("warn", "Can't allow roster presence privilege without roster \"get\" privilege")
 			module:log("warn", "Setting presence permission to none")
-			ent_priv.permission = nil
+			ent_priv.presence = nil
 		end
 
 		if session.type == "component" then
@@ -153,17 +163,18 @@ local function on_auth(event)
 		end
 	end
 
-	session.privileges = ent_priv
+	session.privileges[_MODULE_HOST] = ent_priv
 end
 
 local function on_presence(event)
 	-- Permission are already checked at this point,
 	-- we only advertise them to the entity
 	local session = event.origin
-	if session.privileges then
-		advertise_perm(session, session.full_jid, session.privileges)
-		set_presence_perm_set(session.full_jid, session.privileges)
-		advertise_presences(session, session.full_jid, session.privileges)
+    local session_privileges = get_session_privileges(session, _MODULE_HOST)
+	if session_privileges then
+		advertise_perm(session, session.full_jid, session_privileges)
+		set_presence_perm_set(session.full_jid, session_privileges)
+		advertise_presences(session, session.full_jid, session_privileges)
 	end
 end
 
@@ -193,11 +204,12 @@ module:hook("iq-get/bare/jabber:iq:roster:query", function(event)
 		-- we don't want stanzas addressed to /self
 		return;
 	end
+    local node, host = jid.split(stanza.attr.to);
+    local session_privileges = get_session_privileges(session, host)
 
-	if session.privileges and _ROSTER_GET_PERM:contains(session.privileges.roster) then
+	if session_privileges and _ROSTER_GET_PERM:contains(session_privileges.roster) then
 		module:log("debug", "Roster get from allowed privileged entity received")
 		-- following code is adapted from mod_remote_roster
-		local node, host = jid.split(stanza.attr.to);
 		local roster = roster_manager.load_roster(node, host);
 
 		local reply = st.reply(stanza):query("jabber:iq:roster");
@@ -232,11 +244,12 @@ module:hook("iq-set/bare/jabber:iq:roster:query", function(event)
 		-- we don't want stanzas addressed to /self
 		return;
 	end
+    local from_node, from_host = jid.split(stanza.attr.to);
+    local session_privileges = get_session_privileges(session, from_host)
 
-	if session.privileges and _ROSTER_SET_PERM:contains(session.privileges.roster) then
+	if session_privileges and _ROSTER_SET_PERM:contains(session_privileges.roster) then
 		module:log("debug", "Roster set from allowed privileged entity received")
 		-- following code is adapted from mod_remote_roster
-		local from_node, from_host = jid.split(stanza.attr.to);
 		if not(user_manager.user_exists(from_node, from_host)) then return; end
 		local roster = roster_manager.load_roster(from_node, from_host);
 		if not(roster) then return; end
@@ -323,7 +336,10 @@ module:hook("message/host", function(event)
 	local session, stanza = event.origin, event.stanza;
 	local privilege_elt = stanza:get_child('privilege', _PRIV_ENT_NS)
 	if privilege_elt==nil then return; end
-	if session.privileges and session.privileges.message=="outgoing" then
+    local _, to_host = jid.split(stanza.attr.to)
+    local session_privileges = get_session_privileges(session, to_host)
+
+	if session_privileges and session_privileges.message=="outgoing" then
 		if #privilege_elt.tags==1 and privilege_elt.tags[1].name == "forwarded"
 			and privilege_elt.tags[1].attr.xmlns==_FORWARDED_NS then
 			local message_elt = privilege_elt.tags[1]:get_child('message', 'jabber:client')
