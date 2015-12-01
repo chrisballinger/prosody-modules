@@ -265,7 +265,7 @@ local function iq_hook(event)
 			end
 			if ns_data.filtering then
 				local first_child = stanza.tags[1]
-				for _, attribute in ns_data.filtering do
+				for _, attribute in pairs(ns_data.filtering) do
 					-- if any filtered attribute if not present,
 					-- we must continue the normal bahaviour
 					if not first_child.attr[attribute] then
