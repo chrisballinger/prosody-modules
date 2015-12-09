@@ -224,7 +224,7 @@ local function message_handler(event, c2s)
 	-- Stanza without 'to' are treated as if it was to their own bare jid
 
 	-- We store chat messages or normal messages that have a body
-	if not(orig_type == "chat" or orig_type == "normal" and stanza:get_child("body") ) then
+	if not(orig_type == "chat" or (orig_type == "normal" and stanza:get_child("body")) ) then
 		module:log("debug", "Not archiving stanza: %s (type)", stanza:top_tag());
 		return;
 	end
