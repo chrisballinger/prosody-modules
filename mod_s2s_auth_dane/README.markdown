@@ -26,8 +26,7 @@ LuaSec 0.5 or later is also required.
 Configuration
 =============
 
-After [installing the
-module](https://prosody.im/doc/installing_modules), just add it to
+After [installing the module][doc:installing\_modules], just add it to
 `modules_enabled`;
 
     modules_enabled = {
