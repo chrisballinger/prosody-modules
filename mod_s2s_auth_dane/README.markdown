@@ -77,8 +77,7 @@ tools](http://www.internetsociety.org/deploy360/dnssec/tools/)
 Further reading
 ===============
 
--   [DANE TLSA implementation and operational
-    guidance](http://tools.ietf.org/html/draft-ietf-dane-ops)
+-   [DANE Operational Guidance][rfc7671]
 
 Compatibility
 =============
