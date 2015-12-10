@@ -355,3 +355,32 @@ module:hook("s2s-check-certificate", function(event)
 	end
 end);
 
+-- Telnet command
+if module:get_option_set("modules_enabled", {}):contains("admin_telnet") then
+	module:depends("admin_telnet"); -- Make sure the env is there
+	local def_env = module:shared("admin_telnet/env");
+
+	local sessions = module:shared("s2s/sessions");
+
+	local function annotate(session, line)
+		line = line or {};
+		table.insert(line, "--");
+		if session.dane == nil then
+			table.insert(line, "No DANE attempted, probably insecure SRV response");
+		elseif session.dane == false then
+			table.insert(line, "DANE failed or response was insecure");
+		elseif type(session.dane) ~= "table" then
+			table.insert(line, "Waiting for DANE records...");
+		elseif session.dane.matching then
+			table.insert(line, "Matching DANE record:\n|       " .. tostring(session.dane.matching));
+		else
+			table.insert(line, "DANE records:\n|       " .. tostring(session.dane));
+		end
+		return table.concat(line, " ");
+	end
+
+	function def_env.s2s:show_dane(...)
+		return self:show(..., annotate);
+	end
+end
+
