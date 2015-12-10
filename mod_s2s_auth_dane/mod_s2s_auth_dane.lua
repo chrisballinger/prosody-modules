@@ -225,7 +225,6 @@ function module.add_host(module)
 			return false;
 		end
 		-- Cleanup
-		session.dane = nil;
 		session.srv_hosts = nil;
 	end);
 end
@@ -290,6 +289,7 @@ module:hook("s2s-check-certificate", function(event)
 							session.cert_chain_status = "valid";
 						end
 						match_found = true;
+						dane.matching = tlsa;
 						break;
 					end
 				-- DANE-TA or PKIX-CA
@@ -319,6 +319,7 @@ module:hook("s2s-check-certificate", function(event)
 								end
 							end
 							match_found = true;
+							dane.matching = tlsa;
 							break;
 						end
 					end
