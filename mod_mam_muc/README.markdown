@@ -9,9 +9,8 @@ Introduction
 
 This module logs the conversation of chatrooms running on the server to
 Prosody's archive storage. To access them you will need a client with
-support for [XEP-0313: Message Archive
-Management](http://xmpp.org/extensions/xep-0313.html) or a module such
-as [mod\_http\_muc\_log](mod_http_muc_log.html).
+support for [XEP-0313: Message Archive Management] or a module such
+as [mod\_http\_muc\_log].
 
 Usage
 =====
