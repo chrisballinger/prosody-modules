@@ -112,6 +112,7 @@ local function dane_lookup(host_session, cb)
 			for _, record in ipairs(answer) do
 				t_insert(srv_hosts, record.srv);
 				dns_lookup(function(dane_answer)
+					host_session.log("debug", "Got answer for %s:%d", record.srv.target, record.srv.port);
 					n = n - 1;
 					-- There are three kinds of answers
 					-- Insecure, Secure and Bogus
@@ -129,10 +130,13 @@ local function dane_lookup(host_session, cb)
 					if (dane_answer.bogus or dane_answer.secure) and not dane then
 						-- The first answer we care about
 						-- For services with only one SRV record, this will be the only one
+						host_session.log("debug", "First secure (or bogus) TLSA")
 						dane = dane_answer;
 					elseif dane_answer.bogus then
+						host_session.log("debug", "Got additional bogus TLSA")
 						dane.bogus = dane_answer.bogus;
 					elseif dane_answer.secure then
+						host_session.log("debug", "Got additional secure TLSA")
 						for _, dane_record in ipairs(dane_answer) do
 							t_insert(dane, dane_record);
 						end
