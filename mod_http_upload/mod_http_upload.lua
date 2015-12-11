@@ -35,7 +35,7 @@ module:add_feature(xmlns_http_upload);
 -- state
 local pending_slots = module:shared("upload_slots");
 
-local storage_path = join_path(prosody.paths.data, module.name);
+local storage_path = module:get_option_string(module.name .. "_path", join_path(prosody.paths.data, module.name));
 lfs.mkdir(storage_path);
 
 -- hooks

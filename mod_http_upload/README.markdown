@@ -58,6 +58,16 @@ A maximum file size can be set by:
 http_upload_file_size_limit = 10 * 1024 * 1024 -- this is 10MB in bytes
 ```
 
+Path
+----
+
+By default, uploaded files are put in a sub-directory of the default
+Prosody storage path (usually `/var/lib/prosody`). This can be changed:
+
+``` {.lua}
+http_upload_path = "/path/to/uploded/files"
+```
+
 Compatibility
 =============
 
