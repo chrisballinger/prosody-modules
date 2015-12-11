@@ -11,6 +11,7 @@
 local st = require"util.stanza";
 local lfs = require"lfs";
 local uuid = require"util.uuid".generate;
+local urlencode = require"util.http".urlencode;
 local t_concat = table.concat;
 local t_insert = table.insert;
 local s_upper = string.upper;
@@ -66,7 +67,7 @@ module:hook("iq/host/"..xmlns_http_upload..":request", function (event)
 	reply:tag("slot", { xmlns = xmlns_http_upload });
 	local random = uuid();
 	pending_slots[random.."/"..filename] = origin.full_jid;
-	local url = module:http_url() .. "/" .. random .. "/" .. filename;
+	local url = module:http_url() .. "/" .. random .. "/" .. urlencode(filename);
 	reply:tag("get"):text(url):up();
 	reply:tag("put"):text(url):up();
 	origin.send(reply);
