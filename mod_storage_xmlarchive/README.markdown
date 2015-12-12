@@ -23,7 +23,7 @@ storage = {
 }
 ```
 
-To use it with [mod\_mam\_muc] or [mod_http_muc_log]:
+To use it with [mod\_mam\_muc] or [mod\_http\_muc\_log]:
 
 ``` lua
 storage = {
@@ -31,8 +31,8 @@ storage = {
 }
 ```
 
-Refer to [Prosodys data storage
-documentation](https://prosody.im/doc/storage) for more information.
+Refer to [Prosodys data storage documentation][doc:storage] for more
+information.
 
 Note that this module does not implement the "keyval" storage method and
 can't be used by anything other than archives.
