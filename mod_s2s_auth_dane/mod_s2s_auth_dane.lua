@@ -67,11 +67,12 @@ local enabled_uses = set.intersection(implemented_uses, configured_uses) / funct
 -- Takes a s2sin/out and a callback
 local function dane_lookup(host_session, cb)
 	cb = cb or noop;
+	local log = host_session.log or module._log;
 	if host_session.dane ~= nil then return end -- Has already done a lookup
 
 	if host_session.direction == "incoming" then
 		if not host_session.from_host then
-			module:log("debug", "Session doesn't have a 'from' host set");
+			log("debug", "Session doesn't have a 'from' host set");
 			return;
 		end
 		-- We don't know what hostname or port to use for Incoming connections
@@ -80,19 +81,19 @@ local function dane_lookup(host_session, cb)
 		-- and incoming connections, so this should work well
 		local name = host_session.from_host and idna_to_ascii(host_session.from_host);
 		if not name then
-			module:log("warn", "Could not convert '%s' to ASCII for DNS lookup", tostring(host_session.from_host));
+			log("warn", "Could not convert '%s' to ASCII for DNS lookup", tostring(host_session.from_host));
 			return;
 		end
 		host_session.dane = dns_lookup(function (answer, err)
 			host_session.dane = false; -- Mark that we already did the lookup
 
 			if not answer then
-				module:log("debug", "Resolver error: %s", tostring(err));
+				log("debug", "Resolver error: %s", tostring(err));
 				return cb(host_session);
 			end
 
 			if not answer.secure then
-				module:log("debug", "Results are not secure");
+				log("debug", "Results are not secure");
 				return cb(host_session);
 			end
 
@@ -112,7 +113,7 @@ local function dane_lookup(host_session, cb)
 			for _, record in ipairs(answer) do
 				t_insert(srv_hosts, record.srv);
 				dns_lookup(function(dane_answer)
-					host_session.log("debug", "Got answer for %s:%d", record.srv.target, record.srv.port);
+					log("debug", "Got answer for %s:%d", record.srv.target, record.srv.port);
 					n = n - 1;
 					-- There are three kinds of answers
 					-- Insecure, Secure and Bogus
@@ -130,13 +131,13 @@ local function dane_lookup(host_session, cb)
 					if (dane_answer.bogus or dane_answer.secure) and not dane then
 						-- The first answer we care about
 						-- For services with only one SRV record, this will be the only one
-						host_session.log("debug", "First secure (or bogus) TLSA")
+						log("debug", "First secure (or bogus) TLSA")
 						dane = dane_answer;
 					elseif dane_answer.bogus then
-						host_session.log("debug", "Got additional bogus TLSA")
+						log("debug", "Got additional bogus TLSA")
 						dane.bogus = dane_answer.bogus;
 					elseif dane_answer.secure then
-						host_session.log("debug", "Got additional secure TLSA")
+						log("debug", "Got additional secure TLSA")
 						for _, dane_record in ipairs(dane_answer) do
 							t_insert(dane, dane_record);
 						end
@@ -147,7 +148,7 @@ local function dane_lookup(host_session, cb)
 							if #dane > 0 and dane.bogus then
 								-- Got at least one non-bogus reply,
 								-- This should trigger a failure if one of them did not match
-								host_session.log("warn", "Ignoring bogus replies");
+								log("warn", "Ignoring bogus replies");
 								dane.bogus = nil;
 							end
 							if #dane == 0 and dane.bogus == nil then
@@ -230,7 +231,7 @@ function module.add_host(module)
 end
 
 -- Compare one TLSA record against a certificate
-local function one_dane_check(tlsa, cert)
+local function one_dane_check(tlsa, cert, log)
 	local select, match, certdata = tlsa.select, tlsa.match;
 
 	if select == 0 then
@@ -238,7 +239,7 @@ local function one_dane_check(tlsa, cert)
 	elseif select == 1 and cert.pubkey then
 		certdata = pem2der(cert:pubkey());
 	else
-		module:log("warn", "DANE selector %s is unsupported", tlsa:getSelector() or select);
+		log("warn", "DANE selector %s is unsupported", tlsa:getSelector() or select);
 		return;
 	end
 
@@ -247,12 +248,12 @@ local function one_dane_check(tlsa, cert)
 	elseif match == 2 then
 		certdata = hashes.sha512(certdata);
 	elseif match ~= 0 then
-		module:log("warn", "DANE match rule %s is unsupported", tlsa:getMatchType() or match);
+		log("warn", "DANE match rule %s is unsupported", tlsa:getMatchType() or match);
 		return;
 	end
 
 	if #certdata ~= #tlsa.data then
-		module:log("warn", "Length mismatch: Cert: %d, TLSA: %d", #certdata, #tlsa.data);
+		log("warn", "Length mismatch: Cert: %d, TLSA: %d", #certdata, #tlsa.data);
 	end
 	return certdata == tlsa.data;
 end
@@ -266,14 +267,14 @@ module:hook("s2s-check-certificate", function(event)
 		local match_found, supported_found;
 		for i = 1, #dane do
 			local tlsa = dane[i].tlsa;
-			module:log("debug", "TLSA #%d: %s", i, tostring(tlsa))
+			log("debug", "TLSA #%d: %s", i, tostring(tlsa))
 			local use = tlsa.use;
 
 			if enabled_uses:contains(use) then
 				-- DANE-EE or PKIX-EE
 				if use == 3 or use == 1 then
 					-- Should we check if the cert subject matches?
-					local is_match = one_dane_check(tlsa, cert);
+					local is_match = one_dane_check(tlsa, cert, log);
 					if is_match ~= nil then
 						supported_found = true;
 					end
@@ -298,7 +299,7 @@ module:hook("s2s-check-certificate", function(event)
 					local chain = session.conn:socket():getpeerchain();
 					for c = 1, #chain do
 						local cacert = chain[c];
-						local is_match = one_dane_check(tlsa, cacert);
+						local is_match = one_dane_check(tlsa, cacert, log);
 						if is_match ~= nil then
 							supported_found = true;
 						end
