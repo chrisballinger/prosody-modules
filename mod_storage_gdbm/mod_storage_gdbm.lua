@@ -29,10 +29,6 @@ local function is_stanza(s)
 	return getmetatable(s) == st.stanza_mt;
 end
 
-local function t(c, a, b)
-	if c then return a; end return b;
-end
-
 local base_path = path.resolve_relative_path(prosody.paths.data, module.host);
 lfs.mkdir(base_path);
 
@@ -106,26 +102,26 @@ function archive:find(username, query)
 	query = query or empty;
 	local meta = self:get(username) or empty;
 	local prefix = (username or "@") .. "#";
-	local r = query.reverse;
-	local d = t(r, -1, 1);
-	local s = meta[t(r, query.before, query.after)];
+	local reverse = query.reverse;
+	local step = reverse and -1 or 1;
+	local first = meta[query.after];
+	local last = meta[query.before];
+	-- we don't want to include the actual 'after' or 'before' item
+	if first then first = first + 1; end
+	if last then last = last - 1; end
+	first, last = first or 1, last or #meta;
+	if reverse then first, last = last, first; end
 	local limit = query.limit;
-	if s then
-		s = s + d;
-	else
-		s = t(r, #meta, 1)
-	end
-	local e = t(r, 1, #meta);
-	local c = 0;
+	local count = 0;
 	return function ()
-		if limit and c >= limit then return end
+		if limit and count >= limit then return end
 		local item, value;
-		for i = s, e, d do
+		for i = first, last, step do
 			item = meta[i];
 			if (not query.with or item.with == query.with)
 			and (not query.start or item.when >= query.start)
 			and (not query["end"] or item.when <= query["end"]) then
-				s = i + d; c = c + 1;
+				first = i + step; count = count + 1;
 				value = self:get(prefix..item.key);
 				return item.key, (deserialize_map[item.type] or id)(value), item.when, item.with;
 			end
