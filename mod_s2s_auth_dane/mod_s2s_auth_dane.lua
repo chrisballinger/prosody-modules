@@ -84,6 +84,7 @@ local function dane_lookup(host_session, cb)
 			log("warn", "Could not convert '%s' to ASCII for DNS lookup", tostring(host_session.from_host));
 			return;
 		end
+		log("debug", "Querying SRV records from _xmpp-server._tcp.%s.", name);
 		host_session.dane = dns_lookup(function (answer, err)
 			host_session.dane = false; -- Mark that we already did the lookup
 
@@ -116,6 +117,7 @@ local function dane_lookup(host_session, cb)
 			local dane;
 			for _, record in ipairs(answer) do
 				t_insert(srv_hosts, record.srv);
+				log("debug", "Querying TLSA record for %s:%d", record.srv.target, record.srv.port);
 				dns_lookup(function(dane_answer)
 					log("debug", "Got answer for %s:%d", record.srv.target, record.srv.port);
 					n = n - 1;
@@ -175,6 +177,7 @@ local function dane_lookup(host_session, cb)
 		end
 		-- Do TLSA lookup for currently selected SRV record
 		local srv_choice = srv_hosts[host_session.srv_choice or 0] or { target = idna_to_ascii(host_session.to_host), port = 5269 };
+		log("debug", "Querying TLSA record for %s:%d", srv_choice.target, srv_choice.port);
 		host_session.dane = dns_lookup(function(answer)
 			if answer and ((answer.secure and #answer > 0) or answer.bogus) then
 				srv_choice.dane = answer;
