@@ -92,7 +92,11 @@ local function dane_lookup(host_session, cb)
 				return cb(host_session);
 			end
 
-			if not answer.secure then
+			if answer.bogus then
+				log("warn", "Results are bogus!");
+				-- Bad sign, probably not a good idea to do any fallback here
+				host_session.dane = answer;
+			elseif not answer.secure then
 				log("debug", "Results are not secure");
 				return cb(host_session);
 			end
