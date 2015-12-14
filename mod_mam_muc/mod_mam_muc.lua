@@ -3,6 +3,11 @@
 --
 -- This file is MIT/X11 licensed.
 
+if module:get_host_type() ~= "component" then
+	module:log("error", "mod_%s should be loaded only on a MUC component, not normal hosts", module.name);
+	return;
+end
+
 local xmlns_mam     = "urn:xmpp:mam:0";
 local xmlns_delay   = "urn:xmpp:delay";
 local xmlns_forward = "urn:xmpp:forward:0";
