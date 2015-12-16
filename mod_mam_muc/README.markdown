@@ -56,9 +56,13 @@ max_history_messages = 1000;
 Compatibility
 =============
 
-  ------- ---------------
-  trunk   Works
-  0.10    Works
+  ------- -----------------
+  trunk   Works best
+  0.10    Works partially
   0.9     Does not work
   0.8     Does not work
-  ------- ---------------
+  ------- -----------------
+
+Prosody trunk (after April 2014) has a major rewrite of the MUC module,
+allowing easier integration. Without this (0.10), some features do not
+work, such as correct advertising and join/part logging.
