@@ -37,7 +37,7 @@ Examples
 ========
 
     for store in accounts roster private blocklist vcard archive2-archive; do
-      prosodyctl migrate example.com $store sql2
+      prosodyctl migrate example.com $store sql
     done
 
 Compatibility

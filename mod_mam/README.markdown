@@ -41,11 +41,11 @@ mod\_mam uses the store "archive2"[^1]. See [Prosodys data storage
 documentation](https://prosody.im/doc/storage) for information on how to
 configure storage.
 
-For example, to use mod\_storage\_sql2[^2]:
+For example, to use mod\_storage\_sql:
 
 ``` {.lua}
 storage = {
-  archive2 = "sql2";
+  archive2 = "sql";
 }
 ```
 
@@ -85,14 +85,12 @@ Compatibility
 
   ------- ---------------
   trunk   Works
-  0.10    Works [^3]
+  0.10    Works [^2]
   0.9     Unsupported
   0.8     Does not work
   ------- ---------------
 
 [^1]: Might be changed to "mam" at some point
 
-[^2]: mod\_storage\_sql2 will replace mod\_storage\_sql at some point
-
-[^3]: requires a storage driver with archive support, eg
-    mod\_storage\_sql2 in 0.10
+[^2]: requires a storage driver with archive support, eg
+    mod\_storage\_sql in 0.10

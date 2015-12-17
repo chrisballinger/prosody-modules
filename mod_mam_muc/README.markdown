@@ -25,9 +25,7 @@ modules_enabled = {
   "mam_muc",
 }
 storage = {
-  -- This makes mod_mam_muc use the sql2 storage backend (others will use internal)
-    -- which at the time of this writing is the only one supporting stanza archives
-    muc_log = "sql2";
+    muc_log = "sql"; -- Requires 0.10 or later
 }
 ```
 
