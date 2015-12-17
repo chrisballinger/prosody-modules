@@ -7,8 +7,7 @@ summary: 'XEP-0313: Message Archive Management'
 Introduction
 ============
 
-Implementation of [XEP-0313: Message Archive
-Management](http://xmpp.org/extensions/xep-0313.html).
+Implementation of [XEP-0313: Message Archive Management].
 
 Details
 =======
@@ -37,9 +36,8 @@ Configuration
 Storage backend
 ---------------
 
-mod\_mam uses the store "archive2"[^1]. See [Prosodys data storage
-documentation](https://prosody.im/doc/storage) for information on how to
-configure storage.
+mod\_mam uses the store "archive2"[\^1]. See [Prosodys data storage
+documentation][doc:storage] for information on how to configure storage.
 
 For example, to use mod\_storage\_sql:
 
