@@ -24,11 +24,11 @@ Component "conference.example.org" "muc"
 modules_enabled = {
   "mam_muc",
 }
-``` {.lua}
+```
 
 And configure it to use an archive-capable storage module:
 
-```
+``` {.lua}
 storage = {
     muc_log = "sql"; -- Requires 0.10 or later
 }
