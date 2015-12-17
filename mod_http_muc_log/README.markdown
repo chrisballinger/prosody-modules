@@ -8,41 +8,40 @@ Introduction
 ============
 
 This module provides a built-in web interface to view chatroom logs
-stored by [mod\_mam\_muc](mod_mam_muc.html).
+stored by [mod\_mam\_muc].
 
 Installation
 ============
 
-Just copy the folder muc\_log\_http as it is, into the modules folder of
-your Prosody installation.
+Same as any other module, be sure to include the HTML template
+`http_muc_log.html` alongside `mod_http_muc_log.lua`.
 
-Configuration Details
-=====================
+Configuration
+=============
 
-You need to add muc\_log\_http to your global modules\_enabled, and the
-configuration options similarly must be put into your global
-(server-wide) options section:
+For example:
 
-        Component "conference.example.com" "muc"
-        modules_enabled = {
-            .....
-            "mam_muc";
-            "http_muc_log";
-            .....
-        }
-        storage = {
-            muc_log = "sql"; -- for example
-        }
+``` lua
+Component "conference.example.com" "muc"
+modules_enabled = {
+    "mam_muc";
+    "http_muc_log";
+}
+storage = {
+    muc_log = "sql"; -- for example
+}
+```
 
 The web interface would then be reachable at the address:
 
     http://conference.example.com:5280/muc_log/
 
-See [the page about Prosodys HTTP server](http://prosody.im/doc/http)
-for info about the address.
+See [the page about Prosodys HTTP server][doc:http] for info about the
+address.
 
 Compatibility
 =============
 
 Requires Prosody 0.10 or above and a storage backend with support for
-stanza archives.
+stanza archives. See [mod\_storage\_muc\_log] for using legacy data from
+[mod\_muc\_log].
