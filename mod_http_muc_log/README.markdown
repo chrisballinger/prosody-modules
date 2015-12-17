@@ -31,7 +31,7 @@ configuration options similarly must be put into your global
             .....
         }
         storage = {
-            muc_log = "sql2"; -- for example
+            muc_log = "sql"; -- for example
         }
 
 The web interface would then be reachable at the address:
