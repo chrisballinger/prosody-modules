@@ -59,18 +59,18 @@ local keyval = {};
 local keyval_mt = { __index = keyval, flags = lmdb.MDB_CREATE };
 drivers.keyval = keyval_mt;
 
-function keyval:set(user, value)
+function keyval:set(key, value)
 	if type(value) == "table" and next(value) == nil then
 		value = nil;
 	end
 	if value ~= nil then
 		value = serialize(value);
 	end
-	return transaction(self.env, keyvalue_set, self.db, user, value);
+	return transaction(self.env, keyvalue_set, self.db, key, value);
 end
 
-function keyval:get(user)
-	local ok, data = transaction(self.env, keyvalue_get, self.db, user);
+function keyval:get(key)
+	local ok, data = transaction(self.env, keyvalue_get, self.db, key);
 	if not ok then return ok, data; end
 	return deserialize(data);
 end
