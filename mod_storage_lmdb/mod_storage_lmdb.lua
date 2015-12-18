@@ -20,9 +20,9 @@ local serialization = require"util.serialization";
 local serialize = serialization.serialize;
 local deserialize = serialization.deserialize;
 
-local function transaction(env, func, ...)
+local function transaction(env, flag, func, ...)
 	local args, n_args = {...}, select("#", ...);
-	local t = env:txn_begin(nil, 0);
+	local t = env:txn_begin(nil, flag);
 	local function f() return func(t, unpack(args, 1, n_args)); end
 	local success, a, b, c = xpcall(f, traceback);
 	if not success then
@@ -66,11 +66,11 @@ function keyval:set(key, value)
 	if value ~= nil then
 		value = serialize(value);
 	end
-	return transaction(self.env, keyvalue_set, self.db, key, value);
+	return transaction(self.env, 0, keyvalue_set, self.db, key, value);
 end
 
 function keyval:get(key)
-	local ok, data = transaction(self.env, keyvalue_get, self.db, key);
+	local ok, data = transaction(self.env, lmdb.MDB_RDONLY, keyvalue_get, self.db, key);
 	if not ok then return ok, data; end
 	return deserialize(data);
 end
