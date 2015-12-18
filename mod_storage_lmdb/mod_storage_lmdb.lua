@@ -8,12 +8,49 @@
 --
 -- luacheck: globals prosody open
 
+local assert = assert;
+local select = select;
+local xpcall = xpcall;
+local traceback = debug.traceback;
+
 local lmdb = require"lightningmdb";
 local lfs = require"lfs";
 local path = require"util.paths";
 local serialization = require"util.serialization";
 local serialize = serialization.serialize;
 local deserialize = serialization.deserialize;
+
+local function transaction(env, func, ...)
+	local args, n_args = {...}, select("#", ...);
+	local t = env:txn_begin(nil, 0);
+	local function f() return func(t, unpack(args, 1, n_args)); end
+	local success, a, b, c = xpcall(f, traceback);
+	if not success then
+		io.stderr:write(a, "\n\n");
+		t:abort();
+		os.exit()
+		return success, a;
+	end
+	local ok, err = t:commit();
+	if not ok then
+		return ok, err;
+	end
+	return success, a, b, c;
+end
+
+local function keyvalue_set(t, db, key, value)
+	if value ~= nil then
+		return assert(t:put(db, key, value, 0));
+	else
+		return t:del(db, key, value);
+	end
+end
+
+local function keyvalue_get(t, db, key)
+	local data, err = t:get(db, key, 0);
+	assert(data or not err, err);
+	return data;
+end
 
 local drivers = {};
 local provider = {};
@@ -23,34 +60,18 @@ local keyval_mt = { __index = keyval, flags = lmdb.MDB_CREATE };
 drivers.keyval = keyval_mt;
 
 function keyval:set(user, value)
-	local t = self.env:txn_begin(nil, 0);
 	if type(value) == "table" and next(value) == nil then
 		value = nil;
 	end
 	if value ~= nil then
 		value = serialize(value);
 	end
-	local ok, err;
-	if value ~= nil then
-		ok, err = t:put(self.db, user, value, 0);
-	else
-		ok, err = t:del(self.db, user, value);
-	end
-	if not ok then
-		t:abort();
-		return nil, err;
-	end
-	return t:commit();
+	return transaction(self.env, keyvalue_set, self.db, user, value);
 end
 
 function keyval:get(user)
-	local t = self.env:txn_begin(nil, 0);
-	local data, err = t:get(self.db, user, 0);
-	if not data then
-		t:abort();
-		return nil, err;
-	end
-	t:commit();
+	local ok, data = transaction(self.env, keyvalue_get, self.db, user);
+	if not ok then return ok, data; end
 	return deserialize(data);
 end
 
@@ -95,7 +116,7 @@ if prosody then
 		maxdbs = module:get_option_number("lmdb_maxdbs", 20);
 	});
 
-	function module.unload()
+	function module.unload() --luacheck: ignore
 		provider.env:sync(1);
 		provider.env:close();
 	end
