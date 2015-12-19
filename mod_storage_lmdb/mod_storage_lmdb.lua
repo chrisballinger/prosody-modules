@@ -26,9 +26,7 @@ local function transaction(env, flag, func, ...)
 	local function f() return func(t, unpack(args, 1, n_args)); end
 	local success, a, b, c = xpcall(f, traceback);
 	if not success then
-		io.stderr:write(a, "\n\n");
 		t:abort();
-		os.exit()
 		return success, a;
 	end
 	local ok, err = t:commit();
