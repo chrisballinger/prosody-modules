@@ -20,26 +20,6 @@ You can have all the details by reading the
 [XEP-0355](http://xmpp.org/extensions/xep-0355.html). Only the admin
 mode is implemented so far.
 
-If you use it with a component, you need to patch
-core/mod\_component.lua to fire a new signal. To do it, copy the
-following patch in a, for example, /tmp/component.patch file:
-
-    diff --git a/plugins/mod_component.lua b/plugins/mod_component.lua
-    --- a/plugins/mod_component.lua
-    +++ b/plugins/mod_component.lua
-    @@ -85,6 +85,7 @@
-                    session.type = "component";
-                    module:log("info", "External component successfully authenticated");
-                    session.send(st.stanza("handshake"));
-    +               module:fire_event("component-authenticated", { session = session });
-     
-                    return true;
-            end
-
-Then, at the root of prosody, enter:
-
-`patch -p1 < /tmp/component.patch`
-
 Usage
 =====
 
@@ -98,8 +78,28 @@ to use.
 Compatibility
 =============
 
+If you use it with Prosody 0.9 and a component, you need to patch
+core/mod\_component.lua to fire a new signal. To do it, copy the
+following patch in a, for example, /tmp/component.patch file:
+
+    diff --git a/plugins/mod_component.lua b/plugins/mod_component.lua
+    --- a/plugins/mod_component.lua
+    +++ b/plugins/mod_component.lua
+    @@ -85,6 +85,7 @@
+                    session.type = "component";
+                    module:log("info", "External component successfully authenticated");
+                    session.send(st.stanza("handshake"));
+    +               module:fire_event("component-authenticated", { session = session });
+     
+                    return true;
+            end
+
+Then, at the root of prosody, enter:
+
+`patch -p1 < /tmp/component.patch`
+
   ----- ----------------------------------------------------
-  dev   Need a patched core/mod\_component.lua (see above)
+  0.10  Works
   0.9   Need a patched core/mod\_component.lua (see above)
   ----- ----------------------------------------------------
 
