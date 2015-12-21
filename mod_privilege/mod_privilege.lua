@@ -12,7 +12,7 @@ local jid = require("util/jid")
 local set = require("util/set")
 local st = require("util/stanza")
 local roster_manager = require("core/rostermanager")
-local user_manager = require("core/usermanager")
+local usermanager_user_exists = require "core.usermanager".user_exists;
 local hosts = prosody.hosts
 local full_sessions = prosody.full_sessions;
 
@@ -250,7 +250,7 @@ module:hook("iq-set/bare/jabber:iq:roster:query", function(event)
 	if session_privileges and _ROSTER_SET_PERM:contains(session_privileges.roster) then
 		module:log("debug", "Roster set from allowed privileged entity received")
 		-- following code is adapted from mod_remote_roster
-		if not(user_manager.user_exists(from_node, from_host)) then return; end
+		if not(usermanager_user_exists(from_node, from_host)) then return; end
 		local roster = roster_manager.load_roster(from_node, from_host);
 		if not(roster) then return; end
 
