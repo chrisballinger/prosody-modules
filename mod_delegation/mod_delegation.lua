@@ -9,9 +9,9 @@
 
 -- TODO: client mode
 
-local jid = require("util/jid")
-local st = require("util/stanza")
-local set = require("util/set")
+local jid = require("util.jid")
+local st = require("util.stanza")
+local set = require("util.set")
 
 local delegation_session = module:shared("/*/delegation/session")
 
