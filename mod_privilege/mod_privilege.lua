@@ -8,10 +8,10 @@
 
 -- TODO: manage external <presence/> (for "roster" presence permission) when the account with the roster is offline
 
-local jid = require("util/jid")
-local set = require("util/set")
-local st = require("util/stanza")
-local roster_manager = require("core/rostermanager")
+local jid = require("util.jid")
+local set = require("util.set")
+local st = require("util.stanza")
+local roster_manager = require("core.rostermanager")
 local usermanager_user_exists = require "core.usermanager".user_exists;
 local hosts = prosody.hosts
 local full_sessions = prosody.full_sessions;
