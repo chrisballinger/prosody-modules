@@ -2,12 +2,16 @@ module:set_global();
 
 local helpers = require "util.helpers";
 
-helpers.log_events(prosody.events, "global", module._log);
+local function init(module, events, name)
+	helpers.log_events(events, name, module._log);
 
-function module.add_host(module)
-	helpers.log_events(prosody.hosts[module.host].events, module.host, module._log);
+	function module.unload()
+		helpers.revert_log_events(events);
+	end
 end
 
-function module.remove_host(module)
-	helpers.revert_log_events(prosody.hosts[module.host].events);
+init(module, prosody.events, "global");
+
+function module.add_host(module)
+	init(module, prosody.hosts[module.host].events, module.host);
 end
