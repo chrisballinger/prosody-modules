@@ -9,7 +9,7 @@
 -- COPYING file in the source package for more information.
 --
 
-local lpty = assert(require "lpty", "mod_auth_external requires lpty: https://code.google.com/p/prosody-modules/wiki/mod_auth_external#Installation");
+local lpty = assert(require "lpty", "mod_auth_external requires lpty: https://modules.prosody.im/mod_auth_external.html#installation");
 local usermanager = require "core.usermanager";
 local new_sasl = require "util.sasl".new;
 local server = require "net.server";
