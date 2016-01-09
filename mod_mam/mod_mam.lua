@@ -44,7 +44,7 @@ if archive.name == "null" then
 	return;
 elseif not archive.find then
 	module:log("debug", "Attempt to open archive storage returned a valid driver but it does not seem to implement the storage API");
-	module:log("error", "mod_%s does not support archiving", archive._provided_by or archive.name and "storage_"..name.."(?)" or "<unknown>");
+	module:log("error", "mod_%s does not support archiving", archive._provided_by or archive.name and "storage_"..archive.name.."(?)" or "<unknown>");
 	module:log("info", "See https://prosody.im/doc/storage and https://prosody.im/doc/archiving for more information");
 	return;
 end
