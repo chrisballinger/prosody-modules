@@ -1,5 +1,5 @@
 -- XEP-0313: Message Archive Management for Prosody
--- Copyright (C) 2011-2014 Kim Alvefur
+-- Copyright (C) 2011-2016 Kim Alvefur
 --
 -- This file is MIT/X11 licensed.
 
@@ -36,12 +36,16 @@ if global_default_policy ~= "roster" then
 end
 
 local archive_store = "archive2";
-local archive = module:open_store(archive_store, "archive");
-if not archive or archive.name == "null" then
-	module:log("error", "Could not open archive storage");
+local archive = assert(module:open_store(archive_store, "archive"));
+if archive.name == "null" then
+	module:log("debug", "Attempt to open archive storage returned null driver");
+	module:log("error", "Unable to open archive storage, no archive capable storage driver enabled?");
+	module:log("info", "See https://prosody.im/doc/storage and https://prosody.im/doc/archiving for more information");
 	return;
 elseif not archive.find then
-	module:log("error", "mod_%s does not support archiving", archive._provided_by);
+	module:log("debug", "Attempt to open archive storage returned a valid driver but it does not seem to implement the storage API");
+	module:log("error", "mod_%s does not support archiving", archive._provided_by or archive.name and "storage_"..name.."(?)" or "<unknown>");
+	module:log("info", "See https://prosody.im/doc/storage and https://prosody.im/doc/archiving for more information");
 	return;
 end
 
