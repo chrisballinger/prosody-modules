@@ -126,13 +126,15 @@ check that a user is not trying to register an account with the username
 'admin'. This stanza comes from [XEP-0077: In-band
 Registration](http://xmpp.org/extensions/xep-0077.html#example-4):
 
-    <iq type='set' id='reg2'>
-      <query xmlns='jabber:iq:register'>
-        <username>bill</username>
-        <password>Calliope</password>
-        <email>bard@shakespeare.lit</email>
-      </query>
-    </iq>
+``` xml
+<iq type='set' id='reg2'>
+  <query xmlns='jabber:iq:register'>
+    <username>bill</username>
+    <password>Calliope</password>
+    <email>bard@shakespeare.lit</email>
+  </query>
+</iq>
+```
 
     KIND: iq
     TYPE: set
