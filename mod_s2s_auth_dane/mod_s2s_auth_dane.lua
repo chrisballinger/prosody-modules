@@ -57,11 +57,15 @@ do
 		implemented_uses:add("DANE-TA");
 		implemented_uses:add("PKIX-CA");
 	else
-		module:log("warn", "Unable to support DANE-TA and PKIX-CA");
+		module:log("debug", "The cert:issued() method is unavailable, DANE-TA and PKIX-CA can't be enabled");
 	end
 end
 local configured_uses = module:get_option_set("dane_uses", { "DANE-EE", "DANE-TA" });
 local enabled_uses = set.intersection(implemented_uses, configured_uses) / function(use) return use_map[use] end;
+local unsupported = configured_uses - implemented_uses;
+if not unsupported:empty() then
+	module:log("warn", "Unable to support DANE uses %s", tostring(unsupported));
+end
 
 -- Find applicable TLSA records
 -- Takes a s2sin/out and a callback
