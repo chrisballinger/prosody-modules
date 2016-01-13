@@ -2,12 +2,13 @@
 
 local jid_bare = require "util.jid".bare;
 local is_admin = require "core.usermanager".is_admin;
+local set = require "util.set";
 
 local block_users = module:get_option_set("block_outgoing_users", {});
 local block_all = block_users:empty();
 
-local stanza_types = { "iq", "presence", "message" };
-local jid_types = { "host", "bare", "full" };
+local stanza_types = module:get_option_set("block_outgoing_stanzas", { "message" });
+local jid_types = set.new{ "host", "bare", "full" };
 
 local function block_stanza(event)
 	local stanza = event.stanza;
@@ -22,8 +23,8 @@ local function block_stanza(event)
 end
 
 function module.load()
-	for _, stanza_type in ipairs(stanza_types) do
-		for _, jid_type in ipairs(jid_types) do
+	for stanza_type in stanza_types do
+		for jid_type in jid_types do
 			module:hook("pre-"..stanza_type.."/"..jid_type, block_stanza, 10000);
 		end
 	end
