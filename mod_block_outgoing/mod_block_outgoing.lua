@@ -12,7 +12,7 @@ local jid_types = { "host", "bare", "full" };
 local function block_stanza(event)
 	local stanza = event.stanza;
 	local from_jid = jid_bare(stanza.attr.from);
-	if stanza.attr.to == nil or is_admin(from_jid, module.host) then
+	if stanza.attr.to == nil or stanza.attr.to == module.host or is_admin(from_jid, module.host) then
 		return;
 	end
 	if block_all or block_users:contains(from_jid)  then
