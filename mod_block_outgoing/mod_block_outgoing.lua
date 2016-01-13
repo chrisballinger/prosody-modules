@@ -1,6 +1,7 @@
 -- Module to block all outgoing stanzas from a list of users
 
 local jid_bare = require "util.jid".bare;
+local is_admin = require "core.usermanager".is_admin;
 
 local block_users = module:get_option_set("block_outgoing_users", {});
 local block_all = block_users:empty();
@@ -10,10 +11,11 @@ local jid_types = { "host", "bare", "full" };
 
 local function block_stanza(event)
 	local stanza = event.stanza;
-	if stanza.attr.to == nil then
+	local from_jid = jid_bare(stanza.attr.from);
+	if stanza.attr.to == nil or is_admin(from_jid, module.host) then
 		return;
 	end
-	if block_all or block_users:contains(jid_bare(stanza.attr.from))  then
+	if block_all or block_users:contains(from_jid)  then
 		module:log("debug", "Blocked outgoing %s stanza from %s", stanza.name, stanza.attr.from);
 		return true;
 	end
