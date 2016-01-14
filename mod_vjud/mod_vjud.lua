@@ -59,12 +59,12 @@ local vCard_mt = {
 };
 
 local function get_user_vcard(user, host)
-	local vCard = dm_load(user, host or base_host, "vcard");
-	if vCard then
-		vCard = st.deserialize(vCard);
-		vCard = vcard.from_xep54(vCard);
-		return setmetatable(vCard, vCard_mt);
-	end
+	local vCard err = dm_load(user, host or base_host, "vcard");
+	if not vCard then return nil, err; end
+	vCard = st.deserialize(vCard);
+	vCard, err = vcard.from_xep54(vCard);
+	if not vCard then return nil, err; end
+	return setmetatable(vCard, vCard_mt);
 end
 
 local at_host = "@"..base_host;
@@ -102,8 +102,10 @@ module:hook("iq/host/jabber:iq:search:query", function(event)
 
 		local username, hostname = jid_split(email);
 		if hostname == base_host and username and usermanager.user_exists(username, hostname) then
-			local vCard = get_user_vcard(username);
-			if vCard then
+			local vCard, err = get_user_vcard(username);
+			if not vCard then
+				module:log("debug", "Couldn't get vCard for user %s: %s", username, err or "unknown error");
+			else
 				reply:add_child(item_template.apply{
 					jid = username..at_host;
 					first = vCard.N and vCard.N[2] or nil;
