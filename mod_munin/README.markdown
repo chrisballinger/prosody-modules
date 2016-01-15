@@ -83,6 +83,6 @@ See [Munin documentation][muninconf] for more information.
 Compatibility
 =============
 
-Requires Prosody 0.10 or above
+**Requires** Prosody 0.10 or above
 
 [muninconf]: http://guide.munin-monitoring.org/en/stable-2.0/reference/munin.conf.html
