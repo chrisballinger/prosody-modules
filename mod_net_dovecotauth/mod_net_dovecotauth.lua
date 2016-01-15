@@ -18,7 +18,7 @@ local new_buffer = module:require"buffer".new;
 local dump = require"util.serialization".serialize;
 
 -- Config
-local vhost = module:get_option_string("dovecotauth_host", (next(hosts))); -- TODO Is there a better solution?
+local default_vhost = module:get_option_string("dovecotauth_host", (next(hosts))); -- TODO Is there a better solution?
 local allow_master = module:get_option_boolean("dovecotauth_allow_master", false);
 
 -- Active sessions
@@ -128,7 +128,7 @@ function sess:feed(data)
 			-- FIXME Should this be on a separate listener?
 			local id = part();
 			local user = part();
-			if user and user_exists(user, vhost) then
+			if user and user_exists(user, default_vhost) then
 				self:send("USER", id);
 			else
 				self:send("NOTFOUND", id);
@@ -149,7 +149,7 @@ local listener = {}
 function listener.onconnect(conn)
 	s = new_session(conn);
 	sessions[conn] = s;
-	local g_sasl = new_sasl(vhost, s);
+	local g_sasl = new_sasl(default_vhost, s);
 	s.g_sasl = g_sasl;
 	s:handshake();
 end
