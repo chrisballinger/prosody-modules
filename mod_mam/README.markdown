@@ -33,6 +33,14 @@ modules_enabled = {
 Configuration
 =============
 
+Option summary
+--------------
+
+  option                         type                    default
+  ------------------------------ ----------------------- ---------
+  max\_archive\_query\_results   number                  `50`
+  default\_archive\_policy       boolean or `"roster"`   `false`
+
 Storage backend
 ---------------
 
