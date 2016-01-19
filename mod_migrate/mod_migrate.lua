@@ -22,7 +22,7 @@ function module.command(arg)
 		target = assert(target:open(source_store, store_type));
 
 		local function migrate_user(username)
-			module:log("info", "Migrating data for %s", username);
+			module:log("info", "Migrating %s data for %s", source_store, username);
 			local data, err = storage:get(username);
 			assert(data or err==nil, err);
 			assert(target:set(username, data));
@@ -30,7 +30,7 @@ function module.command(arg)
 
 		if store_type == "archive" then
 			function migrate_user(username)
-				module:log("info", "Migrating archive items for %s", username);
+				module:log("info", "Migrating %s archive items for %s", source_store, username);
 				local count, errs = 0, 0;
 				for id, item, when, with in storage:find(username) do
 					local ok, err = target:append(username, id, item, when, with);
