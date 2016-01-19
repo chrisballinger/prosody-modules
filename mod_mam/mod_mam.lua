@@ -306,7 +306,7 @@ if cleanup_after ~= "never" then
 			if not ok then
 				module:log("warn", "Could not expire archives for user %s: %s", user, err);
 			end
-			user[cleanup] = nil;
+			cleanup[user] = nil;
 		end
 		return cleanup_interval;
 	end);
