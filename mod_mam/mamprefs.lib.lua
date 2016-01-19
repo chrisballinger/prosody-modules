@@ -3,7 +3,7 @@
 --
 -- This file is MIT/X11 licensed.
 
-local global_default_policy = module:get_option("default_archive_policy", false);
+local global_default_policy = module:get_option("default_archive_policy", true);
 
 do
 	local prefs_format = {
