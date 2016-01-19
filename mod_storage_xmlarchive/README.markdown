@@ -40,8 +40,10 @@ can't be used by anything other than archives.
 Compatibility
 =============
 
-  ------ ---------------
+  ------ ------------------------------------------------------------------------------------
   0.10   Works
-  0.9    Maybe
+  0.9    [Works before this commit](https://hg.prosody.im/prosody-modules/rev/e63dba236a2a)
   0.8    Does not work
-  ------ ---------------
+  ------ ------------------------------------------------------------------------------------
+
+
