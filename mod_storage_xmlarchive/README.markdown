@@ -40,10 +40,11 @@ can't be used by anything other than archives.
 Compatibility
 =============
 
-  ------ ------------------------------------------------------------------------------------
+  ------ -------------------------------
   0.10   Works
-  0.9    [Works before this commit](https://hg.prosody.im/prosody-modules/rev/e63dba236a2a)
+  0.9    [Use this version][worksin09]
   0.8    Does not work
-  ------ ------------------------------------------------------------------------------------
+  ------ -------------------------------
 
 
+[worksin09]: https://hg.prosody.im/prosody-modules/raw-file/004d3bfc05ea/mod_storage_xmlarchive/mod_storage_xmlarchive.lua
