@@ -272,7 +272,7 @@ local function c2s_message_handler(event)
 end
 
 local cleanup_after = module:get_option_string("archive_expires_after", "1w");
-local cleanup_interval = module:get_option_number("archive_expire_interval", 4 * 60 * 60);
+local cleanup_interval = module:get_option_number("archive_cleanup_interval", 4 * 60 * 60);
 if cleanup_after ~= "never" then
 	local day = 86400;
 	local multipliers = { d = day, w = day * 7, m = 31 * day, y = 365.2425 * day };
@@ -308,7 +308,7 @@ if cleanup_after ~= "never" then
 			end
 			user[cleanup] = nil;
 		end
-		return 14400;
+		return cleanup_interval;
 	end);
 end
 

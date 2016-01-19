@@ -37,10 +37,12 @@ Option summary
 --------------
 
   option                         type                    default
-  ------------------------------ ----------------------- ---------
+  ------------------------------ ----------------------- -----------
   max\_archive\_query\_results   number                  `50`
   default\_archive\_policy       boolean or `"roster"`   `true`
   archive\_expires\_after        string                  `"1w"`
+  archive\_cleanup\_interval     number                  `4*60*60`
+
 
 Storage backend
 ---------------
