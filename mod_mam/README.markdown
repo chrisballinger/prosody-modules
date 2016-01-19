@@ -58,6 +58,9 @@ storage = {
 }
 ```
 
+If no archive-capable storage backend can be opened then an in-memory
+one will be used as fallback.
+
 Query size limits
 -----------------
 
@@ -116,12 +119,10 @@ Compatibility
 
   ------- ---------------
   trunk   Works
-  0.10    Works [^2]
-  0.9     Unsupported
+  0.10    Works
+  0.9     Works
   0.8     Does not work
   ------- ---------------
 
 [^1]: Might be changed to "mam" at some point
 
-[^2]: requires a storage driver with archive support, eg
-    mod\_storage\_sql in 0.10

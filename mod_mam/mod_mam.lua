@@ -39,10 +39,8 @@ local archive_store = "archive2";
 local archive = assert(module:open_store(archive_store, "archive"));
 
 if archive.name == "null" then
-	module:log("debug", "Attempt to open archive storage returned null driver");
-	module:log("error", "Unable to open archive storage, no archive capable storage driver enabled?");
-	module:log("info", "See https://prosody.im/doc/storage and https://prosody.im/doc/archiving for more information");
-	return;
+	module:log("info", "Using in-memory fallback archive driver");
+	archive = module:require "fallback_archive";
 elseif not archive.find then
 	module:log("debug", "Attempt to open archive storage returned a valid driver but it does not seem to implement the storage API");
 	module:log("error", "mod_%s does not support archiving", archive._provided_by or archive.name and "storage_"..archive.name.."(?)" or "<unknown>");
