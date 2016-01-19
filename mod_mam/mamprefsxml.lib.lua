@@ -6,8 +6,6 @@
 local st = require"util.stanza";
 local xmlns_mam = "urn:xmpp:mam:0";
 
-local global_default_policy = module:get_option("default_archive_policy", false);
-
 local default_attrs = {
 	always = true, [true] = "always",
 	never = false, [false] = "never",
@@ -16,7 +14,7 @@ local default_attrs = {
 
 local function tostanza(prefs)
 	local default = prefs[false];
-	default = default ~= nil and default_attrs[default] or global_default_policy;
+	default = default_attrs[default];
 	local prefstanza = st.stanza("prefs", { xmlns = xmlns_mam, default = default });
 	local always = st.stanza("always");
 	local never = st.stanza("never");
