@@ -44,7 +44,7 @@ Option summary
 Storage backend
 ---------------
 
-mod\_mam uses the store "archive2"[\^1]. See [Prosodys data storage
+mod\_mam uses the store "archive2"[^1]. See [Prosodys data storage
 documentation][doc:storage] for information on how to configure storage.
 
 For example, to use mod\_storage\_sql (requires Prosody 0.10 or later):
