@@ -39,7 +39,7 @@ Option summary
   option                         type                    default
   ------------------------------ ----------------------- ---------
   max\_archive\_query\_results   number                  `50`
-  default\_archive\_policy       boolean or `"roster"`   `false`
+  default\_archive\_policy       boolean or `"roster"`   `true`
   archive\_expires\_after        string                  `"1w"`
 
 Storage backend
@@ -97,12 +97,10 @@ Message matching policy
 
 The MAM protocol includes a way for clients to control what messages
 should be stored. This allows users to enable or disable archiving by
-default or for specific contacts. This module will log no messages by
-default, for privacy concerns. If you decide to change this, you should
-inform your users.
+default or for specific contacts.
 
 ``` {.lua}
-default_archive_policy = false
+default_archive_policy = true
 ```
 
   `default_archive_policy =`   Meaning
