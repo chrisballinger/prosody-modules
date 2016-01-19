@@ -37,6 +37,7 @@ end
 
 local archive_store = "archive2";
 local archive = assert(module:open_store(archive_store, "archive"));
+
 if archive.name == "null" then
 	module:log("debug", "Attempt to open archive storage returned null driver");
 	module:log("error", "Unable to open archive storage, no archive capable storage driver enabled?");
@@ -179,6 +180,7 @@ module:hook("iq-set/self/"..xmlns_mam..":query", function(event)
 			origin.send(fwd_st);
 		end
 	end
+
 	if reverse then
 		for i = #results, 1, -1 do
 			origin.send(results[i]);
