@@ -40,6 +40,7 @@ Option summary
   ------------------------------ ----------------------- ---------
   max\_archive\_query\_results   number                  `50`
   default\_archive\_policy       boolean or `"roster"`   `false`
+  archive\_expires\_after        string                  `"1w"`
 
 Storage backend
 ---------------
@@ -66,6 +67,30 @@ include a reference to the next page, letting clients page through the
 result set. Setting large number is not recomended, as Prosody will be
 blocked while processing the request and will not be able to do anything
 else.
+
+Archive expiry
+--------------
+
+Messages in the archive will expire after some time, by default one
+week. This can be changed by setting `archive_expires_after`:
+
+``` {.lua}
+archive_expires_after = "1d" -- one day
+
+archive_expires_after = "1w" -- one week, the default
+
+archive_expires_after = "2m" -- two months
+
+archive_expires_after = "1y" -- one year
+
+archive_expires_after = 60 * 60 -- one hour
+
+archive_expires_after = "never" -- forever
+```
+
+The format is an integer number of seconds or a multiple of a period
+given by a suffix that can be one of `d` (day), `w` (week), `m` (month)
+or `y` (year). No multiplier means seconds.
 
 Message matching policy
 -----------------------

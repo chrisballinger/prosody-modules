@@ -49,6 +49,8 @@ elseif not archive.find then
 	return;
 end
 
+local cleanup;
+
 -- Handle prefs.
 module:hook("iq/self/"..xmlns_mam..":prefs", function(event)
 	local origin, stanza = event.origin, event.stanza;
@@ -89,6 +91,8 @@ module:hook("iq-set/self/"..xmlns_mam..":query", function(event)
 	local origin, stanza = event.origin, event.stanza;
 	local query = stanza.tags[1];
 	local qid = query.attr.queryid;
+
+	if cleanup then cleanup[origin.username] = true; end
 
 	-- Search query parameters
 	local qwith, qstart, qend;
@@ -253,6 +257,7 @@ local function message_handler(event, c2s)
 		-- And stash it
 		local ok, id = archive:append(store_user, nil, time_now(), with, stanza);
 		if ok then
+			if cleanup then cleanup[store_user] = true; end
 			module:fire_event("archive-message-added", { origin = origin, stanza = stanza, for_user = store_user, id = id });
 		end
 	else
@@ -262,6 +267,47 @@ end
 
 local function c2s_message_handler(event)
 	return message_handler(event, true);
+end
+
+local cleanup_after = module:get_option_string("archive_expires_after", "1w");
+local cleanup_interval = module:get_option_number("archive_expire_interval", 4 * 60 * 60);
+if cleanup_after ~= "never" then
+	local day = 86400;
+	local multipliers = { d = day, w = day * 7, m = 31 * day, y = 365.2425 * day };
+	local n, m = cleanup_after:lower():match("(%d+)%s*([dmy]?)");
+	if not n then
+		module:log("error", "Could not parse archive_expires_after string %q", cleanup_after);
+		return false;
+	end
+
+	cleanup_after = tonumber(n) * ( multipliers[m] or 1 );
+
+	if not archive.delete then
+		module:log("error", "archive_expires_after set but mod_%s does not support deleting", archive._provided_by);
+		return false;
+	end
+
+	cleanup = {};
+
+	pcall(function ()
+		local um = require "core.usermanager";
+		for user in um.users(module.host) do
+			cleanup[user] = true;
+		end
+	end);
+
+	module:add_timer(10, function()
+		local user = next(cleanup);
+		if user then
+			module:log("debug", "Removing old messages for user %q", user);
+			local ok, err = archive:delete(user, { ["end"] = os.time() - cleanup_after; })
+			if not ok then
+				module:log("warn", "Could not expire archives for user %s: %s", user, err);
+			end
+			user[cleanup] = nil;
+		end
+		return 14400;
+	end);
 end
 
 -- Stanzas sent by local clients
