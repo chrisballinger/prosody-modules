@@ -215,7 +215,7 @@ function listener.ondisconnect(conn, err)
 	module:log("error", "connection lost");
 	module:fire_event("component_client/disconnected", { reason = err });
 	if exit_on_disconnect and not prosody.shutdown_reason then
-		prosody.shutdown("Shutdown by component_client disconnect");
+		prosody.shutdown("Shutdown by component_client disconnect", 1);
 	end
 end
 
