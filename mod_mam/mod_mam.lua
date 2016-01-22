@@ -45,7 +45,7 @@ if archive.name == "null" or not archive.find then
 	else
 		module:log("debug", "Attempt to open archive storage returned null driver");
 	end
-	module:log("info", "See https://prosody.im/doc/storage and https://prosody.im/doc/archiving for more information");
+	module:log("debug", "See https://prosody.im/doc/storage and https://prosody.im/doc/archiving for more information");
 	module:log("info", "Using in-memory fallback archive driver");
 	archive = module:require "fallback_archive";
 end
