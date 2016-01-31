@@ -60,7 +60,7 @@ do
 		module:log("debug", "The cert:issued() method is unavailable, DANE-TA and PKIX-CA can't be enabled");
 	end
 	if not cert_mt.__index.pubkey then
-		module:log("debug", "The cert:issued() method is unavailable, the SPKI usage can't be supported");
+		module:log("debug", "The cert:pubkey() method is unavailable, the SPKI usage can't be supported");
 	end
 end
 local configured_uses = module:get_option_set("dane_uses", { "DANE-EE", "DANE-TA" });
