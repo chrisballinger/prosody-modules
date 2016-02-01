@@ -58,6 +58,14 @@ function condition_handlers.FROM(from)
 	return compile_jid_match("from", from), { "split_from" };
 end
 
+function condition_handlers.FROM_EXACTLY(from)
+	return ("from == %q"):format(from), { "from" };
+end
+
+function condition_handlers.TO_EXACTLY(to)
+	return ("to == %q"):format(to), { "to" };
+end
+
 function condition_handlers.TYPE(type)
 	return compile_comparison_list("(type or (name == 'message' and 'normal') or (name == 'presence' and 'available'))", type), { "type", "name" };
 end
