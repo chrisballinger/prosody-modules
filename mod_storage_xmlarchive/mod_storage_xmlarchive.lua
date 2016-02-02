@@ -187,6 +187,7 @@ function archive:delete(username, query)
 		if not err then return true end -- already empty
 		return dates, err;
 	end
+	if dates[1] > before then return true; end -- Nothing to delete
 	local remaining_dates = {};
 	for d = 1, #dates do
 		if dates[d] >= before then
