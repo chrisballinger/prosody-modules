@@ -298,7 +298,7 @@ if cleanup_after ~= "never" then
 		end
 	end);
 
-	module:add_timer(10, function()
+	module:add_timer(math.random(10, 60), function()
 		local user = next(cleanup);
 		if user then
 			module:log("debug", "Removing old messages for user %q", user);
@@ -308,7 +308,7 @@ if cleanup_after ~= "never" then
 			end
 			cleanup[user] = nil;
 		end
-		return cleanup_interval;
+		return math.random(cleanup_interval, cleanup_interval * 2);
 	end);
 end
 
