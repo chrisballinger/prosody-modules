@@ -40,7 +40,7 @@ function archive:append(username, _, data, when, with)
 	if offset == 0 then
 		-- means the message is at the beginnig of the file, so it's a new day
 		-- so we add this new day to the "index"
-		dm.list_append(username, module.host, self.store, day);
+		ok, err = dm.list_append(username, module.host, self.store, day);
 	end
 	if not ok then
 		return nil, err;
