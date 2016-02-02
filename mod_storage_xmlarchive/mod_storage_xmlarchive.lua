@@ -182,7 +182,11 @@ function archive:delete(username, query)
 	end
 	local before = query.before or query["end"] or "9999-12-31";
 	if type(before) == "number" then before = dt.date(before); else before = before:sub(1, 10); end
-	local dates = dm.list_load(username, module.host, self.store) or empty;
+	local dates, err = dm.list_load(username, module.host, self.store);
+	if not dates or next(dates) == nil then
+		if not err then return true end -- already empty
+		return dates, err;
+	end
 	local remaining_dates = {};
 	for d = 1, #dates do
 		if dates[d] >= before then
