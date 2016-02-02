@@ -110,9 +110,9 @@ default_archive_policy = true
 
   `default_archive_policy =`   Meaning
   ---------------------------- ------------------------------------------------------
-  `false`                      Store no messages. This is the default.
+  `false`                      Store no messages.
   `"roster"`                   Store messages to/from contacts in the users roster.
-  `true`                       Store all messages.
+  `true`                       Store all messages. This is the default.
 
 Compatibility
 =============
