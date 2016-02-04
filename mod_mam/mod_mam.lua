@@ -284,6 +284,8 @@ if cleanup_after ~= "never" then
 
 	cleanup_after = tonumber(n) * ( multipliers[m] or 1 );
 
+	module:log("debug", "archive_expires_after = %d -- in seconds", cleanup_after);
+
 	if not archive.delete then
 		module:log("error", "archive_expires_after set but mod_%s does not support deleting", archive._provided_by);
 		return false;
@@ -305,6 +307,11 @@ if cleanup_after ~= "never" then
 			local ok, err = archive:delete(user, { ["end"] = os.time() - cleanup_after; })
 			if not ok then
 				module:log("warn", "Could not expire archives for user %s: %s", user, err);
+			else
+				-- :affected() is a recent addition for eg SQLite3 in LuaDBI
+				pcall(function(stmt)
+					module:log("debug", "Removed %d messages", stmt:affected());
+				end, err);
 			end
 			cleanup[user] = nil;
 		end
