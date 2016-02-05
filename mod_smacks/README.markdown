@@ -55,6 +55,7 @@ Clients that support XEP-0198:
 -   Gajim
 -   Swift (but not resumption, as of version 2.0 and alphas of 3.0)
 -   Psi (in an unreleased branch)
+-   Conversations
 -   Yaxim
 
 [7693724881b3]: //hg.prosody.im/prosody-modules/raw-file/7693724881b3/mod_smacks/mod_smacks.lua
