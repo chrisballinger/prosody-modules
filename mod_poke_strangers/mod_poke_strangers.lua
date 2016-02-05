@@ -7,6 +7,19 @@ local set = require "util.set";
 
 local recently_queried = set.new();
 
+local version_id = uuid_generate();
+local disco_id = uuid_generate();
+
+module:hook("iq-result/host/" .. version_id, function (event)
+	module:log("info", "Stranger " .. event.stanza.attr.from .. " version: " .. tostring(event.stanza));
+	return true;
+end);
+
+module:hook("iq-result/host/" .. disco_id, function (event)
+	module:log("info", "Stranger " .. event.stanza.attr.from .. " disco: " .. tostring(event.stanza));
+	return true;
+end);
+
 function check_subscribed(event)
 	local stanza = event.stanza;
 	local local_user_jid = stanza.attr.to;
@@ -27,22 +40,7 @@ function check_subscribed(event)
 
 		recently_queried:add(stranger_jid);
 
-		local version_id = uuid_generate();
-
-		module:hook("iq-result/host/" .. version_id, function (event)
-			module:log("info", "Stranger " .. stranger_jid .. " version: " .. tostring(event.stanza));
-			return true;
-		end);
-
 		module:send(st.iq({ type = "get", to = stranger_jid, from = to_host, id = version_id }):query("jabber:iq:version"));
-
-
-		local disco_id = uuid_generate();
-
-		module:hook("iq-result/host/" .. disco_id, function (event)
-			module:log("info", "Stranger " .. stranger_jid .. " disco: " .. tostring(event.stanza));
-			return true;
-		end);
 
 		module:send(st.iq({ type = "get", to = stranger_jid, from = to_host, id = disco_id }):query("http://jabber.org/protocol/disco#info"));
 	end
