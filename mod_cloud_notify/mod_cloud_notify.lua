@@ -103,6 +103,7 @@ module:hook("message/offline/handle", function(event)
 		end
 		push_publish:add_child(push_form:form(form_data));
 		push_publish:up(); -- / publish
+		push_publish:up(); -- / pubsub
 		if push_info.options then
 			push_publish:tag("publish-options"):add_child(push_info.options);
 		end
