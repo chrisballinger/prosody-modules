@@ -184,10 +184,10 @@ end (so it must match the entire portion of the JID).
 its own, and does **not** match 'user@example.com'. To perform domain
 whitelists or blacklists, use Zones.
 
-  Condition   Matches
-  ----------- -------------------------------------------------------
-  `FROM_EXACTLY`      The JID in the 'from' attribute exactly matches the given JID
-  `TO_EXACTLY`        The JID in the 'to' attribute exactly matches the given JID
+  Condition        Matches
+  ---------------- ---------------------------------------------------------------
+  `FROM_EXACTLY`   The JID in the 'from' attribute exactly matches the given JID
+  `TO_EXACTLY`     The JID in the 'to' attribute exactly matches the given JID
 
 These additional conditions do not support pattern matching, but are
 useful to match the exact to/from address on a stanza. For example, if
