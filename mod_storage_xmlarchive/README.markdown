@@ -42,7 +42,7 @@ Compatibility
 
   ------ -------------------------------
   0.10   Works
-  0.9    [Use this version][worksin09]
+  0.9    **[Use this version][worksin09]**
   0.8    Does not work
   ------ -------------------------------
 
