@@ -276,7 +276,7 @@ local cleanup_interval = module:get_option_number("archive_cleanup_interval", 4 
 if cleanup_after ~= "never" then
 	local day = 86400;
 	local multipliers = { d = day, w = day * 7, m = 31 * day, y = 365.2425 * day };
-	local n, m = cleanup_after:lower():match("(%d+)%s*([dmy]?)");
+	local n, m = cleanup_after:lower():match("(%d+)%s*([dwmy]?)");
 	if not n then
 		module:log("error", "Could not parse archive_expires_after string %q", cleanup_after);
 		return false;
