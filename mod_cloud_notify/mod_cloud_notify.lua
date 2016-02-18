@@ -92,6 +92,7 @@ module:hook("message/offline/handle", function(event)
 			:tag("pubsub", { xmlns = "http://jabber.org/protocol/pubsub" })
 				:tag("publish", { node = push_node })
 					:tag("item");
+						:tag("notification", { xmlns = xmlns_push });
 		local form_data = {
 			["message-count"] = tostring(push_info.count);
 		};
@@ -102,6 +103,7 @@ module:hook("message/offline/handle", function(event)
 			form_data["last-message-body"] = stanza:get_child_text("body");
 		end
 		push_publish:add_child(push_form:form(form_data));
+		push_publish:up(); -- / notification
 		push_publish:up(); -- / publish
 		push_publish:up(); -- / pubsub
 		if push_info.options then
