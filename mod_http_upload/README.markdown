@@ -55,8 +55,10 @@ Limits
 A maximum file size can be set by:
 
 ``` {.lua}
-http_upload_file_size_limit = 10 * 1024 * 1024 -- this is 10MB in bytes
+http_upload_file_size_limit = 123 -- bytes
 ```
+
+Default is 10MB (10*1024*1024).
 
 Path
 ----
