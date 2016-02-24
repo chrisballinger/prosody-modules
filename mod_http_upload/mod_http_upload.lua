@@ -21,7 +21,7 @@ return a .. package.config:sub(1,1) .. b;
 end
 
 -- config
-local file_size_limit = module:get_option_number(module.name .. "_file_size_limit", 10 * 1024 * 1024); -- 10 MB
+local file_size_limit = module:get_option_number(module.name .. "_file_size_limit", 1024 * 1024); -- 1 MB
 
 -- depends
 module:depends("http");
