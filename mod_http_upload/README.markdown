@@ -58,7 +58,7 @@ A maximum file size can be set by:
 http_upload_file_size_limit = 123 -- bytes
 ```
 
-Default is 10MB (10*1024*1024).
+Default is 1MB (1024*1024).
 
 Path
 ----
