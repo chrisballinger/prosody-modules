@@ -99,7 +99,7 @@ function archive:find(username, query)
 	local first_item, last_item;
 
 	return function ()
-		if limit and count >= limit then xmlfile:close() return; end
+		if limit and count >= limit then if xmlfile then xmlfile:close() end return; end
 		local filename;
 
 		for d = start_day, last_day, step do
