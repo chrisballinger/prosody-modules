@@ -40,6 +40,7 @@ Further LDAP options are:
   ldap\_scope      Search scope. other values: "base" and "onelevel"                                                                      `"subtree"`
   ldap\_tls        Enable TLS (StartTLS) to connect to LDAP (can be true or false). The non-standard 'LDAPS' protocol is not supported.   `false`
   ldap\_mode       How passwords are validated.                                                                                           `"bind"`
+  ldap\_admins     Search filter to match admins, works like ldap\_scope
 
 **Note:** lua-ldap reads from `/etc/ldap/ldap.conf` and other files like
 `~prosody/.ldaprc` if they exist. Users wanting to use a particular TLS

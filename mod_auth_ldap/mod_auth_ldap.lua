@@ -1,5 +1,6 @@
 -- mod_auth_ldap
 
+local jid_split = require "util.jid".split;
 local new_sasl = require "util.sasl".new;
 local lualdap = require "lualdap";
 local function ldap_filter_escape(s) return (s:gsub("[*()\\%z]", function(c) return ("\\%02x"):format(c:byte()) end)); end
@@ -13,6 +14,7 @@ local ldap_scope = module:get_option_string("ldap_scope", "subtree");
 local ldap_filter = module:get_option_string("ldap_filter", "(uid=$user)"):gsub("%%s", "$user", 1);
 local ldap_base = assert(module:get_option_string("ldap_base"), "ldap_base is a required option for ldap");
 local ldap_mode = module:get_option_string("ldap_mode", "bind");
+local ldap_admins = module:get_option_string("ldap_admin_filter");
 local host = ldap_filter_escape(module:get_option_string("realm", module.host));
 
 -- Initiate connection
@@ -120,6 +122,21 @@ elseif ldap_mode == "bind" then
 	end
 else
 	module:log("error", "Unsupported ldap_mode %s", tostring(ldap_mode));
+end
+
+if ldap_admins then
+	function provider.is_admin(jid)
+		local username = jid_split(jid);
+		return ldap_do("search", 2, {
+			base = ldap_base;
+			scope = ldap_scope;
+			sizelimit = 1;
+			filter = ldap_admins:gsub("%$(%a+)", {
+				user = ldap_filter_escape(username);
+				host = host;
+			});
+		});
+	end
 end
 
 module:provides("auth", provider);
