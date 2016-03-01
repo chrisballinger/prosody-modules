@@ -34,7 +34,7 @@ Further LDAP options are:
   ---------------- ---------------------------------------------------------------------------------------------------------------------- --------------------
   ldap\_base       LDAP base directory which stores user accounts                                                                         **Required field**
   ldap\_server     Space-separated list of hostnames or IPs, optionally with port numbers (e.g. "localhost:8389")                         `"localhost"`
-  ldap\_rootdn     The distinguished name to auth against                                                                                 `"" (anonymous)`
+  ldap\_rootdn     The distinguished name to auth against                                                                                 `""` (anonymous)
   ldap\_password   Password for rootdn                                                                                                    `""`
   ldap\_filter     Search filter, with `$user` and `$host` substituded for user- and hostname                                             `"(uid=$user)"`
   ldap\_scope      Search scope. other values: "base" and "onelevel"                                                                      `"subtree"`
