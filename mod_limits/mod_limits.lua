@@ -65,7 +65,8 @@ function default_filter_set.bytes_in(bytes, session)
 			timer.add_task(limits_resolution, function ()
 				if not session.conn then return; end
 				if throttle:peek(#outstanding_data) then
-					session.log("debug", "Resuming paused session"); session.conn:resume();
+					session.log("debug", "Resuming paused session");
+					session.conn:resume();
 				end
 				-- Handle what we can of the outstanding data
 				session.data(outstanding_data);
