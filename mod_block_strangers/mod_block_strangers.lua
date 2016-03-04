@@ -9,7 +9,8 @@ function check_subscribed(event)
 	local to_user, to_host, to_resource = jid_split(stanza.attr.to);
 	local from_jid = jid_bare(stanza.attr.from);
 	if to_user and not is_contact_subscribed(to_user, to_host, from_jid) then
-		if to_resource and stanza.attr.type == "groupchat" then
+		if to_resource and stanza.attr.type == "groupchat"
+		or stanza.name == "iq" and (stanza.attr.type == "result" or stanza.attr.type == "error") then
 			return nil; -- Pass through
 		end
 		if stanza.name == "iq" and ( stanza.attr.type == "get" or stanza.attr.type == "set" ) then
