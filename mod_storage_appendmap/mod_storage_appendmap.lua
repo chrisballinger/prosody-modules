@@ -73,7 +73,15 @@ function keyval:get(user)
 	return map.get(self, user);
 end
 
-keyval.set = map.set_keys;
+function keyval:set(user, data)
+	map.set(self, user);
+	if data then
+		for k, v in pairs(data) do
+			map.set(self, user, k, v);
+		end
+	end
+	return true;
+end
 
 -- TODO some kind of periodic compaction thing?
 function map:_compact(user)
