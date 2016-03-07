@@ -3,7 +3,7 @@
 -- Copyright (C) 2015 Kim Alvefur
 --
 -- This file is MIT/X11 licensed.
--- 
+--
 -- Implementation of HTTP Upload file transfer mechanism used by Conversations
 --
 
@@ -130,7 +130,7 @@ local function send_response_sans_body(response, body)
 	if response.finished then return; end
 	response.finished = true;
 	response.conn._http_open_response = nil;
-	
+
 	local status_line = "HTTP/"..response.request.httpversion.." "..(response.status or codes[response.status_code]);
 	local headers = response.headers;
 	body = body or response.body or "";
