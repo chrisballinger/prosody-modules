@@ -34,9 +34,11 @@ sender as a "recipient-unavailable" error.
 Configuration
 =============
 
-  Option                      Default           Description
-  --------------------------- ----------------- -----------------------------------------------------------------------------------------
-  smacks\_hibernation\_time   300 (5 minutes)   The number of seconds a disconnected session should stay alive for (to allow reconnect)
+  Option                         Default           Description
+  ------------------------------ ----------------- -----------------------------------------------------------------------------------------
+  `smacks_hibernation_time`      300 (5 minutes)   The number of seconds a disconnected session should stay alive for (to allow reconnect)
+  `smacks_enabled_s2s`           false             Enable Stream Management on server connections? *Experimental*
+  `smacks_max_unacked_stanzas`   0                 How many stanzas to send before requesting acknowledgement
 
 Compatibility
 =============
