@@ -24,8 +24,14 @@ function module.command(arg)
 		local function migrate_user(username)
 			module:log("info", "Migrating %s data for %s", source_store, username);
 			local data, err = storage:get(username);
-			assert(data or err==nil, err);
-			assert(target:set(username, data));
+			if not data and err then
+				module:log("error", "Could not read data: %s", err);
+			else
+				local ok, err = target:set(username, data);
+				if not ok then
+					module:log("error", "Could not write data: %s", err);
+				end
+			end
 		end
 
 		if store_type == "archive" then
