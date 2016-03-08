@@ -12,6 +12,7 @@ local st = require"util.stanza";
 local lfs = require"lfs";
 local uuid = require"util.uuid".generate;
 local urlencode = require"util.http".urlencode;
+local dataform = require "util.dataforms".new;
 local t_concat = table.concat;
 local t_insert = table.insert;
 local s_upper = string.upper;
@@ -31,6 +32,11 @@ module:depends("disco");
 local xmlns_http_upload = "urn:xmpp:http:upload";
 
 module:add_feature(xmlns_http_upload);
+
+module:add_extension(dataform {
+	{ name = "FORM_TYPE", type = "hidden", value = xmlns_http_upload },
+	{ name = "max-file-size", type = "text-single" },
+}:form({ ["max-file-size"] = tostring(file_size_limit) }, "result"));
 
 -- state
 local pending_slots = module:shared("upload_slots");
