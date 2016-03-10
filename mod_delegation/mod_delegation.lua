@@ -299,7 +299,7 @@ module:hook("iq/host", iq_hook, 2^32)
 
 local function find_form_type(stanza)
 	local form_type = nil
-	for field in stanza.childtags('field', 'jabber:x:data') do
+	for field in stanza:childtags('field', 'jabber:x:data') do
 		if field.attr.var=='FORM_TYPE' and field.attr.type=='hidden' then
 			local value = field:get_child('value')
 			if not value then
