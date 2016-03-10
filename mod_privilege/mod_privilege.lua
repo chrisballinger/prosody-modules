@@ -1,5 +1,5 @@
 -- XEP-0356 (Privileged Entity)
--- Copyright (C) 2015 Jérôme Poisson
+-- Copyright (C) 2015-2016 Jérôme Poisson
 --
 -- This module is MIT/X11 licensed. Please see the
 -- COPYING file in the source package for more information.
