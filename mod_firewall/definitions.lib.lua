@@ -1,4 +1,7 @@
 
+-- Name arguments are unused here
+-- luacheck: ignore 212
+
 local definition_handlers = {};
 
 local set = require"util.set";
