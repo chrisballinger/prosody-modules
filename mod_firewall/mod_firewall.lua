@@ -89,8 +89,8 @@ local available_deps = {
 	};
 };
 
-local function include_dep(dep, code)
-	local dep, dep_param = dep:match("^([^:]+):?(.*)$");
+local function include_dep(dependency, code)
+	local dep, dep_param = dependency:match("^([^:]+):?(.*)$");
 	local dep_info = available_deps[dep];
 	if not dep_info then
 		module:log("error", "Dependency not found: %s", dep);
