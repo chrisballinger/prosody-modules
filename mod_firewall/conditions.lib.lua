@@ -23,7 +23,7 @@ local function compile_jid_match_part(part, match)
 	if not match then
 		return part.." == nil";
 	end
-	local pattern = match:match("<(.*)>");
+	local pattern = match:match("^<(.*)>$");
 	if pattern then
 		if pattern == "*" then
 			return part;
