@@ -164,7 +164,7 @@ local function parse_firewall_rules(filename)
 		end
 		line_no = line_no + 1;
 
-		if line_hold or line:find("^[#;]") then
+		if line_hold or line:find("^[#;]") then -- luacheck: ignore 542
 			-- No action; comment or partial line
 		elseif line == "" then
 			if state == "rules" then
