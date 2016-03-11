@@ -33,7 +33,7 @@ local function compile_jid_match_part(part, match)
 		else
 			pattern = pattern:gsub("%p", "%%%0"):gsub("%%(%p)", wildcard_equivs);
 		end
-		return ("%s:match(%q)"):format(part, "^"..pattern.."$");
+		return ("(%s and %s:match(%q))"):format(part, part, "^"..pattern.."$");
 	else
 		return ("%s == %q"):format(part, match);
 	end
