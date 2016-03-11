@@ -134,7 +134,7 @@ local function new_rule(ruleset, chain)
 	return rule;
 end
 
-local function compile_firewall_rules(filename)
+local function parse_firewall_rules(filename)
 	local line_no = 0;
 
 	local function errmsg(err)
@@ -266,7 +266,10 @@ local function compile_firewall_rules(filename)
 			end
 		end
 	end
+	return ruleset;
+end
 
+local function process_firewall_rules(ruleset)
 	-- Compile ruleset and return complete code
 
 	local chain_handlers = {};
@@ -337,6 +340,13 @@ local function compile_firewall_rules(filename)
 		chain_handlers[chain_name] = code_string;
 	end
 
+	return chain_handlers;
+end
+
+local function compile_firewall_rules(filename)
+	local ruleset, err = parse_firewall_rules(filename);
+	if not ruleset then return nil, err; end
+	local chain_handlers = process_firewall_rules(ruleset);
 	return chain_handlers;
 end
 
