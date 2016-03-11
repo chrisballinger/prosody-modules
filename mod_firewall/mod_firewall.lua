@@ -1,9 +1,7 @@
 
 local resolve_relative_path = require "core.configmanager".resolve_relative_path;
 local logger = require "util.logger".init;
-local set = require "util.set";
 local it = require "util.iterators";
-local add_filter = require "util.filters".add_filter;
 
 local definitions = module:shared("definitions");
 local active_definitions = {};
