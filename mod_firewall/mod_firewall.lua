@@ -166,7 +166,7 @@ local function compile_firewall_rules(filename)
 		end
 		line_no = line_no + 1;
 
-		if line_hold or line:match("^[#;]") then
+		if line_hold or line:find("^[#;]") then
 			-- No action; comment or partial line
 		elseif line == "" then
 			if state == "rules" then
@@ -174,7 +174,7 @@ local function compile_firewall_rules(filename)
 					:format(line_no);
 			end
 			state = nil;
-		elseif not(state) and line:match("^::") then
+		elseif not(state) and line:sub(1, 2) == "::" then
 			chain = line:gsub("^::%s*", "");
 			local chain_info = chains[chain];
 			if not chain_info then
@@ -183,7 +183,7 @@ local function compile_firewall_rules(filename)
 				return nil, errmsg("Only event chains supported at the moment");
 			end
 			ruleset[chain] = ruleset[chain] or {};
-		elseif not(state) and line:match("^%%") then -- Definition (zone, limit, etc.)
+		elseif not(state) and line:sub(1,1) == "%" then -- Definition (zone, limit, etc.)
 			local what, name = line:match("^%%%s*(%w+) +([^ :]+)");
 			if not definition_handlers[what] then
 				return nil, errmsg("Definition of unknown object: "..what);
@@ -192,7 +192,7 @@ local function compile_firewall_rules(filename)
 			end
 
 			local val = line:match(": ?(.*)$");
-			if not val and line:match(":<") then -- Read from file
+			if not val and line:find(":<") then -- Read from file
 				local fn = line:match(":< ?(.-)%s*$");
 				if not fn then
 					return nil, errmsg("Unable to parse filename");
@@ -214,7 +214,7 @@ local function compile_firewall_rules(filename)
 				active_definitions[what] = {};
 			end
 			active_definitions[what][name] = ret;
-		elseif line:match("^[^%s:]+[%.=]") then
+		elseif line:find("^[^%s:]+[%.=]") then
 			-- Action
 			if state == nil then
 				-- This is a standalone action with no conditions
@@ -247,7 +247,7 @@ local function compile_firewall_rules(filename)
 			-- Check standard modifiers for the condition (e.g. NOT)
 			local negated;
 			local condition = line:match("^[^:=%.]*");
-			if condition:match("%f[%w]NOT%f[^%w]") then
+			if condition:find("%f[%w]NOT%f[^%w]") then
 				local s, e = condition:match("%f[%w]()NOT()%f[^%w]");
 				condition = (condition:sub(1,s-1)..condition:sub(e+1, -1)):match("^%s*(.-)%s*$");
 				negated = true;
@@ -281,7 +281,7 @@ local function compile_firewall_rules(filename)
 		-- chain (filter-based will be added later)
 		for _, rule in ipairs(rules) do
 			for _, condition in ipairs(rule.conditions) do
-				if condition:match("^not%(.+%)$") then
+				if condition:find("^not%(.+%)$") then
 					condition = condition:match("^not%((.+)%)$");
 				end
 				condition_uses[condition] = (condition_uses[condition] or 0) + 1;
@@ -376,7 +376,7 @@ function module.load()
 						for _, event_name in ipairs(chain_definition) do
 							module:hook(event_name, handler, chain_definition.priority);
 						end
-					elseif not chain:match("^user/") then
+					elseif not chain:sub(1, 5) == "user/" then
 						module:log("warn", "Unknown chain %q", chain);
 					end
 					module:hook("firewall/chains/"..chain, handler);

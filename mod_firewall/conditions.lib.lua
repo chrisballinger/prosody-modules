@@ -28,7 +28,7 @@ local function compile_jid_match_part(part, match)
 		if pattern == "*" then
 			return part;
 		end
-		if pattern:match("^<.*>$") then
+		if pattern:find("^<.*>$") then
 			pattern = pattern:match("^<(.*)>$");
 		else
 			pattern = pattern:gsub("%p", "%%%0"):gsub("%%(%p)", wildcard_equivs);
@@ -144,7 +144,7 @@ function condition_handlers.DAY(days)
 				op = "or";
 			end
 			table.insert(conditions, ("current_day >= %d %s current_day <= %d"):format(day_start_num, op, day_end_num));
-		elseif day_range:match("%a") then
+		elseif day_range:find("%a") then
 			local day = resolve_day_number(day_range:match("%a+"));
 			table.insert(conditions, "current_day == "..day);
 		else

@@ -29,7 +29,7 @@ local function compile_xml(data)
 				else
 					table.insert(attr_str, ", ");
 				end
-				if k:match("^%a%w*$") then
+				if k:find("^%a%w*$") then
 					table.insert(attr_str, string.format("%s = %q", k, v));
 				else
 					table.insert(attr_str, string.format("[%q] = %q", k, v));
@@ -45,7 +45,7 @@ local function compile_xml(data)
 				code[#code+1] = (string.format(":tag(%q%s)", name, table.concat(attr_str)));
 			end
 		end
-		if text and text:match("%S") then
+		if text and text:find("%S") then
 			code[#code+1] = (string.format(":text(%q)", text));
 		elseif short_close then
 			short_close = nil;
