@@ -3,7 +3,7 @@ local action_handlers = {};
 
 -- Run code through this to allow strings to contain code. e.g.: LOG=Received: $(stanza:top_tag())
 local function meta(s, extra)
-	return (s:gsub("$(%b())", [["..%1.."]])
+	return (s:gsub("$(%b())", [["..tostring(%1).."]])
 		:gsub("$(%b<>)", [["..stanza:find("%1").."]])
 		:gsub("$$(%a+)", extra or {}));
 end
