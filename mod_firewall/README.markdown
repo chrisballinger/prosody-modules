@@ -310,3 +310,13 @@ stanza.
   Action          Description
   --------------- ------------------------------------------------------------------------------------------------------------------------
   `LOG=message`   Logs the given message to Prosody's log file. Optionally prefix it with a log level in square brackets, e.g. `[debug]`
+
+You can include expressions in log messages, using `$(...)` syntax. For example, to log the stanza that matched the rule, you can use $(stanza),
+or to log just the top tag of the stanza, use $(stanza:top_tag()).
+
+Example:
+
+    # Log all stanzas to user@example.com:
+    TO: user@example.com
+    LOG=[debug] User received: $(stanza)
+
