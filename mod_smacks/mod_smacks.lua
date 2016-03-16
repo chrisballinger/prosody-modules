@@ -171,7 +171,7 @@ module:hook_stanza(xmlns_sm3, "enable", function (session, stanza) return handle
 
 module:hook_stanza("http://etherx.jabber.org/streams", "features",
 		function (session, stanza)
-			module:add_timer(0, function ()
+			module:add_timer(1e-6, function ()
 				if can_do_smacks(session) then
 					if stanza:get_child("sm", xmlns_sm3) then
 						session.sends2s(st.stanza("enable", sm3_attr));
