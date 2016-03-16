@@ -142,7 +142,11 @@ function action_handlers.BOUNCE(with)
 	else
 		text = "nil";
 	end
-	return route_modify(("error_reply(stanza, %s, %s, %s)"):format(error_type, error, text), nil, true);
+	local route_modify_code, deps = route_modify(("error_reply(stanza, %s, %s, %s)"):format(error_type, error, text), nil, true);
+	deps[#deps+1] = "type";
+	deps[#deps+1] = "name";
+	return [[if type == "error" or (name == "iq" and type == "result") then return true; end -- Don't reply to 'error' stanzas, or iq results
+			]]..route_modify_code, deps;
 end
 
 function action_handlers.REDIRECT(where)
