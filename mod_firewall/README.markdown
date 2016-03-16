@@ -294,6 +294,8 @@ and rules (this may change in the future).
   `BOUNCE=error (text)`   As above, but include the supplied human-readable text with a description of the error
   `COPY=jid`              Make a copy of the stanza and send the copy to the specified JID. The copied stanza flows through Prosody's routing code, and as such is affected by firewall rules. Be careful to avoid loops.
 
+**Note:** It is incorrect behaviour to reply to an 'error' stanza with another error, so BOUNCE will simply act the same as 'DROP' for stanzas that should not be bounced (error stanzas and iq results).
+
 ### Stanza modification
 
 These actions make it possible to modify the content and structure of a
