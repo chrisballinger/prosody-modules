@@ -7,15 +7,17 @@ local memory = setmetatable({}, {
 	end
 });
 
+local NULL = {};
+
 local keyval_store = {};
 keyval_store.__index = keyval_store;
 
 function keyval_store:get(username)
-	return self.store[username];
+	return self.store[username or NULL];
 end
 
 function keyval_store:set(username, data)
-	self.store[username] = data;
+	self.store[username or NULL] = data;
 	return true;
 end
 
@@ -23,17 +25,17 @@ local map_store = {};
 map_store.__index = map_store;
 
 function map_store:get(username, key)
-	local userstore = self.store[username];
+	local userstore = self.store[username or NULL];
 	if type(userstore) == "table" then
 		return userstore[key];
 	end
 end
 
 function map_store:set(username, key, data)
-	local userstore = self.store[username];
+	local userstore = self.store[username or NULL];
 	if userstore == nil then
 		userstore = {};
-		self.store[username] = userstore;
+		self.store[username or NULL] = userstore;
 	end
 	userstore[key] = data;
 	return true;
@@ -46,10 +48,10 @@ function archive_store:append(username, key, value, when, with)
 	if type(when) ~= "number" then
 		when, with, value = value, when, with;
 	end
-	local a = self.store[username];
+	local a = self.store[username or NULL];
 	if not a then
 		a = {};
-		self.store[username] = a;
+		self.store[username or NULL] = a;
 	end
 	local i = #a+1;
 	local v = { key = key, when = when, with = with, value = value };
@@ -78,7 +80,7 @@ local function archive_iter (a, start, stop, step, limit, when_start, when_end, 
 end
 
 function archive_store:find(username, query)
-	local a = self.store[username] or {};
+	local a = self.store[username or NULL] or {};
 	local start, stop, step = 1, #a, 1;
 	local qstart, qend, qwith = -math.huge, math.huge;
 	local limit;
@@ -104,16 +106,16 @@ end
 
 function archive_store:delete(username, query)
 	if not query or next(query) == nil then
-		self.store[username] = nil;
+		self.store[username or NULL] = nil;
 		return true;
 	end
-	local old = self.store[username];
+	local old = self.store[username or NULL];
 	if not old then return true; end
 	local qstart = query.start or -math.huge;
 	local qend = query["end"] or math.huge;
 	local qwith = query.with;
 	local new = {};
-	self.store[username] = new;
+	self.store[username or NULL] = new;
 	local t;
 	for i = 1, #old do
 		i = old[i];
@@ -123,7 +125,7 @@ function archive_store:delete(username, query)
 		end
 	end
 	if #new == 0 then
-		self.store[username] = nil;
+		self.store[username or NULL] = nil;
 	end
 	return true;
 end
