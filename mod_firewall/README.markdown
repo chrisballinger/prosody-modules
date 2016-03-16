@@ -292,7 +292,9 @@ and rules (this may change in the future).
   `BOUNCE.`               Bounce the stanza with the default error (usually service-unavailable)
   `BOUNCE=error`          Bounce the stanza with the given error (MUST be a defined XMPP stanza error, see [RFC6120](http://xmpp.org/rfcs/rfc6120.html#stanzas-error-conditions).
   `BOUNCE=error (text)`   As above, but include the supplied human-readable text with a description of the error
-  `COPY=jid`              Make a copy of the stanza and send the copy to the specified JID.
+  `COPY=jid`              Make a copy of the stanza and send the copy to the specified JID. The copied stanza flows through Prosody's routing code, and as such is affected by firewall rules. Be careful to avoid loops.
+
+**Note:** It is incorrect behaviour to reply to an 'error' stanza with another error, so BOUNCE will simply act the same as 'DROP' for stanzas that should not be bounced (error stanzas and iq results).
 
 ### Stanza modification
 
@@ -310,3 +312,51 @@ stanza.
   Action          Description
   --------------- ------------------------------------------------------------------------------------------------------------------------
   `LOG=message`   Logs the given message to Prosody's log file. Optionally prefix it with a log level in square brackets, e.g. `[debug]`
+
+You can include expressions in log messages, using `$(...)` syntax. For example, to log the stanza that matched the rule, you can use $(stanza),
+or to log just the top tag of the stanza, use $(stanza:top_tag()).
+
+Example:
+
+    # Log all stanzas to user@example.com:
+    TO: user@example.com
+    LOG=[debug] User received: $(stanza)
+
+Chains
+------
+
+Rules are grouped into "chains", which are injected at particular points in Prosody's routing code.
+
+Available chains are:
+
+  Chain          Description
+  -------------- -------------------------------------------------------------------------------------------
+  deliver        Applies to stanzas delivered to local recipients (regardless of the stanza's origin)
+  deliver_remote Applies to stanzas delivered to remote recipients (just before they leave the local server)
+  preroute       Applies to incoming stanzas from local users, before any routing rules are applied
+
+By default, if no chain is specified, rules are put into the 'deliver' chain.
+
+Example of chain use:
+
+    # example.com's firewall script
+    
+    # This line is optional, because 'deliver' is the default chain anyway:
+    ::deliver
+    
+    # This rule matches any stanzas delivered to our local user bob:
+    TO: bob@example.com
+    DROP.
+    
+    # Oops! This rule will never match, because alice is not a local user,
+    # and only stanzas to local users go through the 'deliver' chain:
+    TO: alice@remote.example.com
+    DROP.
+
+    # Create a 'preroute' chain of rules:
+    ::preroute
+    # These rules are matched for outgoing stanzas from local clients
+    
+    # This will match any stanzas sent to alice from a local user:
+    TO: alice@remote.example.com
+    DROP.
