@@ -322,3 +322,41 @@ Example:
     TO: user@example.com
     LOG=[debug] User received: $(stanza)
 
+Chains
+------
+
+Rules are grouped into "chains", which are injected at particular points in Prosody's routing code.
+
+Available chains are:
+
+  Chain          Description
+  -------------- -------------------------------------------------------------------------------------------
+  deliver        Applies to stanzas delivered to local recipients (regardless of the stanza's origin)
+  deliver_remote Applies to stanzas delivered to remote recipients (just before they leave the local server)
+  preroute       Applies to incoming stanzas from local users, before any routing rules are applied
+
+By default, if no chain is specified, rules are put into the 'deliver' chain.
+
+Example of chain use:
+
+    # example.com's firewall script
+    
+    # This line is optional, because 'deliver' is the default chain anyway:
+    ::deliver
+    
+    # This rule matches any stanzas delivered to our local user bob:
+    TO: bob@example.com
+    DROP.
+    
+    # Oops! This rule will never match, because alice is not a local user,
+    # and only stanzas to local users go through the 'deliver' chain:
+    TO: alice@remote.example.com
+    DROP.
+
+    # Create a 'preroute' chain of rules:
+    ::preroute
+    # These rules are matched for outgoing stanzas from local clients
+    
+    # This will match any stanzas sent to alice from a local user:
+    TO: alice@remote.example.com
+    DROP.
