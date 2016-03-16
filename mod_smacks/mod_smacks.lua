@@ -85,7 +85,7 @@ local function outgoing_stanza_filter(stanza, session)
 		session.log("debug", "#queue = %d", #queue);
 		if session.hibernating then
 			session.log("debug", "hibernating, stanza queued");
-			return ""; -- Hack to make session.send() not return nil
+			return nil;
 		end
 		if #queue > max_unacked_stanzas and not session.awaiting_ack then
 			session.awaiting_ack = true;
