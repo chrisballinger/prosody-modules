@@ -292,7 +292,7 @@ and rules (this may change in the future).
   `BOUNCE.`               Bounce the stanza with the default error (usually service-unavailable)
   `BOUNCE=error`          Bounce the stanza with the given error (MUST be a defined XMPP stanza error, see [RFC6120](http://xmpp.org/rfcs/rfc6120.html#stanzas-error-conditions).
   `BOUNCE=error (text)`   As above, but include the supplied human-readable text with a description of the error
-  `COPY=jid`              Make a copy of the stanza and send the copy to the specified JID.
+  `COPY=jid`              Make a copy of the stanza and send the copy to the specified JID. The copied stanza flows through Prosody's routing code, and as such is affected by firewall rules. Be careful to avoid loops.
 
 ### Stanza modification
 
