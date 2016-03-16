@@ -1,3 +1,5 @@
+local jid_bare = require "util.jid".bare;
+local sessions = prosody.full_sessions;
 
 module:hook("presence/full", function (event)
 	local stanza = event.stanza;
