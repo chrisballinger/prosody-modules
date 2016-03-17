@@ -194,7 +194,7 @@ function condition_handlers.ORIGIN_MARKED(name_and_time)
 		error("Error parsing mark name, see documentation for usage examples");
 	end
 	if time then
-		return ("(current_time - (session.firewall_marked_%s or 0)) < %d"):format(idsafe(name), tonumber(time)), { "timestamp" };
+		return ("(current_timestamp - (session.firewall_marked_%s or 0)) < %d"):format(idsafe(name), tonumber(time)), { "timestamp" };
 	end
 	return ("not not session.firewall_marked_"..idsafe(name));
 end
