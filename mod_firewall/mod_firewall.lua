@@ -221,7 +221,7 @@ local function parse_firewall_rules(filename)
 			end
 			state = "actions";
 			-- Action handlers?
-			local action = line:match("^%P+");
+			local action = line:match("^[%w_]+");
 			if not action_handlers[action] then
 				return nil, ("Unknown action on line %d: %s"):format(line_no, action or "<unknown>");
 			end
