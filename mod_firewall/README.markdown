@@ -372,9 +372,11 @@ Available chains are:
   deliver_remote Applies to stanzas delivered to remote recipients (just before they leave the local server)
   preroute       Applies to incoming stanzas from local users, before any routing rules are applied
 
-By default, if no chain is specified, rules are put into the 'deliver' chain. It is possible to create custom
-chains (useful with the JUMP_CHAIN action described below). User-created chains must begin with "user/", e.g.
-"user/spam_filtering".
+A chain is begun by a line `::name` where 'name' is the name of the chain you want the following rules to be
+inserted into. If no chain is specified, rules are put into the 'deliver' chain.
+
+It is possible to create custom chains (useful with the JUMP_CHAIN action described below). User-created
+chains must begin with "user/", e.g. "user/spam_filtering".
 
 Example of chain use:
 
