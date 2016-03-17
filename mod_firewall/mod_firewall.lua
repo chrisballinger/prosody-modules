@@ -6,7 +6,7 @@ local it = require "util.iterators";
 local definitions = module:shared("definitions");
 local active_definitions = {};
 
-local chains = {
+local default_chains = {
 	preroute = {
 		type = "event";
 		priority = 0.1;
@@ -26,6 +26,16 @@ local chains = {
 		priority = 0.1;
 	};
 };
+
+local extra_chains = module:get_option("firewall_extra_chains", {});
+
+local chains = {};
+for k,v in pairs(default_chains) do
+	chains[k] = v;
+end
+for k,v in pairs(extra_chains) do
+	chains[k] = v;
+end
 
 function idsafe(name)
 	return name:match("^%a[%w_]*$")
