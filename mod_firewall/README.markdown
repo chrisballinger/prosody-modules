@@ -149,6 +149,11 @@ path ends with a '\#' then the text content of the last element will be
 returned. If the path ends with '@name' then the value of the attribute
 'name' will be returned.
 
+You can use INSPECT to test for the existence of an element or attribute,
+or you can see if it is equal to a string by appending `=STRING` (as in the
+example above). Finally,you can also test whether it matches a given Lua
+pattern by using `~=PATTERN`.
+
 INSPECT is somewhat slower than the other stanza matching conditions. To
 minimise performance impact, always place it below other faster
 condition checks where possible (e.g. above we first checked KIND, TYPE
