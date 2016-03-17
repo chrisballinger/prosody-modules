@@ -115,7 +115,7 @@ local function wrap_session_out(session, resume)
 		session.last_acknowledged_stanza = 0;
 	end
 
-	add_filter(session, "stanzas/out", outgoing_stanza_filter, -1000);
+	add_filter(session, "stanzas/out", outgoing_stanza_filter, -999);
 
 	local session_close = session.close;
 	function session.close(...)
@@ -132,7 +132,7 @@ local function wrap_session_in(session, resume)
 	if not resume then
 		session.handled_stanza_count = 0;
 	end
-	add_filter(session, "stanzas/in", count_incoming_stanzas, 1000);
+	add_filter(session, "stanzas/in", count_incoming_stanzas, 999);
 
 	return session;
 end
