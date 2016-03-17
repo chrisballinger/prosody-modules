@@ -413,32 +413,42 @@ function module.command(arg)
 		require"util.prosodyctl".show_usage([[mod_firewall <firewall.pfw>]], [[Compile files with firewall rules to Lua code]]);
 		return 1;
 	end
+	local verbose = arg[1] == "-v";
+	if verbose then table.remove(arg, 1); end
 
 	local serialize = require "util.serialization".serialize;
-	print("local logger = require \"util.logger\".init;");
-	print();
-	print("local function fire_event(name, data)\n\tmodule:fire_event(name, data)\nend");
-	print();
+	if verbose then
+		print("local logger = require \"util.logger\".init;");
+		print();
+		print("local function fire_event(name, data)\n\tmodule:fire_event(name, data)\nend");
+		print();
+	end
 
 	for _, filename in ipairs(arg) do
 		print("do -- File "..filename);
 		local chain_functions = assert(compile_firewall_rules(arg[1]));
-		print();
-		print("local active_definitions = "..serialize(active_definitions)..";");
-		print();
+		if verbose then
+			print();
+			print("local active_definitions = "..serialize(active_definitions)..";");
+			print();
+		end
 		for chain, handler_code in pairs(chain_functions) do
 			print("---- Chain "..chain:gsub("_", " "));
+			if not verbose then
+				print(("%s = %s;"):format(chain, handler_code:sub(8)));
+			else
 
-			print(("local %s = (%s)(active_definitions, fire_event, logger(%q));"):format(chain, handler_code:sub(8), filename));
-			print();
+				print(("local %s = (%s)(active_definitions, fire_event, logger(%q));"):format(chain, handler_code:sub(8), filename));
+				print();
 
-			local chain_definition = chains[chain];
-			if chain_definition and chain_definition.type == "event" then
-				for _, event_name in ipairs(chain_definition) do
-					print(("module:hook(%q, %s, %d);"):format(event_name, chain, chain_definition.priority or 0));
+				local chain_definition = chains[chain];
+				if chain_definition and chain_definition.type == "event" then
+					for _, event_name in ipairs(chain_definition) do
+						print(("module:hook(%q, %s, %d);"):format(event_name, chain, chain_definition.priority or 0));
+					end
 				end
+				print(("module:hook(%q, %s, %d);"):format("firewall/chains/"..chain, chain, chain_definition.priority or 0));
 			end
-			print(("module:hook(%q, %s, %d);"):format("firewall/chains/"..chain, chain, chain_definition.priority or 0));
 
 			print("---- End of chain "..chain);
 			print();
