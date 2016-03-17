@@ -225,6 +225,8 @@ Example:
     DAY: Sat-Sun, Wednesday
     REPLY=Sorry, I'm out enjoying life!
 
+All times and dates are handled in the server's local time.
+
 ### Rate-limiting
 
 It is possible to selectively rate-limit stanzas, and use rules to
