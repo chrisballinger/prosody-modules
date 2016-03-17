@@ -357,7 +357,7 @@ Example of chain use:
     TO: alice@remote.example.com
     DROP.
 
-    # Create a 'preroute' chain of rules:
+    # Create a 'preroute' chain of rules (matched for incoming stanzas from local clients):
     ::preroute
     # These rules are matched for outgoing stanzas from local clients
     
