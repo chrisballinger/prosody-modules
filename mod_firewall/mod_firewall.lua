@@ -37,6 +37,7 @@ for k,v in pairs(extra_chains) do
 	chains[k] = v;
 end
 
+-- Returns the input if it is safe to be used as a variable name, otherwise nil
 function idsafe(name)
 	return name:match("^%a[%w_]*$")
 end
