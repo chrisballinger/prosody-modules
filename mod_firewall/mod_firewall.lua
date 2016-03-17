@@ -27,8 +27,8 @@ local chains = {
 	};
 };
 
-local function idsafe(name)
-	return not not name:match("^%a[%w_]*$")
+function idsafe(name)
+	return name:match("^%a[%w_]*$")
 end
 
 -- Dependency locations:
