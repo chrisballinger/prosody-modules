@@ -264,6 +264,27 @@ limit yet. If it is, the condition matches, otherwise it will not.
 **Note:** Reloading mod\_firewall resets the current state of any
 limiters.
 
+### Session marking
+
+It is possible to 'mark' sessions (see the MARK_ORIGIN action below). To match stanzas from marked sessions, use the
+`ORIGIN_MARKED` condition.
+
+  Condition                       Description
+  ------------------------------- ---------------------------------------------------------------
+  ORIGIN_MARKED: markname         Matches if the origin has been marked with 'markname'.
+  ORIGIN_MARKED: markname (Xs)    Matches if the origin has been marked with 'markname' within the past X seconds.
+
+Example usage:
+
+    # This rule drops messages from sessions that have been marked as spammers in the past hour
+    ORIGIN_MARKED: spammer (3600s)
+    DROP.
+
+    # This rule marks the origin session as a spammer if they send a message to a honeypot JID
+    KIND: message
+    TO: honeypot@example.com
+    MARK_ORIGIN=spammer
+
 Actions
 -------
 
@@ -308,6 +329,15 @@ stanza.
   `STRIP=name`             Remove any child elements with the given name in the default namespace
   `STRIP=name namespace`   Remove any child elements with the given name and the given namespace
   `INJECT=xml`             Inject the given XML into the stanza as a child element
+
+### Sessions
+
+It is possible to mark sessions, and then use these marks to match rules later on.
+
+  Action                   Description
+  ------------------------ --------------------------------------------------------------------------
+  `MARK_ORIGIN=mark`        Marks the originating session with the given flag.
+  `UNMARK_ORIGIN=mark`      Removes the given mark from the origin session (if it is set).
 
 ### Informational
 
