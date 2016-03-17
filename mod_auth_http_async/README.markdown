@@ -28,4 +28,4 @@ http_auth_url = "http://example.com/auth"
 Compatibility
 =============
 
-Requires 0.10+
+Requires Prosody trunk

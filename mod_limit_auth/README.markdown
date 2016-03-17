@@ -25,12 +25,11 @@ limit_auth_period = 30 -- over 30 seconds
 
 limit_auth_max = 5 -- tolerate no more than 5 failed attempts
 
- -- Will only work with Prosody 0.10:
+ -- Will only work with Prosody trunk:
 limit_auth_tarpit_delay = 10 -- delay answer this long
 ```
 
 Compatibility
 =============
 
-Requires 0.9 or later. The tarpit feature requires Prosody 0.10 or
-later.
+Requires 0.9 or later. The tarpit feature requires Prosody trunk.
