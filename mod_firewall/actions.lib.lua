@@ -183,4 +183,12 @@ function action_handlers.JUMP_CHAIN(name)
 	return ("if fire_event(%q, event) then return true; end"):format("firewall/chains/"..name);
 end
 
+function action_handlers.MARK_ORIGIN(name)
+	return [[session.firewall_marked_]]..idsafe(name)..[[ = current_timestamp;]], { "timestamp" };
+end
+
+function action_handlers.UNMARK_ORIGIN(name)
+	return [[session.firewall_marked_]]..idsafe(name)..[[ = nil;]]
+end
+
 return action_handlers;
