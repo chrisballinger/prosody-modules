@@ -95,7 +95,12 @@ end
 
 function condition_handlers.INSPECT(path)
 	if path:find("=") then
-		return ("stanza:find(%q) == %q"):format(path:match("(.-)=(.*)"));
+		local query, is_pattern_match, value = path:match("(.-)(~?)=(.*)");
+		if is_pattern_match ~= "" then
+			return ("stanza:find(%q):match(%q)"):format(path:match("(.-)~=(.*)"));
+		else
+			return ("stanza:find(%q) == %q"):format(path:match("(.-)=(.*)"));
+		end
 	end
 	return ("stanza:find(%q)"):format(path);
 end
