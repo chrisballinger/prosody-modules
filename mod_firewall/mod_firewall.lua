@@ -414,14 +414,35 @@ function module.command(arg)
 		return 1;
 	end
 
+	local serialize = require "util.serialization".serialize;
+	print("local logger = require \"util.logger\".init;");
+	print();
+	print("local function fire_event(name, data)\n\tmodule:fire_event(name, data)\nend");
+	print();
+
 	for _, filename in ipairs(arg) do
-		print("\n-- File "..filename);
+		print("do -- File "..filename);
 		local chain_functions = assert(compile_firewall_rules(arg[1]));
+		print();
+		print("local active_definitions = "..serialize(active_definitions)..";");
+		print();
 		for chain, handler_code in pairs(chain_functions) do
-			print("\n---- Chain "..chain);
-			print(handler_code);
-			print("\n---- End of chain "..chain);
+			print("---- Chain "..chain:gsub("_", " "));
+
+			print(("local %s = (%s)(active_definitions, fire_event, logger(%q));"):format(chain, handler_code:sub(8), filename));
+			print();
+
+			local chain_definition = chains[chain];
+			if chain_definition and chain_definition.type == "event" then
+				for _, event_name in ipairs(chain_definition) do
+					print(("module:hook(%q, %s, %d);"):format(event_name, chain, chain_definition.priority or 0));
+				end
+			end
+			print(("module:hook(%q, %s, %d);"):format("firewall/chains/"..chain, chain, chain_definition.priority or 0));
+
+			print("---- End of chain "..chain);
+			print();
 		end
-		print("\n-- End of file "..filename);
+		print("end -- End of file "..filename);
 	end
 end
