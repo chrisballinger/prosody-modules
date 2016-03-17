@@ -73,7 +73,7 @@ end
 local function zone_check(zone, which)
 	local which_not = which == "from" and "to" or "from";
 	return ("(zone_%s[%s_host] or zone_%s[%s] or zone_%s[bare_%s]) "
-		.."and not(zone_%s[%s_host] or zone_%s[%s] or zone_%s[%s])"
+		.."and not(zone_%s[%s_host] or zone_%s[%s] or zone_%s[bare_%s])"
 		)
 		:format(zone, which, zone, which, zone, which,
 		zone, which_not, zone, which_not, zone, which_not), {
