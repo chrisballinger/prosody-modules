@@ -3,6 +3,7 @@ local jid_split = require "util.jid".split;
 local jid_bare = require "util.jid".bare;
 local is_contact_subscribed = require "core.rostermanager".is_contact_subscribed;
 local throttle = require "util.throttle";
+local gettime = require "socket".gettime;
 
 local sessions = prosody.full_sessions;
 
@@ -37,6 +38,7 @@ function check_subscribed(event)
 		log("debug", "%s is not subscribed to %s@%s", from_jid, to_user, to_host);
 		if not lim:poll(1) then
 			log("warn", "Sent too many messages to non-contacts, bouncing message");
+			event.origin.firewall_mark_throttle_unsolicited = gettime();
 			event.origin.send(st.error_reply(stanza, "cancel", "service-unavailable"));
 			return true;
 		end
