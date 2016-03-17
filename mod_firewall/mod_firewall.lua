@@ -80,6 +80,7 @@ local available_deps = {
 		end
 		return table.concat(defs, " ");
 	end, depends = { "date_time" }; };
+	timestamp = { global_code = [[local get_time = require "socket".gettime]]; local_code = [[local current_timestamp = get_time()]]; };
 	throttle = {
 		global_code = function (throttle)
 			assert(idsafe(throttle), "Invalid rate limit name: "..throttle);
