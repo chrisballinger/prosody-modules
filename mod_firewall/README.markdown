@@ -344,6 +344,11 @@ It is possible to mark sessions, and then use these marks to match rules later o
   `MARK_ORIGIN=mark`        Marks the originating session with the given flag.
   `UNMARK_ORIGIN=mark`      Removes the given mark from the origin session (if it is set).
 
+**Note:** Marks apply to sessions, not JIDs. E.g. if marking in a rule that matches a stanza received
+over s2s, it is the s2s session that is marked.
+
+It is possible to have multiple marks on an origin at any given time.
+
 ### Informational
 
   Action          Description
