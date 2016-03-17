@@ -180,7 +180,7 @@ function action_handlers.JUMP_EVENT(name)
 end
 
 function action_handlers.JUMP_CHAIN(name)
-	return ("do return fire_event(%q, event); end"):format("firewall/chains/"..name);
+	return ("if fire_event(%q, event) then return true; end"):format("firewall/chains/"..name);
 end
 
 return action_handlers;
