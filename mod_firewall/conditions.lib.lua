@@ -180,4 +180,18 @@ function condition_handlers.LIMIT(name)
 	return ("not throttle_%s:poll(1)"):format(name), { "throttle:"..name };
 end
 
+function condition_handlers.ORIGIN_MARKED(name_and_time)
+	local name, time = name_and_time:match("^%s*(%w+)%s+%(([^)]+)s%)%s*$");
+	if not name then
+		name = name_and_time:match("^%s*(%w+)%s*$");
+	end
+	if not name then
+		error("Error parsing mark name, see documentation for usage examples");
+	end
+	if time then
+		return ("(current_time - (session.firewall_marked_%s or 0)) < %d"):format(idsafe(name), tonumber(time)), { "timestamp" };
+	end
+	return ("not not session.firewall_marked_"..idsafe(name));
+end
+
 return condition_handlers;
