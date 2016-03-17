@@ -42,6 +42,22 @@ function idsafe(name)
 	return name:match("^%a[%w_]*$")
 end
 
+-- Run quoted (%q) strings through this to allow them to contain code. e.g.: LOG=Received: $(stanza:top_tag())
+function meta(s, extra)
+	return (s:gsub("$(%b())", [["..tostring(%1).."]])
+		:gsub("$(%b<>)", function (expr)
+			expr = expr:sub(2,-2);
+			if expr:match("^@") then
+				return "\"..stanza.attr["..(%q):format(expr:sub(2)).."]..\"";
+			end
+			return "\"..stanza:find("..("%q"):format(expr:sub(2, -2))..")..\"";
+		end)
+		:gsub("$$(%a+)", extra or {})
+		:gsub([[^""%.%.]], "")
+		:gsub([[%.%.""$]], ""));
+end
+
+
 -- Dependency locations:
 -- <type lib>
 -- <type global>
