@@ -1,3 +1,4 @@
+--luacheck: globals meta idsafe
 local condition_handlers = {};
 
 local jid = require "util.jid";
