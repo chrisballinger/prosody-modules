@@ -364,3 +364,7 @@ Example of chain use:
     # This will match any stanzas sent to alice from a local user:
     TO: alice@remote.example.com
     DROP.
+
+  Action                   Description
+  ------------------------ ------------------------------------------------------------------------
+  `JUMP_CHAIN=name`        Switches chains, and passes the stanza through the rules in chain 'name'. If the new chain causes the stanza to be dropped/redirected, the current chain halts further processing.
