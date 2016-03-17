@@ -48,7 +48,7 @@ function meta(s, extra)
 		:gsub("$(%b<>)", function (expr)
 			expr = expr:sub(2,-2);
 			if expr:match("^@") then
-				return "\"..stanza.attr["..(%q):format(expr:sub(2)).."]..\"";
+				return "\"..stanza.attr["..("%q"):format(expr:sub(2)).."]..\"";
 			end
 			return "\"..stanza:find("..("%q"):format(expr:sub(2, -2))..")..\"";
 		end)
