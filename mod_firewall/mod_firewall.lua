@@ -108,11 +108,18 @@ local available_deps = {
 		return table.concat(defs, " ");
 	end, depends = { "date_time" }; };
 	timestamp = { global_code = [[local get_time = require "socket".gettime]]; local_code = [[local current_timestamp = get_time()]]; };
-	throttle = {
+	globalthrottle = {
 		global_code = function (throttle)
 			assert(idsafe(throttle), "Invalid rate limit name: "..throttle);
 			assert(active_definitions.RATE[throttle], "Unknown rate limit: "..throttle);
-			return ("local throttle_%s = rates.%s;"):format(throttle, throttle);
+			return ("local global_throttle_%s = rates.%s:single();"):format(throttle, throttle);
+		end;
+	};
+	multithrottle = {
+		global_code = function (throttle)
+			assert(idsafe(throttle), "Invalid rate limit name: "..throttle);
+			assert(active_definitions.RATE[throttle], "Unknown rate limit: "..throttle);
+			return ("local multi_throttle_%s = rates.%s:multi();"):format(throttle, throttle);
 		end;
 	};
 };
