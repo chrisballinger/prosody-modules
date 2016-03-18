@@ -104,4 +104,3 @@ module:add_timer(3600, function (now)
 	return 3600;
 end);
 
-module:log("info", "Loaded");
