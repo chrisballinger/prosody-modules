@@ -187,9 +187,9 @@ function condition_handlers.LIMIT(name)
 end
 
 function condition_handlers.ORIGIN_MARKED(name_and_time)
-	local name, time = name_and_time:match("^%s*(%w+)%s+%(([^)]+)s%)%s*$");
+	local name, time = name_and_time:match("^%s*([%w_]+)%s+%(([^)]+)s%)%s*$");
 	if not name then
-		name = name_and_time:match("^%s*(%w+)%s*$");
+		name = name_and_time:match("^%s*([%w_]+)%s*$");
 	end
 	if not name then
 		error("Error parsing mark name, see documentation for usage examples");
