@@ -33,14 +33,13 @@ function definition_handlers.RATE(name, line)
 			local burst = tonumber(line:match("%(%s*burst%s+([%d.]+)%s*%)")) or 1;
 			local max_throttles = tonumber(line:match("%(%s*entries%s+([%d]+)%s*%)")) or multirate_cache_size;
 
-			local cache = new_cache(max_throttles, evict_only_unthrottled);
-
 			return {
 				single = function ()
 					return new_throttle(rate*burst, burst);
 				end;
 				
 				multi = function ()
+					local cache = new_cache(max_throttles, evict_only_unthrottled);
 					return {
 						poll_on = function (_, key, amount)
 							assert(key, "no key");
