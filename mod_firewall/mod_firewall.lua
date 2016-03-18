@@ -117,6 +117,7 @@ local available_deps = {
 	};
 	multithrottle = {
 		global_code = function (throttle)
+			assert(pcall(require, "util.cache"), "Using LIMIT with 'on' requires Prosody 0.10 or higher");
 			assert(idsafe(throttle), "Invalid rate limit name: "..throttle);
 			assert(active_definitions.RATE[throttle], "Unknown rate limit: "..throttle);
 			return ("local multi_throttle_%s = rates.%s:multi();"):format(throttle, throttle);
