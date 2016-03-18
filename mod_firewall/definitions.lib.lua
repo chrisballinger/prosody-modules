@@ -6,7 +6,6 @@ local definition_handlers = {};
 
 local set = require"util.set";
 local new_throttle = require "util.throttle".create;
-local new_cache = require "util.cache".new;
 
 local multirate_cache_size = module:get_option_number("firewall_multirate_cache_limit", 1000);
 
@@ -39,7 +38,7 @@ function definition_handlers.RATE(name, line)
 				end;
 				
 				multi = function ()
-					local cache = new_cache(max_throttles, evict_only_unthrottled);
+					local cache = require "util.cache".new(max_throttles, evict_only_unthrottled);
 					return {
 						poll_on = function (_, key, amount)
 							assert(key, "no key");
@@ -59,3 +58,4 @@ function definition_handlers.RATE(name, line)
 end
 
 return definition_handlers;
+
