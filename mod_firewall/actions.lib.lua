@@ -158,7 +158,7 @@ end
 function action_handlers.LOG(string)
 	local level = string:match("^%[(%a+)%]") or "info";
 	string = string:gsub("^%[%a+%] ?", "");
-	return meta(("log(%q, %q)"):format(level, string));
+	return meta(("(session.log or log)(%q, %q)"):format(level, string));
 end
 
 function action_handlers.RULEDEP(dep)
