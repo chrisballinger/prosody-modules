@@ -182,8 +182,22 @@ function condition_handlers.TIME(ranges)
 	return table.concat(conditions, " or "), { "time:hour,min" };
 end
 
-function condition_handlers.LIMIT(name)
-	return ("not throttle_%s:poll(1)"):format(name), { "throttle:"..name };
+function condition_handlers.LIMIT(spec)
+	local name, param = spec:match("^(%w+) on (.+)$");
+
+	if not name then
+		name = spec:match("^%w+$");
+		if not name then
+			error("Unable to parse LIMIT specification");
+		end
+	else
+		param = meta(("%q"):format(param));
+	end
+
+	if not param then
+		return ("not global_throttle_%s:poll(1)"):format(name), { "globalthrottle:"..name };
+	end
+	return ("not multi_throttle_%s:poll_on(%s, 1)"):format(name, param), { "multithrottle:"..name };	
 end
 
 function condition_handlers.ORIGIN_MARKED(name_and_time)
