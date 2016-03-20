@@ -1,7 +1,5 @@
 -- Fetches Atom feeds and publishes to PubSub nodes
 --
--- Depends: http://code.matthewwild.co.uk/lua-feeds
---
 -- Config:
 -- Component "pubsub.example.com" "pubsub"
 -- modules_enabled = {
@@ -21,11 +19,22 @@ local date, time = os.date, os.time;
 local dt_parse, dt_datetime = require "util.datetime".parse, require "util.datetime".datetime;
 local uuid = require "util.uuid".generate;
 local hmac_sha1 = require "util.hashes".hmac_sha1;
-local parse_feed = require "feeds".feed_from_string;
+local parse_xml = require "uit.xml".parse;
 local st = require "util.stanza";
---local dump = require"util.serialization".serialize;
+local translate_rss = module:require("feeds").translate_rss;
 
 local xmlns_atom = "http://www.w3.org/2005/Atom";
+
+local function parse_feed(data)
+	local feed, err = parse_xml(data);
+	if not feed then return feed, err; end
+	if feed.attr.xmlns == xmlns_atom then
+		return feed;
+	elseif feed.attr.xmlns == nil and feed.name == "rss" then
+		return translate_rss(feed);
+	end
+	return nil, "unsupported-format";
+end
 
 local use_pubsubhubub = module:get_option_boolean("use_pubsubhubub", true);
 if use_pubsubhubub then
@@ -75,7 +84,7 @@ function update_entry(item)
 	local node = item.node;
 	module:log("debug", "parsing %d bytes of data in node %s", #item.data or 0, node)
 	local feed = parse_feed(item.data);
-	for _, entry in ipairs(feed) do
+	for entry in feed:childtags("entry") do
 		entry.attr.xmlns = xmlns_atom;
 
 		local e_published = entry:get_child_text("published");
@@ -119,11 +128,12 @@ function update_entry(item)
 	end
 	if use_pubsubhubub and not item.subscription then
 		--module:log("debug", "check if %s has a hub", item.node);
-		local hub = item.hub or feed.links and feed.links.hub;
-		if hub then
-			item.hub = hub;
-			module:log("debug", "%s has a hub: %s", item.node, item.hub);
-			subscribe(item);
+		for link in feed:childtags("link") do
+			if link.attr.rel == "hub" then
+				item.hub = link.attr.href;
+				module:log("debug", "Node %s has a hub: %s", item.node, item.hub);
+				return subscribe(item);
+			end
 		end
 	end
 end
