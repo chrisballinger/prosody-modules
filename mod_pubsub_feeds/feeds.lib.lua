@@ -66,7 +66,7 @@ local function translate_rss(rss_feed)
 	-- TODO channel properties
 	feed:tag("entry");
 	for item in channel:childtags("item") do
-		for tag in rss_item:childtags() do
+		for tag in item:childtags() do
 			local translator = rss2atom[tag.name];
 			if translator then
 				translator(feed, tag);
