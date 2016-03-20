@@ -44,8 +44,6 @@ end
 local http = require "net.http";
 local formdecode = http.formdecode;
 local formencode = http.formencode;
-local urldecode  = http.urldecode;
-local urlencode  = http.urlencode;
 
 local feed_list = module:shared("feed_list");
 local refresh_interval;
@@ -156,7 +154,7 @@ end
 
 function refresh_feeds(now)
 	--module:log("debug", "Refreshing feeds");
-	for node, item in pairs(feed_list) do
+	for _, item in pairs(feed_list) do
 		if item.subscription ~= "subscribe" and item.last_update + refresh_interval < now then
 			--module:log("debug", "checking %s", item.node);
 			fetch(item, update_entry);
@@ -166,7 +164,7 @@ function refresh_feeds(now)
 end
 
 local function format_url(node)
-	return module:http_url(nil, "/callback") .. "?node=" .. urlencode(node);
+	return module:http_url(nil, "/callback") .. "?" .. formencode({ node = node });
 end
 
 function subscribe(feed, want)
