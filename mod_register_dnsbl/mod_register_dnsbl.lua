@@ -2,7 +2,7 @@ local adns = require "net.adns";
 local rbl = module:get_option_string("registration_rbl");
 
 local function reverse(ip, suffix)
-	local a,b,c,d = ip:match("^(%d+%).(%d+%).(%d+%).(%d+%)$");
+	local a,b,c,d = ip:match("^(%d+).(%d+).(%d+).(%d+)$");
 	if not a then return end
 	return ("%d.%d.%d.%d.%s"):format(d,c,b,a, suffix);
 end
