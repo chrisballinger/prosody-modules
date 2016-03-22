@@ -19,7 +19,7 @@ local date, time = os.date, os.time;
 local dt_parse, dt_datetime = require "util.datetime".parse, require "util.datetime".datetime;
 local uuid = require "util.uuid".generate;
 local hmac_sha1 = require "util.hashes".hmac_sha1;
-local parse_xml = require "uit.xml".parse;
+local parse_xml = require "util.xml".parse;
 local st = require "util.stanza";
 local translate_rss = module:require("feeds").translate_rss;
 
