@@ -7,8 +7,8 @@ summary: 'XEP-0273: Stanza Interception and Filtering Technology'
 Introduction
 ============
 
-SIFT is a technology to allow clients to filter incoming traffic on the
-server. This helps save bandwidth, etc.
+[SIFT][XEP-0273] is a technology to allow clients to filter incoming
+traffic on the server. This helps save bandwidth, etc.
 
 Compatibility
 =============
