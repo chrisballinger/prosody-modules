@@ -9,6 +9,9 @@ function module.command(arg)
 	if not migrate_to then
 		return print("Usage: prosodyctl mod_migrate example.com <source-store>[-<store-type>] <target-driver> [users]*");
 	end
+	if not prosody.hosts[host] then
+		return print(("The host %q is not know by Prosody."):format(host));
+	end
 	sm.initialize_host(host);
 	um.initialize_host(host);
 	local module = module:context(host);
