@@ -281,6 +281,7 @@ module:hook("pre-resource-unbind", function (event)
 			local hibernate_time = os_time(); -- Track the time we went into hibernation
 			session.hibernating = hibernate_time;
 			local resumption_token = session.resumption_token;
+			module:fire_event("smacks-hibernation-start", {origin = session, queue = session.outgoing_stanza_queue});
 			timer.add_task(resume_timeout, function ()
 				session.log("debug", "mod_smacks hibernation timeout reached...");
 				-- We need to check the current resumption token for this resource
@@ -378,6 +379,7 @@ function handle_resume(session, stanza, xmlns_sm)
 		-- Ok, we need to re-send any stanzas that the client didn't see
 		-- ...they are what is now left in the outgoing stanza queue
 		local queue = original_session.outgoing_stanza_queue;
+		module:fire_event("smacks-hibernation-end", {origin = session, queue = queue});
 		session.log("debug", "#queue = %d", #queue);
 		for i=1,#queue do
 			session.send(queue[i]);
