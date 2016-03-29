@@ -6,6 +6,7 @@
 local st = require"util.stanza";
 local jid = require"util.jid";
 local dataform = require"util.dataforms".new;
+local filters = require "util.filters";
 
 local xmlns_push = "urn:xmpp:push:0";
 
@@ -78,8 +79,7 @@ local push_form = dataform {
 };
 
 -- http://xmpp.org/extensions/xep-0357.html#publishing
-module:hook("message/offline/handle", function(event)
-	local origin, stanza = event.origin, event.stanza;
+local function handle_notify_request(origin, stanza)
 	local to = stanza.attr.to;
 	local node = to and jid.split(to) or origin.username;
 	local user_push_services = push_enabled[node];
@@ -111,7 +111,54 @@ module:hook("message/offline/handle", function(event)
 		end
 		module:send(push_publish);
 	end
+end
+
+-- publish on offline message
+module:hook("message/offline/handle", function(event)
+	if event.stanza._notify then
+		event.stanza._notify = nil;
+		return;
+	end
+	return handle_notify_request(event.origin, event.stanza);
 end, 1);
+
+-- publish on unacked smacks message
+local function process_new_stanza(stanza, session)
+	if getmetatable(stanza) ~= st.stanza_mt then
+		return stanza; -- Things we don't want to touch
+	end
+	if stanza.name == "message" and stanza.attr.xmlns == nil and
+			( stanza.attr.type == "chat" or ( stanza.attr.type or "normal" ) == "normal" ) and
+			-- not already notified via cloud
+			not stanza._notify then
+		stanza._notify = true;
+		session.log("debug", "Invoking cloud handle_notify_request for new smacks hibernated stanza...");
+		handle_notify_request(session, stanza)
+	end
+	return stanza;
+end
+
+-- smacks hibernation is started
+local function hibernate_session(event)
+	local session = event.origin;
+	local queue = event.queue;
+	-- process already unacked stanzas
+	for i=1,#queue do
+		process_new_stanza(queue[i], session);
+	end
+	-- process future unacked (hibernated) stanzas
+	filters.add_filter(session, "stanzas/out", process_new_stanza);
+end
+
+-- smacks hibernation is ended
+local function restore_session(event)
+	local session = event.origin;
+	filters.remove_filter(session, "stanzas/out", process_new_stanza);
+end
+
+module:hook("smacks-hibernation-start", hibernate_session);
+module:hook("smacks-hibernation-end", restore_session);
+
 
 module:hook("message/offline/broadcast", function(event)
 	local user_push_services = push_enabled[event.origin.username];

@@ -28,12 +28,5 @@ Configuration
 
 Configured in-band by supporting clients.
 
-Future
-======
-
-Adding support for sending notifications for users who are online but
-not currently connected, such as when `mod_smacks` is keeping their
-session alive, should be added.
-
 [^1]: The service which is expected to forward notifications to
     something like Google Cloud Messaging or Apple Notification Service
