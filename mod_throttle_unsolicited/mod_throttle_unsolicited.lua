@@ -5,8 +5,6 @@ local is_contact_subscribed = require "core.rostermanager".is_contact_subscribed
 local throttle = require "util.throttle";
 local gettime = require "socket".gettime;
 
-local sessions = prosody.full_sessions;
-
 local max = module:get_option_number("unsolicited_messages_per_minute", 10);
 local multiplier = module:get_option_number("throttle_unsolicited_burst", 1);
 
