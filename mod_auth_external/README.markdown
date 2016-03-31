@@ -22,8 +22,8 @@ using [LuaRocks](http://luarocks.org/), for example:
 Note: Earlier versions of the module did not depend on lpty. While using
 the newer version is strongly recommended, you can find the [older
 version
-here](https://prosody-modules.googlecode.com/hg-history/50ee38e95e754bf1034d980364f93564028b2f34/mod_auth_external/mod_auth_external.lua)
-if you need it (revision 50ee38e95e75 of the repository).
+here](https://hg.prosody.im/prosody-modules/raw-file/50ee38e95e75/mod_auth_external/mod_auth_external.lua)
+if you need it (revision of the repository).
 
 Configuration
 =============
