@@ -12,7 +12,7 @@ local function cache_hook(event)
 	local origin, stanza = event.origin, event.stanza;
 	local typ = stanza.attr.type;
 	module:log("debug", "Cache hook, got %s from a %s", stanza:top_tag(), origin.type);
-	if origin.type:match"^s2s" and ( typ == nil or typ == "unavailable" ) then
+	if origin.type == "s2sin" and ( typ == nil or typ == "unavailable" ) then
 		local from_jid = stanza.attr.from;
 		local from_bare = jid_bare(from_jid);
 		local username = jid_split(stanza.attr.to);
