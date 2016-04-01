@@ -6,8 +6,6 @@ local datetime = require"util.datetime";
 
 local presence_cache = {}; -- Reload to empty
 
-local cache_full = module:get_option_boolean(module.name.."_full", false);
-
 local function cache_hook(event)
 	local origin, stanza = event.origin, event.stanza;
 	local typ = stanza.attr.type;
@@ -42,10 +40,6 @@ local function cache_hook(event)
 					presence_cache[username] = nil;
 				end
 			end
-		elseif cache_full then
-			stanza = st.clone(stanza);
-			stanza:tag("delay", { xmlns = "urn:xmpp:delay", from = module.host, stamp = datetime.datetime() }):up();
-			contact_presence_cache[from_jid] = stanza;
 		else -- only cache binary state
 			contact_presence_cache[from_jid] = datetime.datetime();
 		end
@@ -76,9 +70,6 @@ local function answer_probe_from_cache(event)
 				:tag("delay", { xmlns = "urn:xmpp:delay", from = module.host, stamp = presence }):up();
 		end
 		origin.send(presence);
-	end
-	if cache_full then
-		return true;
 	end
 end
 

@@ -13,10 +13,6 @@ Note that in its current form, the number of presence stanzas sent to a
 client is doubled, as the client would get both the cached stanzas and
 replies to presence probes. Also see [mod\_throttle\_presence].
 
-By default, only binary (online or offline) state is stored. It can
-optionally store the full presence but this requires much more memory
-and bandwidth.
-
 Configuration
 =============
 
@@ -30,12 +26,8 @@ Just enable the module.
 Advanced configuration
 ======================
 
-To enable *experimental* full stanza caching:
 
-    presence_cache_full = false
 
-This will usually double the presence data sent to clients, pending
-support for deduplication.
 
 TODO
 ====
