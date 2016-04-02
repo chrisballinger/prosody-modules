@@ -44,13 +44,14 @@ end
 
 -- vCard -> PEP
 local function update_pep(session, vcard)
-	local nickname = vcard and vcard:get_child_text("NICKNAME");
+	if not vcard then return end
+	local nickname = vcard:get_child_text("NICKNAME");
 	if nickname then
 		publish(session, "http://jabber.org/protocol/nick", "current", st.stanza("item", {id="current"})
 			:tag("nick", { xmlns="http://jabber.org/protocol/nick" }):text(nickname));
 	end
 
-	local photo = vcard and vcard:get_child("PHOTO");
+	local photo = vcard:get_child("PHOTO");
 	if photo then
 		local photo_type = photo:get_child_text("TYPE");
 		local photo_b64 = photo:get_child_text("BINVAL");
