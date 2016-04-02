@@ -16,9 +16,9 @@ local function on_evict(cache_key)
 
 	if jids then
 		jids[full_jid] = nil;
-	end
-	if next(jids) == nil then
-		bare_cache[bare_cache_key] = nil;
+		if next(jids) == nil then
+			bare_cache[bare_cache_key] = nil;
+		end
 	end
 end
 
