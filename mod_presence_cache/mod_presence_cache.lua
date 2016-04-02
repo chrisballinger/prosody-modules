@@ -22,6 +22,7 @@ local function on_evict(cache_key)
 	end
 end
 
+-- used indirectly for the on_evict callback
 local presence_cache = cache.new(cache_size, on_evict);
 
 local function cache_hook(event)
@@ -41,8 +42,16 @@ local function cache_hook(event)
 
 		local cache_key = username .. "\0" .. contact_full;
 		local bare_cache_key = username .. "\0" .. contact_bare;
-		local stamp = datetime.datetime();
+
 		local jids = bare_cache[bare_cache_key];
+
+		if typ == "unavailable" then -- remove from cache
+			presence_cache:set(cache_key, nil);
+			on_evict(cache_key);
+			return;
+		end
+
+		local stamp = datetime.datetime();
 		if jids then
 			jids[contact_full] = stamp;
 		else
