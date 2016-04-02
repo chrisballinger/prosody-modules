@@ -29,6 +29,24 @@ local function get_vcard(username)
 	return vcard, err;
 end
 
+local function replace_tag(s, replacement)
+	local once = false;
+	s:maptags(function (tag)
+		if tag.name == replacement.name and tag.attr.xmlns == replacement.attr.xmlns then
+			if not once then
+				once = true;
+				return replacement;
+			else
+				return nil;
+			end
+		end
+		return tag;
+	end);
+	if not once then
+		s:add_child(replacement);
+	end
+end
+
 local function set_vcard(username, vcard)
 	if vcard then
 		vcard = st.preserialize(st.clone(vcard));
@@ -95,13 +113,11 @@ local function on_publish_metadata(event)
 		return;
 	end -- Publishing in the wrong order?
 	local vcard = get_vcard(username);
-	local old_photo = vcard:get_child("PHOTO");
-	if old_photo then
-		local photo_type = old_photo:get_child("TYPE");
-		photo_type[1] = metadata.attr.type;
-		local photo_b64 = old_photo:get_child("BINVAL");
-		photo_b64[1] = pep_photo:get_child_text("data", "urn:xmpp:avatar:data");
-	end
+	local new_photo = st.stanza("PHOTO", { xmlns = "vcard-temp" })
+		:tag("TYPE"):text(metadat.attr.type):up()
+		:tag("BINVAL"):text(pep_photo:get_child_text("data", "urn:xmpp:avatar:data"));
+
+	replace_tag(vcard, new_photo);
 	set_vcard(username, vcard);
 end
 
@@ -109,15 +125,9 @@ end
 local function on_publish_nick(event)
 	local username = event.session.username;
 	local vcard = get_vcard(username);
-	local new_nick = event.item:get_child_text("nick", "http://jabber.org/protocol/nick");
-	local old_nick = vcard:get_child("NICKNAME");
-	if not old_nick then
-		vcard:tag("NICKNAME"):text(new_nick);
-	elseif old_nick[1] ~= new_nick then
-		old_nick[1] = new_nick;
-	else
-		return -- no change
-	end
+	local new_nick = st.stanza("NICKNAME", { xmlns = "vcard-temp" })
+		:text(event.item:get_child_text("nick", "http://jabber.org/protocol/nick"));
+	replace_tag(vcard, new_nick);
 	set_vcard(username, vcard);
 end
 
