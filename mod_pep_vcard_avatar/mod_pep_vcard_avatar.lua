@@ -114,7 +114,7 @@ local function on_publish_metadata(event)
 	end -- Publishing in the wrong order?
 	local vcard = get_vcard(username);
 	local new_photo = st.stanza("PHOTO", { xmlns = "vcard-temp" })
-		:tag("TYPE"):text(metadat.attr.type):up()
+		:tag("TYPE"):text(metadata.attr.type):up()
 		:tag("BINVAL"):text(pep_photo:get_child_text("data", "urn:xmpp:avatar:data"));
 
 	replace_tag(vcard, new_photo);
