@@ -87,13 +87,14 @@ local function outgoing_stanza_filter(stanza, session)
 			session.log("debug", "hibernating, stanza queued");
 			return nil;
 		end
-		if #queue > max_unacked_stanzas and not session.awaiting_ack then
+		if #queue > max_unacked_stanzas and session.awaiting_ack == nil then
 			session.log("debug", "Queuing <r> (in a moment)");
-			session.awaiting_ack = true;
+			session.awaiting_ack = false;
 			session.awaiting_ack_timer = module:add_timer(1e-06, function ()
 				if not session.awaiting_ack then
 					session.log("debug", "Sending <r> (after send)");
 					(session.sends2s or session.send)(st.stanza("r", { xmlns = session.smacks }))
+					session.awaiting_ack = true;
 				end
 			end);
 		end
