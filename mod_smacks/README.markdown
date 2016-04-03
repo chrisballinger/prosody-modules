@@ -1,6 +1,6 @@
 ---
 labels:
-- 'Stage-Beta'
+- 'Stage-Alpha'
 summary: 'XEP-0198: Reliability and fast reconnects for XMPP'
 ...
 
