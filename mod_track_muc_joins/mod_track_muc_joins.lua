@@ -6,10 +6,16 @@ module:hook("presence/full", function (event)
 	local session = sessions[stanza.attr.to];
 	if not session then return end;
 	local log = session.log or module._log;
+
+	local from_jid = stanza.attr.from;
+	if not session.directed or not session.directed[from_jid] then
+		return; -- Never sent presence there, can't be a MUC join
+	end
+
 	local muc_x = stanza:get_child("x", "http://jabber.org/protocol/muc#user");
 	if not muc_x then return end -- Not MUC related
 
-	local room = jid_bare(stanza.attr.from);
+	local room = jid_bare(from_jid);
 	local joined = stanza.attr.type;
 	if joined == nil then
 		joined = true;
@@ -36,4 +42,3 @@ module:hook("presence/full", function (event)
 	end
 end);
 
--- TODO Check session.directed for outgoing presence?
