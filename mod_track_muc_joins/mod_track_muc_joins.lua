@@ -7,14 +7,10 @@ module:hook("presence/full", function (event)
 	if not session then return end;
 	local log = session.log or module._log;
 
-	local from_jid = stanza.attr.from;
-	if not session.directed or not session.directed[from_jid] then
-		return; -- Never sent presence there, can't be a MUC join
-	end
-
 	local muc_x = stanza:get_child("x", "http://jabber.org/protocol/muc#user");
 	if not muc_x then return end -- Not MUC related
 
+	local from_jid = stanza.attr.from;
 	local room = jid_bare(from_jid);
 	local joined = stanza.attr.type;
 	if joined == nil then
@@ -24,6 +20,10 @@ module:hook("presence/full", function (event)
 	else
 		-- Ignore errors and whatever
 		return;
+	end
+
+	if joined and not session.directed or not session.directed[from_jid] then
+		return; -- Never sent presence there, can't be a MUC join
 	end
 
 	-- Check for status code 100, meaning it's their own reflected presence
