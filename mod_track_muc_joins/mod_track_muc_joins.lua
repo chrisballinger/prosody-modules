@@ -33,6 +33,7 @@ module:hook("presence/full", function (event)
 			log("debug", "%s room %s", joined and "Joined" or "Left", room);
 			local rooms = session.rooms_joined;
 			if not rooms then
+				if not joined then return; end
 				session.rooms_joined = { [room] = joined };
 			else
 				rooms[room] = joined;
