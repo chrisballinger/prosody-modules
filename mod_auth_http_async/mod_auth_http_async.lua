@@ -9,7 +9,7 @@
 
 local new_sasl = require "util.sasl".new;
 local base64 = require "util.encodings".base64.encode;
-local waiter =require "util.async".waiter;
+local have_async, async = pcall(require, "util.async");
 local http = require "net.http";
 
 local log = module._log;
@@ -19,8 +19,7 @@ local api_base = module:get_option_string("http_auth_url",  ""):gsub("$host", ho
 if api_base == "" then error("http_auth_url required") end
 
 local function async_http_request(url, ex)
-	local wait, done = waiter();
-
+	local wait, done = async.waiter();
 	local content, code, request, response;
 	local function cb(content_, code_, request_, response_)
 		content, code, request, response = content_, code_, request_, response_;
@@ -35,18 +34,31 @@ local provider = {};
 
 function provider.test_password(username, password)
 	log("debug", "test password for user %s at host %s", username, host);
-
-
-	local _, code = async_http_request(api_base:gsub("$user", username), {
+	local url = api_base:gsub("$user", username);
+	local ex = {
 		headers = { Authorization = "Basic "..base64(username..":"..password); };
-	});
-
-	if code >= 200 and code <= 299 then
-		return true;
+	}
+	if (have_async) then
+	    local _, code = async_http_request(url, ex);
+	    if code >= 200 and code <= 299 then
+			module:log("debug", "HTTP auth provider confirmed valid password");
+	        return true;
+	    else
+	        module:log("debug", "HTTP auth provider returned status code %d", code);
+	    end
 	else
-		module:log("debug", "HTTP auth provider returned status code %d", code);
-		return nil, "Auth failed. Invalid username or password.";
+	    local ok, err = http.request(url, ex, function(body, code)
+			if code >= 200 and code <= 299 then
+				module:log("debug", "HTTP auth provider confirmed valid password");
+			else
+				module:log("debug", "HTTP auth provider returned status code %d", code);
+			end
+		end);
+	    if ok then
+	        return true;
+	    end
 	end
+	return nil, "Auth failed. Invalid username or password.";
 end
 
 function provider.set_password(username, password)
@@ -74,4 +86,3 @@ function provider.get_sasl_handler()
 end
 	
 module:provides("auth", provider);
-
