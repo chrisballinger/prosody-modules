@@ -25,7 +25,7 @@ local function log_and_send_response(response, body)
 		local date = os.date("%d/%m/%Y:%H:%M:%S %z");
 		module:log("info", "%s - - [%s] \"%s\" %d %s", ip, date, req, response.status_code, tostring(len));
 	end
-	return server.send_response(response, body);
+	return send_response(response, body);
 end
 
 if module.wrap_object_event then
