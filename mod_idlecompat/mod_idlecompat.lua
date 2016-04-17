@@ -1,6 +1,6 @@
 -- Last User Interaction in Presence via Last Activity compatibility module
 -- http://xmpp.org/extensions/xep-0319.html
--- http://xmpp.org/extensions/xep-0012.html
+-- http://xmpp.org/extensions/xep-0256.html
 -- Copyright (C) 2014 Tobias Markmann
 --
 -- This file is MIT/X11 licensed.
@@ -11,7 +11,7 @@ local datetime = require "util.datetime";
 local function on_presence(event)
 	local stanza = event.stanza;
 
-	local last_activity = stanza.name == "presence" and stanza:get_child("query", "jabber:iq:last") or false;
+	local last_activity = stanza:get_child("query", "jabber:iq:last");
 	local has_idle = stanza:get_child("idle", "urn:xmpp:idle:1");
 	if last_activity and not has_idle then
 		module:log("debug", "Adding XEP-0319 tag from Last Activity.");
