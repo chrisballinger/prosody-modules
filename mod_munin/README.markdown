@@ -63,8 +63,8 @@ Simply add `munin_node_name` surrounded by brackets to `/etc/munin/munin.conf`:
 
 ``` ini
 [xmpp.example.com]
-address = xmpp.example.com
-port = 4949
+address xmpp.example.com
+port 4949
 ```
 
 You can leave out `address` if it equal to the name in brackets, and
