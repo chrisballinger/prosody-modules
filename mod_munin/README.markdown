@@ -27,6 +27,11 @@ modules_enabled = {
 munin_node_name = "xmpp.example.com"
 ```
 
+You will also want to enable statistics collection by setting:
+
+```lua
+statistics_interval = 300 -- every 5 minutes, same as munin
+```
 
 ## Summary
 
