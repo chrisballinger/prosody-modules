@@ -10,6 +10,11 @@ Introduction
 
 This module allows you to authenticate against an PHPBB3 database.
 
+To support the `bcrypt` password hashing algorithm, install
+[bcrypt](https://luarocks.org/modules/mikejsavage/bcrypt) from luarocks:
+
+    luarocks install bcrypt
+
 Configuration
 =============
 
