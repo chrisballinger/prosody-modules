@@ -10,6 +10,7 @@ local saslprep = require "util.encodings".stringprep.saslprep;
 local DBI = require "DBI"
 local md5 = require "util.hashes".md5;
 local uuid_gen = require "util.uuid".generate;
+local have_bcrypt, bcrypt = pcall(require, "bcrypt"); -- available from luarocks
 
 local connection;
 local params = module:get_option("sql");
@@ -176,7 +177,10 @@ local function hashGensaltPrivate(input)
 end
 local function phpbbCheckHash(password, hash)
 	if #hash == 32 then return hash == md5(password, true); end -- legacy PHPBB2 hash
-	return #hash == 34 and hashCryptPrivate(password, hash) == hash;
+	if #hash == 34 then return hashCryptPrivate(password, hash) == hash; end
+	if #hash == 60 and have_bcrypt then return bcrypt.verify(password, hash); end
+	module:log("error", "Unsupported hash: %s", hash);
+	return false;
 end
 local function phpbbCreateHash(password)
 	local random = uuid_gen():sub(-6);
