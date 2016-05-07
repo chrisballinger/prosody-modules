@@ -50,7 +50,7 @@ function map_store:set_keys(username, keydatas)
 	end
 	for k,v in pairs(keydatas) do
 		if v == self.remove then v = nil; end
-		current[k] = v;
+		userstore[k] = v;
 	end
 	return true;
 end
