@@ -41,6 +41,20 @@ function map_store:set(username, key, data)
 	return true;
 end
 
+map_store.remove = {};
+function map_store:set_keys(username, keydatas)
+	local userstore = self.store[username or NULL];
+	if userstore == nil then
+		userstore = {};
+		self.store[username or NULL] = userstore;
+	end
+	for k,v in pairs(keydatas) do
+		if v == self.remove then v = nil; end
+		current[k] = v;
+	end
+	return true;
+end
+
 local archive_store = {};
 archive_store.__index = archive_store;
 
