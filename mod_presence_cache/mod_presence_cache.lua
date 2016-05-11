@@ -1,3 +1,8 @@
+-- XEP-0280: Message Carbons implementation for Prosody
+-- Copyright (C) 2015-2016 Kim Alvefur
+--
+-- This file is MIT/X11 licensed.
+
 local is_contact_subscribed = require"core.rostermanager".is_contact_subscribed;
 local jid_split = require"util.jid".split;
 local jid_bare = require"util.jid".bare;
