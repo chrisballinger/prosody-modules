@@ -366,7 +366,7 @@ function save_to_history(self, stanza)
 	if stanza.attr.type then
 		with = with .. "<" .. stanza.attr.type
 	end
-	archive:append(room, stanza, nil, time_now(), with);
+	archive:append(room, nil, stanza, time_now(), with);
 end
 
 module:hook("muc-broadcast-message", function (event)
