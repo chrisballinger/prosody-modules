@@ -59,7 +59,7 @@ local vCard_mt = {
 };
 
 local function get_user_vcard(user, host)
-	local vCard err = dm_load(user, host or base_host, "vcard");
+	local vCard, err = dm_load(user, host or base_host, "vcard");
 	if not vCard then return nil, err; end
 	vCard = st.deserialize(vCard);
 	vCard, err = vcard.from_xep54(vCard);
