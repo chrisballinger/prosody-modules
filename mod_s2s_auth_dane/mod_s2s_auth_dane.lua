@@ -227,7 +227,7 @@ function module.add_host(module)
 
 	module:hook("s2s-authenticated", function(event)
 		local session = event.session;
-		if session.dane and next(session.dane) ~= nil and not session.secure then
+		if session.dane and type(session.dane) == "table" and next(session.dane) ~= nil and not session.secure then
 			-- TLSA record but no TLS, not ok.
 			-- TODO Optional?
 			-- Bogus replies should trigger this path
