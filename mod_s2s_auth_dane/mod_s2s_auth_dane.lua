@@ -364,8 +364,6 @@ if module:get_option_set("modules_enabled", {}):contains("admin_telnet") then
 	module:depends("admin_telnet"); -- Make sure the env is there
 	local def_env = module:shared("admin_telnet/env");
 
-	local sessions = module:shared("s2s/sessions");
-
 	local function annotate(session, line)
 		line = line or {};
 		table.insert(line, "--");
