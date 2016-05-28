@@ -198,6 +198,11 @@ local function dane_lookup(host_session, cb)
 	end
 end
 
+local function pause(host_session)
+	host_session.log("debug", "Pausing connection until DANE lookup is completed");
+	host_session.conn:pause()
+end
+
 local function resume(host_session)
 	host_session.log("debug", "DANE lookup completed, resuming connection");
 	host_session.conn:resume()
@@ -213,8 +218,7 @@ function module.add_host(module)
 			return; -- Already done DANE lookup
 		end
 		if dane_lookup(host_session, resume) then
-			host_session.log("debug", "Pausing connection until DANE lookup is completed");
-			host_session.conn:pause()
+			pause(host_session);
 		end
 	end
 
