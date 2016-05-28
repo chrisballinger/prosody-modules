@@ -198,7 +198,33 @@ local function dane_lookup(host_session, cb)
 	end
 end
 
+local function resume(host_session)
+	host_session.log("debug", "DANE lookup completed, resuming connection");
+	host_session.conn:resume()
+end
+
 function module.add_host(module)
+	local function on_new_s2s(event)
+		local host_session = event.origin;
+		if host_session.type == "s2sout" or host_session.type == "s2sin" then
+			return; -- Already authenticated
+		end
+		if host_session.dane ~= nil then
+			return; -- Already done DANE lookup
+		end
+		if dane_lookup(host_session, resume) then
+			host_session.log("debug", "Pausing connection until DANE lookup is completed");
+			host_session.conn:pause()
+		end
+	end
+
+	-- New outgoing connections
+	module:hook("stanza/http://etherx.jabber.org/streams:features", on_new_s2s, 501);
+	module:hook("s2sout-authenticate-legacy", on_new_s2s, 200);
+
+	-- New incoming connections
+	module:hook("s2s-stream-features", on_new_s2s, 10);
+
 	module:hook("s2s-authenticated", function(event)
 		local session = event.session;
 		if session.dane and type(session.dane) == "table" and next(session.dane) ~= nil and not session.secure then
@@ -246,26 +272,11 @@ local function one_dane_check(tlsa, cert, log)
 	return certdata == tlsa.data;
 end
 
--- Re-run streamopend() to continue
-local function resume(session)
-	local attr = {
-		version = session.version,
-		to = session.to_host,
-		from = session.from_host,
-		id = session.streamid,
-	};
-	session.cert_chain_status = nil;
-	session.open_stream.stream_callbacks.streamopened(session, attr);
-end
-
 module:hook("s2s-check-certificate", function(event)
 	local session, cert, host = event.session, event.cert, event.host;
 	if not cert then return end
 	local log = session.log or module._log;
 	local dane = session.dane;
-	if dane == nil and dane_lookup(session, resume) then
-		return false;
-	end
 	if type(dane) == "table" then
 		local match_found, supported_found;
 		for i = 1, #dane do
