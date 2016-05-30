@@ -6,9 +6,24 @@ local json = require"util.json";
 local json_encode, json_decode = json.encode, json.decode;
 local gettime = require"socket".gettime;
 local serialize = require"util.serialization".serialize;
+local have_async, async = pcall(require, "util.async");
 
 local msva_url = assert(os.getenv"MONKEYSPHERE_VALIDATION_AGENT_SOCKET",
 	"MONKEYSPHERE_VALIDATION_AGENT_SOCKET is unset, please set it").."/reviewcert";
+
+if have_async then
+	local _http_request = require "net.http".request;
+	function http_request(url, ex)
+		local wait, done = async.waiter();
+		local content, code, request, response;
+		_http_request(url, ex, function (_content, _code, _request, _response)
+			content, code, request, response = _content, _code, _request, _response;
+			done();
+		end);
+		wait();
+		return content, code, request, response;
+	end
+end
 
 local function check_with_monkeysphere(event)
 	local session, host, cert = event.session, event.host, event.cert;
