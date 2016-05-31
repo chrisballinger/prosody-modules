@@ -83,6 +83,7 @@ end);
 -- http service
 local function upload_data(event, path)
 	if not pending_slots[path] then
+		module:log("warn", "Attempt to upload to unknown slot %q", path);
 		return 401;
 	end
 	local random, filename = path:match("^([^/]+)/([^/]+)$");
