@@ -1,7 +1,8 @@
 Description
 ===========
 
-This module lists those users, who haven't used their account in a defined time-frame.
+This module lists those users, who haven't used their account in a
+defined time-frame.
 
 Dependencies
 ============
@@ -11,21 +12,24 @@ Dependencies
 Usage
 =====
 
-`prosodyctl mod_list_inactive example.com time [format]`
+    prosodyctl mod_list_inactive example.com time [format]
 
-time is a number followed by 'day', 'week', 'month' or 'year'
+Time is a number followed by 'day', 'week', 'month' or 'year'
 
-formats are:
-delete  user:delete"user@example.com" -- last action
-default user@example.com
-event   user@example.com last action
+Formats are:
+
+  --------- ------------------------------------------------
+  delete    `user:delete"user@example.com" -- last action`
+  default   `user@example.com`
+  event     `user@example.com last action`
+  --------- ------------------------------------------------
 
 Example
 =======
 
-`prosodyctl mod_list_inactive example.com 1year`
+    prosodyctl mod_list_inactive example.com 1year
 
 Help
 ====
 
-`prosodyctl mod_list_inactive`
+    prosodyctl mod_list_inactive
