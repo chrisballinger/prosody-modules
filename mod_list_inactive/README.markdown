@@ -7,7 +7,7 @@ defined time-frame.
 Dependencies
 ============
 
-[mod_lastlog](https://modules.prosody.im/mod_lastlog.html)
+[mod_lastlog] must be enabled to collect the data used by this module.
 
 Usage
 =====
