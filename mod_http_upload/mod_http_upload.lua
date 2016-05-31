@@ -91,12 +91,12 @@ local function upload_data(event, path)
 		return 400;
 	end
 	if #event.request.body > file_size_limit then
-		module:log("error", "Uploaded file too large %d bytes", #event.request.body);
+		module:log("warn", "Uploaded file too large %d bytes", #event.request.body);
 		return 400;
 	end
 	local dirname = join_path(storage_path, random);
 	if not lfs.mkdir(dirname) then
-		module:log("error", "Could not create directory %s for upload", dirname);
+		module:log("warn", "Could not create directory %s for upload", dirname);
 		return 500;
 	end
 	local full_filename = join_path(dirname, filename);
