@@ -17,11 +17,13 @@ function module.command(arg)
 		return print("Usage: prosodyctl mod_"..module.name.." <storage driver>");
 	end
 
-	sm.initialize_host("localhost");
-	um.initialize_host("localhost");
+	local hostname = "localhost";
+
+	sm.initialize_host(hostname);
+	um.initialize_host(hostname);
 
 	local start_time = gettime();
-	local storage = assert(sm.load_driver("localhost", test_driver));
+	local storage = assert(sm.load_driver(hostname, test_driver));
 	storage = assert(storage:open("benchmark"));
 	-- for i = 1, 23 do
 		-- storage:set(test_users[i], test_data);
@@ -43,7 +45,7 @@ function module.command(arg)
 	for i = 1, 23 do
 		storage:set(test_users[i], nil);
 	end
-	mm.unload("localhost", "storage_"..test_driver);
+	mm.unload(hostname, "storage_"..test_driver);
 	local time_taken = gettime() - start_time;
 	io.write("\27[0G\27[K"); -- Clear current line
 	io.flush();
