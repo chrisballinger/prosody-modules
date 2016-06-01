@@ -19,6 +19,7 @@
 
 module:set_global();
 
+local have_async, async = pcall(require, "util.async");
 local noop = function () end
 local type = type;
 local t_insert = table.insert;
@@ -208,6 +209,28 @@ local function resume(host_session)
 	host_session.conn:resume()
 end
 
+if have_async then
+	function pause(host_session)
+		host_session.log("debug", "Pausing connection until DANE lookup is completed");
+		local wait, done = async.waiter();
+		host_session._done_waiting_for_dane = done;
+		wait();
+	end
+	local function _resume(_, host_session)
+		if host_session._done_waiting_for_dane then
+			host_session.log("debug", "DANE lookup completed, resuming connection");
+			host_session._done_waiting_for_dane();
+			host_session._done_waiting_for_dane = nil;
+		end
+	end
+	function resume(host_session)
+		-- Something about the way luaunbound calls callbacks is messed up
+		if host_session._done_waiting_for_dane then
+			module:add_timer(0, _resume, host_session);
+		end
+	end
+end
+
 function module.add_host(module)
 	local function on_new_s2s(event)
 		local host_session = event.origin;
@@ -217,9 +240,8 @@ function module.add_host(module)
 		if host_session.dane ~= nil then
 			return; -- Already done DANE lookup
 		end
-		if dane_lookup(host_session, resume) then
-			pause(host_session);
-		end
+		dane_lookup(host_session, resume);
+		-- Let it run in parallell until we need to check the cert
 	end
 
 	-- New outgoing connections
@@ -281,6 +303,12 @@ module:hook("s2s-check-certificate", function(event)
 	if not cert then return end
 	local log = session.log or module._log;
 	local dane = session.dane;
+	if type(dane) ~= "table" then
+		if dane == nil and dane_lookup(session, resume) then
+			pause(session);
+			dane = session.dane;
+		end
+	end
 	if type(dane) == "table" then
 		local match_found, supported_found;
 		for i = 1, #dane do
