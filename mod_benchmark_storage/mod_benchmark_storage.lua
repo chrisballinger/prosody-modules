@@ -17,7 +17,14 @@ function module.command(arg)
 		return print("Usage: prosodyctl mod_"..module.name.." <storage driver>");
 	end
 
-	local hostname = "localhost";
+	local hostname = "benchmark.invalid";
+	prosody.hosts[hostname] = {
+		type = "local",
+		events = prosody.events,
+		modules = {},
+		sessions = {},
+		users = require "core.usermanager".new_null_provider(hostname)
+	};
 
 	sm.initialize_host(hostname);
 	um.initialize_host(hostname);
