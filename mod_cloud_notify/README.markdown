@@ -18,6 +18,16 @@ Details
 
 App servers are notified about offline messages.
 
+Configuration
+=============
+
+  Option                         Default           Description
+  ------------------------------ ----------------- -----------------------------------------------------------------------------------------
+  `push_notification_with_body`      false   Whether or not to send the message body to remote pubsub node.
+  `push_notification_with_sender`           false             Whether or not to send the message sender to remote pubsub node.
+
+There are privacy implications for enabling these options because plaintext content and metadata will be shared with centralized servers (the pubsub node) run by arbitrary app developers.
+
 Installation
 ============
 
