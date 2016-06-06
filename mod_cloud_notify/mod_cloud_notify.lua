@@ -18,7 +18,9 @@ local include_sender = module:get_option("push_notification_with_sender", false)
 local push_enabled = module:shared("push-enabled-users");
 
 -- http://xmpp.org/extensions/xep-0357.html#disco
-module:add_feature(xmlns_push);
+module:hook("account-disco-info", function(event)
+	(event.reply or event.stanza):tag("feature", {var=xmlns_push}):up();
+end);
 
 -- http://xmpp.org/extensions/xep-0357.html#enabling
 module:hook("iq-set/self/"..xmlns_push..":enable", function (event)
