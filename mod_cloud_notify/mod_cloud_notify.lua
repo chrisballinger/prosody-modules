@@ -15,7 +15,8 @@ local include_body = module:get_option("push_notification_with_body", false);
 local include_sender = module:get_option("push_notification_with_sender", false);
 
 -- For keeping state across reloads
-local push_enabled = module:shared("push-enabled-users");
+local push_enabled = module:open_store();
+-- TODO map store would be better here
 
 -- http://xmpp.org/extensions/xep-0357.html#disco
 module:hook("account-disco-info", function(event)
@@ -38,10 +39,9 @@ module:hook("iq-set/self/"..xmlns_push..":enable", function (event)
 		origin.send(st.error_reply(stanza, "modify", "bad-request", "Invalid publish options"));
 		return true;
 	end
-	local user_push_services = push_enabled[origin.username];
+	local user_push_services = push_enabled:get(origin.username);
 	if not user_push_services then
 		user_push_services = {};
-		push_enabled[origin.username] = user_push_services;
 	end
 	user_push_services[push_jid .. "<" .. (push_node or "")] = {
 		jid = push_jid;
@@ -49,7 +49,12 @@ module:hook("iq-set/self/"..xmlns_push..":enable", function (event)
 		count = 0;
 		options = publish_options;
 	};
-	origin.send(st.reply(stanza));
+	local ok, err = push_enabled:set(origin.username, user_push_services);
+	if not ok then
+		origin.send(st.error_reply(stanza, "wait", "internal-server-error"));
+	else
+		origin.send(st.reply(stanza));
+	end
 	return true;
 end);
 
@@ -62,7 +67,7 @@ module:hook("iq-set/self/"..xmlns_push..":disable", function (event)
 		origin.send(st.error_reply(stanza, "modify", "bad-request", "Missing jid"));
 		return true;
 	end
-	local user_push_services = push_enabled[origin.username];
+	local user_push_services = push_enabled:get(origin.username);
 	for key, push_info in pairs(user_push_services) do
 		if push_info.jid == push_jid and (not push_node or push_info.node == push_node) then
 			user_push_services[key] = nil;
@@ -84,7 +89,7 @@ local push_form = dataform {
 local function handle_notify_request(origin, stanza)
 	local to = stanza.attr.to;
 	local node = to and jid.split(to) or origin.username;
-	local user_push_services = push_enabled[node];
+	local user_push_services = push_enabled:get(node);
 	if not user_push_services then return end
 
 	for _, push_info in pairs(user_push_services) do
@@ -163,7 +168,7 @@ module:hook("smacks-hibernation-end", restore_session);
 
 
 module:hook("message/offline/broadcast", function(event)
-	local user_push_services = push_enabled[event.origin.username];
+	local user_push_services = push_enabled:get(event.origin.username);
 	if not user_push_services then return end
 
 	for _, push_info in pairs(user_push_services) do
