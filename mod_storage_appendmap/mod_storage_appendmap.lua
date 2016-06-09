@@ -32,7 +32,7 @@ end
 function map:set_keys(user, keyvalues)
 	local keys, values = {}, {};
 	if _VERSION == "Lua 5.1" then
-		assert(not keyvalues._ENV, "'_ENV' is a restricted key");
+		assert(keyvalues._ENV == nil, "'_ENV' is a restricted key");
 	end
 	for key, value in pairs(keyvalues) do
 		module:log("debug", "user %s sets %q to %s", user, key, tostring(value))
