@@ -18,7 +18,7 @@ module:hook("user-registered", function (event)
 		local log = session.log;
 		adns.lookup(function (reply)
 			if reply and reply[1] then
-				log("warn", "Registration from IP %s found in RBL", ip);
+				log("warn", "Account %s@%s registered from IP %s found in RBL (%s)", event.username, event.host or module.host, ip, reply[1].a);
 			end
 		end, rbl_ip);
 	end
