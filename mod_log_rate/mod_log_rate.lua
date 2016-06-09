@@ -1,13 +1,11 @@
 module:set_global();
 
-local measure = require"core.statsmanager".measure;
-
 local function sink_maker(config)
 	local levels = {
-		debug = measure("rate", "log.debug");
-		info = measure("rate", "log.info");
-		warn = measure("rate", "log.warn");
-		error = measure("rate", "log.error");
+		debug = measure("log.debug", "rate");
+		info = measure("log.info", "rate");
+		warn = measure("log.warn", "rate");
+		error = measure("log.error", "rate");
 	};
 	return function (_, level)
 		return levels[level]();
