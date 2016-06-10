@@ -8,6 +8,7 @@
 --
 
 local st = require "util.stanza"
+local jid = require "util.jid";
 local base64 = require"util.encodings".base64;
 local sha1 = require"util.hashes".sha1;
 
@@ -56,7 +57,7 @@ end
 
 local function publish(session, node, id, item)
 	return module:fire_event("pep-publish-item", {
-		actor = true, session = session, node = node, id = id, item = item;
+		actor = true, user = jid.bare(session.full_jid), session = session, node = node, id = id, item = item;
 	});
 end
 
