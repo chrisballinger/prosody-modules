@@ -50,17 +50,20 @@ module:hook("iq/host/"..xmlns_http_upload..":request", function (event)
 	local request = stanza.tags[1];
 	-- local clients only
 	if origin.type ~= "c2s" then
+		module:log("debug", "Request for upload slot from a %s", origin.type);
 		origin.send(st.error_reply(stanza, "cancel", "not-authorized"));
 		return true;
 	end
 	-- validate
 	local filename = request:get_child_text("filename");
 	if not filename or filename:find("/") then
+		module:log("debug", "Filename %q not allowed", filename or "");
 		origin.send(st.error_reply(stanza, "modify", "bad-request", "Invalid filename"));
 		return true;
 	end
 	local filesize = tonumber(request:get_child_text("size"));
 	if not filesize then
+		module:log("debug", "Missing file size");
 		origin.send(st.error_reply(stanza, "modify", "bad-request", "Missing or invalid file size"));
 		return true;
 	elseif filesize > file_size_limit then
@@ -77,6 +80,7 @@ module:hook("iq/host/"..xmlns_http_upload..":request", function (event)
 	reply:tag("get"):text(url):up();
 	reply:tag("put"):text(url):up();
 	origin.send(reply);
+	origin.log("debug", "Given upload slot %q", random);
 	return true;
 end);
 
@@ -88,6 +92,7 @@ local function upload_data(event, path)
 	end
 	local random, filename = path:match("^([^/]+)/([^/]+)$");
 	if not random then
+		module:log("warn", "Invalid file path %q", path);
 		return 400;
 	end
 	if #event.request.body > file_size_limit then
