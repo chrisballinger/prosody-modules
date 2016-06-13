@@ -32,6 +32,8 @@ if prosody and prosody.arg then
 	c2s_sessions, s2s_sessions = module:shared("/*/c2s/sessions", "/*/s2s/sessions");
 end
 
+local memory_update_interval = module:get_option_number("statistics_meminfo_interval", 60);
+
 local stats = {
 	total_users = {
 		get = function () return it.count(it.keys(bare_sessions)); end
@@ -90,20 +92,30 @@ local stats = {
 };
 
 if has_pposix and pposix.meminfo then
+
+	local cached_meminfo, last_cache_update;
+	local function meminfo()
+		if not cached_meminfo or (os.time() - last_cache_update) > memory_update_interval then
+			cached_meminfo = pposix.meminfo();
+			last_cache_update = os.time();
+		end
+		return cached_meminfo;
+	end
+
 	stats.memory_allocated = {
-		get = function () return math.ceil(pposix.meminfo().allocated); end;
+		get = function () return math.ceil(meminfo().allocated); end;
 		tostring = human;
 	}
 	stats.memory_used = {
-		get = function () return math.ceil(pposix.meminfo().used); end;
+		get = function () return math.ceil(meminfo().used); end;
 		tostring = human;
 	}
 	stats.memory_unused = {
-		get = function () return math.ceil(pposix.meminfo().unused); end;
+		get = function () return math.ceil(meminfo().unused); end;
 		tostring = human;
 	}
 	stats.memory_returnable = {
-		get = function () return math.ceil(pposix.meminfo().returnable); end;
+		get = function () return math.ceil(meminfo().returnable); end;
 		tostring = human;
 	}
 end
