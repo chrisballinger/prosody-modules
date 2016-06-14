@@ -125,23 +125,25 @@ end
 -- Fetch the named user's roster from the API, call callback (cb)
 -- with status and result (friends list) when received.
 function fetch_roster(username, cb)
-    local x = {headers = {}};
-    x["headers"]["ACCEPT"] = "application/json, text/plain, */*";
+	local x = {headers = {}};
+	x["headers"]["ACCEPT"] = "application/json, text/plain, */*";
 	local ok, err = http.request(
-        roster_url:format(username),
-        x,
-        function (roster_data, code)
-            if code ~= 200 then
-                if code ~= 0 then
-                    module:log("error", "Error fetching roster from %s (code %d): %s", roster_url:format(username), code, tostring(roster_data):sub(1, 40):match("^[^\r\n]+"));
-                    cb(nil, code, roster_data);
-                end
-                return;
-            end
-        module:log("debug", "Successfully fetched roster for %s", username);
-        module:log("debug", "The roster data is %s", roster_data);
-        cb(true, code, json.decode(roster_data));
-	end);
+		roster_url:format(username),
+		x,
+		function (roster_data, code)
+			if code ~= 200 then
+				module:log("error", "Error fetching roster from %s (code %d): %s", roster_url:format(username), code, tostring(roster_data):sub(1, 40):match("^[^\r\n]+"));
+				if code ~= 0 then
+					cb(nil, code, roster_data);
+				end
+				return;
+			end
+			module:log("debug", "Successfully fetched roster for %s", username);
+			module:log("debug", "The roster data is %s", roster_data);
+			cb(true, code, json.decode(roster_data));
+		end
+	);
+	module:log("debug", "fetch_roster: ok is %s", ok);
 	if not ok then
 		module:log("error", "Failed to connect to roster API at %s: %s", roster_url:format(username), err);
 		cb(false, 0, err);
