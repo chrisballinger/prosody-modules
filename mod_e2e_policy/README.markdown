@@ -14,15 +14,15 @@ Enable the module as any other:
 
 You can then set some options to configure your desired policy:
 
-  Option                                Default        Description
-  -------------------------------- --------------- -------------------------------------------------------------------------------------------------------------------------------------------------
-  e2e\_policy\_chat                     `"optional"`   Policy for chat messages. Possible values: `"none"`, `"optional"` and `"required"`.
-  e2e\_policy\_muc                      `"optional"`   Policy for MUC messages. Possible values: `"none"`, `"optional"` and `"required"`.
-  e2e\_policy\_whitelist                `{ }`          Make this module ignore messages sent to and from this JIDs or MUCs.
-  e2e\_policy\_message\_optional\_chat  `""`           Set a custom warning message for chat messages.
-  e2e\_policy\_message\_required\_chat  `""`           Set a custom error message for chat messages.
-  e2e\_policy\_message\_optional\_muc   `""`           Set a custom warning message for MUC messages.
-  e2e\_policy\_message\_required\_muc   `""`           Set a custom error message for MUC messages.
+  Option                                 Default        Description
+  ------------------------------------   ------------   -------------------------------------------------------------------------------------------------------------------------------------------------
+  e2e\_policy\_chat                      `"optional"`   Policy for chat messages. Possible values: `"none"`, `"optional"` and `"required"`.
+  e2e\_policy\_muc                       `"optional"`   Policy for MUC messages. Possible values: `"none"`, `"optional"` and `"required"`.
+  e2e\_policy\_whitelist                 `{ }`          Make this module ignore messages sent to and from this JIDs or MUCs.
+  e2e\_policy\_message\_optional\_chat   `""`           Set a custom warning message for chat messages.
+  e2e\_policy\_message\_required\_chat   `""`           Set a custom error message for chat messages.
+  e2e\_policy\_message\_optional\_muc    `""`           Set a custom warning message for MUC messages.
+  e2e\_policy\_message\_required\_muc    `""`           Set a custom error message for MUC messages.
 
 Some examples:
 
