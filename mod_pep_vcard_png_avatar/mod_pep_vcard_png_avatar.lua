@@ -113,18 +113,17 @@ local function on_publish_metadata(event)
 		module:log("error", "No photo found");
 		return;
 	end -- Publishing in the wrong order?
+	local image=pep_photo:get_child_text("data", "urn:xmpp:avatar:data");
 	if pep_photo and metadata.attr.type == "image/webp" then
-		file_webp = io.open("/tmp/Prosody_temp_avatar.webp", "w");
+		local file_webp = io.open("/tmp/Prosody_temp_avatar.webp", "w");
 		file_webp:write(base64.decode(pep_photo:get_child_text("data", "urn:xmpp:avatar:data")));
 		file_webp:close();
 		os.execute("convert /tmp/Prosody_temp_avatar.webp /tmp/Prosody_temp_avatar.png");
-		file_png = io.open("/tmp/Prosody_temp_avatar.png", "r");
+		local file_png = io.open("/tmp/Prosody_temp_avatar.png", "r");
 		image=base64.encode(file_png:read("*a"));
 		file_png:close();
 		os.remove("/tmp/Prosody_temp_avatar.webp");
 		os.remove("/tmp/Prosody_temp_avatar.png");
-	else
-		image=pep_photo:get_child_text("data", "urn:xmpp:avatar:data");
 	end
 	local vcard = get_vcard(username);
 	local new_photo = st.stanza("PHOTO", { xmlns = "vcard-temp" })
