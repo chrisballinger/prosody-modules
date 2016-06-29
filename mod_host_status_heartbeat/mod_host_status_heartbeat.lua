@@ -24,5 +24,4 @@ local heartbeat_methods = {
 
 local send_heartbeat = assert(heartbeat_methods[heartbeat_mode], "Unknown heartbeat_mode: "..heartbeat_mode);
 
---FIXME: Commented for testing!!! :)
 module:add_timer(0, send_heartbeat);
