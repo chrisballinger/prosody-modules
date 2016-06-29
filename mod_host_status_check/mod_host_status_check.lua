@@ -19,7 +19,6 @@ if prosody.hosts[module.host].type == "component" and module:get_option_string("
 	end);
 else
 	connection_events[module.host] = { connected = true, timestamp = time() };
-	module:log("debug", "BLAH")
 end
 
 function module.unload()
