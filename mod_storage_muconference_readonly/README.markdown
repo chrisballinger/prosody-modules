@@ -9,11 +9,10 @@ Introduction
 ============
 
 This is a storage backend using MU-Conference’s SQL storage. It depends
-on [LuaDBI](doc:depends#luadbi)
+on [LuaDBI][doc:depends#luadbi]
 
 This module only works in read-only, and was made to be used by
-[mod\_migrate](mod_migrate) to migrate from MU-Conference’s SQL
-storage.
+[mod_migrate] to migrate from MU-Conference’s SQL storage.
 
 You may need to convert your 'rooms' and 'rooms\_lists' tables to
 utf8mb4 before running that script, in order not to end up with
@@ -31,7 +30,7 @@ In Prosody's configuration file, set:
     storage = "muconference_readonly"
 
 MUConferenceSQL options are the same as the [SQL
-ones](doc:modules:mod_storage_sql#usage).
+ones][doc:modules:mod_storage_sql#usage].
 
 Compatibility
 =============
