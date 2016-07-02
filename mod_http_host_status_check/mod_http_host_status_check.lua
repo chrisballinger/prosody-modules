@@ -1,5 +1,6 @@
 local heartbeats = module:shared("/*/host_status_check/heartbeats");
 local events = module:shared("/*/host_status_check/connection_events");
+local host_status_ok = module:shared("host_status_ok");
 
 local time = require "socket".gettime;
 local template = require "util.interpolation".new("%b{}", function (s) return s end)
@@ -85,6 +86,13 @@ function status_page()
 		
 		if not ok or is_component or last_heartbeat_time then
 			host_statuses[host] = string_pad(status_text, 20);
+		end
+		local last_ok = host_status_ok[host];
+		if last_ok ~= ok then
+			if last_ok ~= nil then
+				module:log("warn", "Host status check %s (%s)", ok and "OK" or "FAILED", status_text);
+			end
+			host_status_ok[host] = ok;
 		end
 	end
 	local page = template(status_page_template, {
