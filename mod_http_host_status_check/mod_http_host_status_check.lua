@@ -7,7 +7,7 @@ local template = require "util.interpolation".new("%b{}", function (s) return s 
 
 module:depends "http"
 
-local threshold = module:get_option_number("status_check_heartbeat_threshold", 5);
+local threshold = module:get_option_number("status_check_heartbeat_threshold", 10);
 
 local function status_string(status, duration, comment)
 	local string_timestamp;
