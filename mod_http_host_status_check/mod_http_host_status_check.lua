@@ -4,14 +4,13 @@ local host_status_ok = module:shared("host_status_ok");
 
 local time = require "socket".gettime;
 local template = require "util.interpolation".new("%b{}", function (s) return s end)
-local st = require "util.stanza";
 
 module:depends "http"
 
 local threshold = module:get_option_number("status_check_heartbeat_threshold", 5);
 
 local function status_string(status, duration, comment)
-	local string_timestamp = "";
+	local string_timestamp;
 	if duration then
 		string_timestamp = ("(%0.2fs%s)"):format(duration, comment or "");
 	elseif comment then
@@ -40,7 +39,7 @@ function status_page()
 	for host in pairs(hosts) do
 		local last_heartbeat_time = heartbeats[host];
 		
-		local ok, status_text = true, "OK";
+		local ok, status_text = true;
 		
 		local is_component = hosts[host].type == "component" and hosts[host].modules.component;
 		
