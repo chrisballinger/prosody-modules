@@ -1,6 +1,6 @@
 ---
 labels: Stage-Beta
-description: HTTP Host Status Check
+summary: HTTP Host Status Check
 ...
 
 Introduction

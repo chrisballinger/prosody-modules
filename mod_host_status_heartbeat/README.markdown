@@ -1,6 +1,6 @@
 ---
 labels: Stage-Beta
-description: Host status heartbeat
+summary: Host status heartbeat
 ...
 
 Introduction
