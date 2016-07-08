@@ -6,6 +6,7 @@ local http_formdecode = require "net.http".formdecode;
 local http_urlencode = require "net.http".urlencode;
 local usermanager = require "core.usermanager";
 local rostermanager = require "core.rostermanager";
+local tohtml = require "util.stanza".xml_escape
 local nodeprep = require "util.encodings".stringprep.nodeprep;
 local tostring = tostring;
 
@@ -15,15 +16,6 @@ local inviter_storage = module:open_store("inviter");
 local serve = module:depends"http_files".serve;
 
 module:depends"http";
-
-local entities = {
-	["<"] = "&lt;", [">"] = "&gt;", ["&"] = "&amp;",
-	["'"] = "&apos;", ["\""] = "&quot;", ["\n"] = "<br/>",
-};
-
-local function tohtml(plain)
-	return (plain:gsub("[<>&'\"\n]", entities));
-end
 
 local function apply_template(template, args)
 	return
