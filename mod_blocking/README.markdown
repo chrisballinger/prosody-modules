@@ -28,13 +28,12 @@ actual blocking is still managed by mod\_privacy, so it is **required**
 for that plugin to be loaded (this may change in future).
 
 An XEP-0191 implementation without dependency on mod\_privacy is
-available in Prosody 0.10 as
-[mod\_blocklist](https://prosody.im/doc/modules/mod_blocklist).
+available in Prosody 0.10 as [mod\_blocklist][doc:modules:mod_blocklist].
 
 Configuration
 =============
 
-Simply ensure that mod\_privacy (or mod\_privacy\_lists in 0.10+) and
+Simply ensure that mod\_privacy (or [mod\_privacy\_lists] in 0.10+) and
 mod\_blocking are loaded in your modules\_enabled list:
 
         modules_enabled = {
