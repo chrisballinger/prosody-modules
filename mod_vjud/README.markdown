@@ -7,8 +7,7 @@ summary: 'XEP-0055: Jabber Search'
 Introduction
 ============
 
-Basic implementation of [XEP-0055: Jabber
-Search](http://xmpp.org/extensions/xep-0055.html).
+Basic implementation of [XEP-0055: Jabber Search].
 
 Details
 =======
