@@ -15,6 +15,7 @@ local inviter_storage = module:open_store("inviter");
 
 local serve = module:depends"http_files".serve;
 
+module:depends"adhoc";
 module:depends"http";
 
 local function apply_template(template, args)
