@@ -120,8 +120,7 @@ end
 
 module:provides("http", {
 	route = {
-		["GET /a_file.txt"] = serve(module:get_directory().."/my_file.txt");
-		["GET /bootstrap.min.css"] = serve(module:get_directory());
+		["GET /bootstrap.min.css"] = serve(module:get_directory() .. "/invite/bootstrap.min.css");
 		["GET /*"] = generate_page;
 		POST = handle_form;
 	};
