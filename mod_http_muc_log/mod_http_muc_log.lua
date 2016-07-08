@@ -96,7 +96,7 @@ local function years_page(event, path)
 		module:log("debug", "Find all dates with messages");
 		local next_day;
 		repeat
-			local when = find_once(room, { start = next_day; with = "message<groupchat"; }, 3);
+			local when = find_once(room, { start = next_day; }, 3);
 			if not when then break; end
 			local t = os_date("!*t", when);
 			dates:set(t.year, t.month, t.day, when );
@@ -165,7 +165,6 @@ local function logs_page(event, path)
 	local iter, err = archive:find(room, {
 		["start"] = datetime.parse(date.."T00:00:00Z");
 		["end"]   = datetime.parse(date.."T23:59:59Z");
-		-- with = "message<groupchat";
 	});
 	if not iter then
 		module:log("warn", "Could not search archive: %s", err or "no error");
