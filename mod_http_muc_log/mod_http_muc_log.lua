@@ -201,22 +201,35 @@ local function logs_page(event, path)
 	end
 	if i == 1 then return end -- No items
 
-	module:log("debug", "Find next date with messages");
-	local next_when = find_once(room, { after = last }, 3);
-	if next_when then
-		next_when = datetime.date(next_when);
-		module:log("debug", "Next message: %s", next_when);
+	local next_when, prev_when = "", "";
+	local date_list = archive.dates and archive:dates(room);
+	if date_list then
+		for i = 1, #date_list do
+			if date_list[i] == date then
+				next_when = date_list[i+1] or "";
+				prev_when = date_list[i-1] or "";
+				break;
+			end
+		end
 	else
-		next_when = "";
-	end
 
-	module:log("debug", "Find prev date with messages");
-	local prev_when = find_once(room, { before = first, reverse = true }, 3);
-	if prev_when then
-		prev_when = datetime.date(prev_when);
-		module:log("debug", "Previous message: %s", prev_when);
-	else
-		prev_when = "";
+		module:log("debug", "Find next date with messages");
+		local next_when = find_once(room, { after = last }, 3);
+		if next_when then
+			next_when = datetime.date(next_when);
+			module:log("debug", "Next message: %s", next_when);
+		else
+			next_when = "";
+		end
+
+		module:log("debug", "Find prev date with messages");
+		local prev_when = find_once(room, { before = first, reverse = true }, 3);
+		if prev_when then
+			prev_when = datetime.date(prev_when);
+			module:log("debug", "Previous message: %s", prev_when);
+		else
+			prev_when = "";
+		end
 	end
 
 	response.headers.content_type = "text/html; charset=utf-8";
