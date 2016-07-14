@@ -6,15 +6,15 @@ summary: HTTP Host Status Check
 Introduction
 ============
 
-This module exposes serves over HTTP the information collected by mod\_host\_status\_check and
-mod\_host\_status\_heartbeat in a convenient format for automated monitoring tools.
+This module exposes serves over HTTP the information collected by [mod\_host\_status\_check] and
+[mod\_host\_status\_heartbeat] in a convenient format for automated monitoring tools.
 
 Configuration
 =============
 
-mod\_http\_status\_check relies on Prosodys HTTP server and mod\_http for
+[mod\_http\_status\_check] relies on Prosodys HTTP server and mod\_http for
 serving HTTP requests. See [Prosodys HTTP server
-documentation](https://prosody.im/doc/http) for information about how to
+documentation][doc:http] for information about how to
 configure ports, HTTP Host names etc.
 
 Simply add this module to modules\_enabled for the host you would like to serve it from.

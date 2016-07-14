@@ -10,7 +10,7 @@ This module allows you to monitor the state of hosts and components in your Pros
 it will track whether components are connected and (if the component supports it) listen for heartbeats
 sent by the component to indicate that it is functioning.
 
-This module does not expose any interface to access the status information itself. See mod\_http\_host\_status\_check
+This module does not expose any interface to access the status information itself. See [mod\_http\_host\_status\_check]
 for a module that allows you to access host status information over HTTP(S).
 
 Configuration
