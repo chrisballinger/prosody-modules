@@ -12,7 +12,7 @@ The only time you will generally want this, is if you are using [mod\_component\
 an external component of another Prosody server that has [mod\_host\_status\_check] loaded and waiting for
 heartbeats.
 
-Alternatively you can run this on the same Prosody host as [mod\_http\_status\_check] and it will simply
+Alternatively you can run this on the same Prosody host as [mod\_http\_host\_status\_check] and it will simply
 update a variable periodically to indicate that Prosody and timers are functional.
 
 Configuration
