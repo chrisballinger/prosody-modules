@@ -2,10 +2,10 @@ module:set_global();
 
 local function sink_maker(config)
 	local levels = {
-		debug = measure("log.debug", "rate");
-		info = measure("log.info", "rate");
-		warn = measure("log.warn", "rate");
-		error = measure("log.error", "rate");
+		debug = module:measure("log.debug", "rate");
+		info = module:measure("log.info", "rate");
+		warn = module:measure("log.warn", "rate");
+		error = module:measure("log.error", "rate");
 	};
 	return function (_, level)
 		return levels[level]();
