@@ -37,7 +37,7 @@ local function get_best_affiliation(a, b)
 end
 
 local function keyval_store_get()
-	if store == "muc" then
+	if store == "config" then
 		local room_jid = room.."@"..host;
 		local result;
 		for row in engine:select("SELECT `name`,`desc`,`topic`,`public`,`secret` FROM `rooms` WHERE `jid`=? LIMIT 1", room_jid or "") do result = row end
@@ -70,6 +70,7 @@ local function keyval_store_get()
 			_data = {
 				persistent = true,
 				name = name,
+				description = desc,
 				subject = subject,
 				password = secret,
 				hidden = hidden,
