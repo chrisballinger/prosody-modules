@@ -100,7 +100,9 @@ local function keyval_store_get()
 			local namespace = row[1];
 			local data, err = xml_parse(row[2]);
 			if data then
-				private[namespace] = stanza_preserialize(data);
+				assert(namespace == data.attr.xmlns, "Wrong namespace in private data!");
+				local key = data.name..":"..data.attr.xmlns;
+				private[key] = stanza_preserialize(data);
 			end
 		end
 		return private;
