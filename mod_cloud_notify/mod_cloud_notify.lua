@@ -48,7 +48,7 @@ module:hook("iq-set/self/"..xmlns_push..":enable", function (event)
 		jid = push_jid;
 		node = push_node;
 		count = 0;
-		options = publish_options;
+		options = publish_options and st.preserialize(publish_options);
 	};
 	local ok, err = push_enabled:set(origin.username, user_push_services);
 	if not ok then
@@ -116,7 +116,7 @@ local function handle_notify_request(origin, stanza)
 		push_publish:up(); -- / publish
 		push_publish:up(); -- / pubsub
 		if push_info.options then
-			push_publish:tag("publish-options"):add_child(push_info.options);
+			push_publish:tag("publish-options"):add_child(st.deserialize(push_info.options));
 		end
 		module:send(push_publish);
 	end
