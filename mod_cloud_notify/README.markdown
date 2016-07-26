@@ -40,5 +40,10 @@ Configuration
 
 Configured in-band by supporting clients.
 
+Compatibility
+=============
+
+Should work with 0.9+.
+
 [^1]: The service which is expected to forward notifications to
     something like Google Cloud Messaging or Apple Notification Service
