@@ -26,6 +26,7 @@ end);
 -- http://xmpp.org/extensions/xep-0357.html#enabling
 module:hook("iq-set/self/"..xmlns_push..":enable", function (event)
 	local origin, stanza = event.origin, event.stanza;
+	origin.log("debug", "Attempting to enable push notifications");
 	-- MUST contain a 'jid' attribute of the XMPP Push Service being enabled
 	local push_jid = stanza.tags[1].attr.jid;
 	-- SHOULD contain a 'node' attribute
@@ -53,6 +54,7 @@ module:hook("iq-set/self/"..xmlns_push..":enable", function (event)
 	if not ok then
 		origin.send(st.error_reply(stanza, "wait", "internal-server-error"));
 	else
+		origin.log("info", "Push notifications enabled");
 		origin.send(st.reply(stanza));
 	end
 	return true;
