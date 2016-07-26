@@ -11,8 +11,8 @@ local filters = require "util.filters";
 local xmlns_push = "urn:xmpp:push:0";
 
 -- configuration
-local include_body = module:get_option("push_notification_with_body", false);
-local include_sender = module:get_option("push_notification_with_sender", false);
+local include_body = module:get_option_boolean("push_notification_with_body", false);
+local include_sender = module:get_option_boolean("push_notification_with_sender", false);
 
 -- For keeping state across reloads
 local push_enabled = module:open_store();
