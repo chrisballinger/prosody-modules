@@ -408,6 +408,7 @@ local function handle_read_timeout(event)
 			return false; -- Kick the session
 		end
 		session.log("debug", "Sending <r> (read timeout)");
+		session.awaiting_ack = false;
 		(session.sends2s or session.send)(st.stanza("r", { xmlns = session.smacks }));
 		session.awaiting_ack = true;
 		return true;
