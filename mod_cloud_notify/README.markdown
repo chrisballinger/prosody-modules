@@ -7,11 +7,10 @@ summary: 'XEP-0357: Cloud push notifications'
 Introduction
 ============
 
-This is an implementation of the server bits of [XEP-0357: Push
-Notifications](http://xmpp.org/extensions/xep-0357.html). It allows
-clients to register an "app server" which is notified about new messages
-while the user is offline or disconnected. Implementation of the "app
-server" is not included[^1].
+This is an implementation of the server bits of [XEP-0357: Push Notifications].
+It allows clients to register an "app server" which is notified about new
+messages while the user is offline or disconnected.  Implementation of the
+"app server" is not included[^1].
 
 Details
 =======
