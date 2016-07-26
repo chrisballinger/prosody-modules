@@ -1,5 +1,5 @@
 -- XEP-0357: Push (aka: My mobile OS vendor won't let me have persistent TCP connections)
--- Copyright (C) 2015 Kim Alvefur
+-- Copyright (C) 2015-2016 Kim Alvefur
 --
 -- This file is MIT/X11 licensed.
 
