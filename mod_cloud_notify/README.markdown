@@ -1,6 +1,6 @@
 ---
 labels:
-- 'Stage-Alpha'
+- 'Stage-Beta'
 summary: 'XEP-0357: Cloud push notifications'
 ---
 
