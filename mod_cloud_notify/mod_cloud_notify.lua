@@ -101,7 +101,6 @@ local function handle_notify_request(origin, stanza)
 	local user_push_services = push_enabled:get(node);
 	if not user_push_services then return end
 
-	module:log("debug", "New message to %s@%s, sending push notifications", node, module.host);
 	for _, push_info in pairs(user_push_services) do
 		push_info.count = push_info.count + 1;
 		local push_jid, push_node = push_info.jid, push_info.node;
@@ -126,7 +125,7 @@ local function handle_notify_request(origin, stanza)
 		if push_info.options then
 			push_publish:tag("publish-options"):add_child(st.deserialize(push_info.options));
 		end
-		module:log("debug", "Sending notification to %s", push_jid);
+		module:log("debug", "Sending push notification for %s@%s to %s", node, module.host, push_jid);
 		module:send(push_publish);
 	end
 	push_enabled:set(node, user_push_services);
