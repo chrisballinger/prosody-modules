@@ -3,54 +3,27 @@ module:set_global();
 local tostring = tostring;
 local filters = require "util.filters";
 
-local def_env = module:shared("admin_telnet/env");
-local rawdebug_enabled = module:shared("sessions");
-local full_sessions = prosody.full_sessions;
-local log = module._log;
-
-local rawdebug = {};
-def_env.rawdebug = rawdebug;
-
-local function new_logger(log, prefix)
-	local msg = prefix .. ": %s";
-	return function (data)
-		log("debug", msg, tostring(data))
-		return data;
+local function log_send(t, session)
+	if t and t ~= "" and t ~= " " then
+		session.log("debug", "SEND(%d): %s", #t, tostring(t));
 	end
+	return t;
 end
 
-function rawdebug:enable(sessionid)
-	local session = full_sessions[sessionid];
-	if not session then
-		return nil, "No such session";
+local function log_recv(t, session)
+	if t and t ~= "" and t ~= " " then
+		session.log("debug", "RECV(%d): %s", #t, tostring(t));
 	end
-	local f = {
-		["stanzas/in"]  = new_logger(session.log or log, "RECV");
-		["stanzas/out"] = new_logger(session.log or log, "SEND");
-	};
-	for type, callback in pairs(f) do
-		filters.add_filter(session, type, callback)
-	end
-	rawdebug_enabled[session] = f;
+	return t;
 end
 
-function rawdebug:disable(sessionid)
-	local session = full_sessions[sessionid];
-	if not session then
-		return nil, "No such session";
-	end
-	local f = rawdebug_enabled[session];
-	for type, callback in pairs(f) do
-		filters.remove_filter(session, type, callback)
-	end
+local function init_raw_logging(session)
+	filters.add_filter(session, "bytes/in",  log_recv, -10000);
+	filters.add_filter(session, "bytes/out", log_send,  10000);
 end
 
-function module.unload()
-	def_env.rawdebug = nil;
-	for session, f in pairs(rawdebug_enabled) do
-		for type, callback in pairs(f) do
-			filters.remove_filter(session, type, callback)
-		end
-	end
-end
+filters.add_filter_hook(init_raw_logging);
 
+function module.unload() -- luacheck: ignore
+	filters.remove_filter_hook(init_raw_logging);
+end
