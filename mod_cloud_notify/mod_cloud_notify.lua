@@ -36,11 +36,7 @@ module:hook("iq-set/self/"..xmlns_push..":enable", function (event)
 		origin.send(st.error_reply(stanza, "modify", "bad-request", "Missing jid"));
 		return true;
 	end
-	local publish_options = enable.tags[1];
-	if publish_options and ( publish_options.name ~= "x" or publish_options.attr.xmlns ~= "jabber:x:data" ) then
-		origin.send(st.error_reply(stanza, "modify", "bad-request", "Invalid publish options"));
-		return true;
-	end
+	local publish_options = enable:get_child("x", "jabber:x:data");
 	local user_push_services = push_enabled:get(origin.username);
 	if not user_push_services then
 		user_push_services = {};
