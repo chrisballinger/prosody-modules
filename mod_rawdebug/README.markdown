@@ -1,26 +1,12 @@
 ---
-labels:
-summary: Telnet command for raw stanza logging
-...
+summary: Extra verbose logging of sent and received
+---
 
-# Summary
+Summary
+=======
 
 Sometimes it is useful to get the raw XML logs from clients for
-debugging purposes, but some clients don't expose this. This command
-lets you activate this on specific sessions.
+debugging purposes, but some clients don't expose this.
 
-# Usage
-
-In the telnet console:
-
-    c2s:show()
-    | example.com
-    |    user@example.com/bd0b8b19 [c2sb75e93d8] available(0) (encrypted)
-    |    ...
-    | OK: Total: $n clients
-
-
-    rawdebug:enable"user@example.com/bd0b8b19"
-    > OK
-
-Then everything sent and received will be logged to debug levels.
+This module logs dumps everything sent and received into debug logs, for
+debugging purposes.
