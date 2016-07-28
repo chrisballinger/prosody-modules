@@ -127,7 +127,7 @@ local function handle_notify_request(origin, stanza)
 		end
 		module:send(push_publish);
 	end
-	push_enabled:set(origin.username, user_push_services);
+	push_enabled:set(node, user_push_services);
 end
 
 -- publish on offline message
