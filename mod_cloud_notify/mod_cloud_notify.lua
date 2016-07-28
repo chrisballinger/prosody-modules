@@ -127,6 +127,7 @@ local function handle_notify_request(origin, stanza)
 		end
 		module:send(push_publish);
 	end
+	push_enabled:set(origin.username, user_push_services);
 end
 
 -- publish on offline message
@@ -177,7 +178,8 @@ module:hook("smacks-hibernation-end", restore_session);
 
 
 module:hook("message/offline/broadcast", function(event)
-	local user_push_services = push_enabled:get(event.origin.username);
+	local origin = event.origin;
+	local user_push_services = push_enabled:get(origin.username);
 	if not user_push_services then return end
 
 	for _, push_info in pairs(user_push_services) do
@@ -185,4 +187,5 @@ module:hook("message/offline/broadcast", function(event)
 			push_info.count = 0;
 		end
 	end
+	push_enabled:set(origin.username, user_push_services);
 end, 1);
