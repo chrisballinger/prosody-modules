@@ -42,8 +42,13 @@ module:hook("iq-set/self/"..xmlns_push..":enable", function (event)
 		-- Could be intentional
 		origin.log("debug", "No publish options in request");
 	end
-	local user_push_services = push_enabled:get(origin.username);
+	local user_push_services, rerr  = push_enabled:get(origin.username);
 	if not user_push_services then
+		if rerr then
+			module:log("warn", "Error reading push notification storage: %s", rerr);
+			origin.send(st.error_reply(stanza, "wait", "internal-server-error"));
+			return true;
+		end
 		user_push_services = {};
 	end
 	user_push_services[push_jid .. "<" .. (push_node or "")] = {
