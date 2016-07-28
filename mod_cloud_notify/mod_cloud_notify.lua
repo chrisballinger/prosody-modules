@@ -33,6 +33,7 @@ module:hook("iq-set/self/"..xmlns_push..":enable", function (event)
 	-- SHOULD contain a 'node' attribute
 	local push_node = enable.attr.node;
 	if not push_jid then
+		origin.log("debug", "Push notification enable request missing the 'jid' field");
 		origin.send(st.error_reply(stanza, "modify", "bad-request", "Missing jid"));
 		return true;
 	end
