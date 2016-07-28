@@ -38,6 +38,10 @@ module:hook("iq-set/self/"..xmlns_push..":enable", function (event)
 		return true;
 	end
 	local publish_options = enable:get_child("x", "jabber:x:data");
+	if not publish_options then
+		-- Could be intentional
+		origin.log("debug", "No publish options in request");
+	end
 	local user_push_services = push_enabled:get(origin.username);
 	if not user_push_services then
 		user_push_services = {};
