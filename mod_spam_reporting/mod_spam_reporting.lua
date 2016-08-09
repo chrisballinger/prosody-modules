@@ -12,7 +12,7 @@ module:hook("iq-get/self/urn:xmpp:blocking:blocklist", function (event)
 		local jid = item.attr.jid;
 		if not report or not jid then return end
 		local type = report:get_child("spam") and "spam" or
-			is_abuse = report:get_child("abuse") and "abuse" or
+			report:get_child("abuse") and "abuse" or
 			"unknown";
 		local reason = report:get_child_text("reason") or "no reason given";
 		module:log("warn", "Received report of %s from JID '%s', %s", type, jid, reason);
