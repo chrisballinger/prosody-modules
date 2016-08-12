@@ -228,6 +228,7 @@ end
 -- Handle messages
 local function message_handler(event, c2s)
 	local origin, stanza = event.origin, event.stanza;
+	local log = c2s and origin.log or module._log;
 	local orig_type = stanza.attr.type or "normal";
 	local orig_from = stanza.attr.from;
 	local orig_to = stanza.attr.to or orig_from;
@@ -235,7 +236,7 @@ local function message_handler(event, c2s)
 
 	-- We store chat messages or normal messages that have a body
 	if not(orig_type == "chat" or (orig_type == "normal" and stanza:get_child("body")) ) then
-		module:log("debug", "Not archiving stanza: %s (type)", stanza:top_tag());
+		log("debug", "Not archiving stanza: %s (type)", stanza:top_tag());
 		return;
 	end
 	-- or if hints suggest we shouldn't
@@ -243,7 +244,7 @@ local function message_handler(event, c2s)
 	or stanza:get_child("no-permanent-store", "urn:xmpp:hints")
 	or stanza:get_child("no-storage", "urn:xmpp:hints")
 	or stanza:get_child("no-store", "urn:xmpp:hints") then
-		module:log("debug", "Not archiving stanza: %s (hint)", stanza:top_tag());
+		log("debug", "Not archiving stanza: %s (hint)", stanza:top_tag());
 		return;
 	end
 
@@ -254,7 +255,7 @@ local function message_handler(event, c2s)
 
 	-- Check with the users preferences
 	if shall_store(store_user, with) then
-		module:log("debug", "Archiving stanza: %s", stanza:top_tag());
+		log("debug", "Archiving stanza: %s", stanza:top_tag());
 
 		-- And stash it
 		local ok, id = archive:append(store_user, nil, stanza, time_now(), with);
@@ -263,7 +264,7 @@ local function message_handler(event, c2s)
 			module:fire_event("archive-message-added", { origin = origin, stanza = stanza, for_user = store_user, id = id });
 		end
 	else
-		module:log("debug", "Not archiving stanza: %s (prefs)", stanza:top_tag());
+		log("debug", "Not archiving stanza: %s (prefs)", stanza:top_tag());
 	end
 end
 
