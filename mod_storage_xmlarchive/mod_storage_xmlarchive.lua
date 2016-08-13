@@ -219,7 +219,7 @@ end
 function provider:purge(username)
 	for store in dm.stores(username, module.host) do
 		local dates = dm.list_load(username, module.host, store) or empty;
-		if dates[1] and type(dates[1]) == "string" and dates[1]:match("^%d%d%d%d%-%d%d-%d%d$") then
+		if dates[1] and type(dates[1]) == "string" and dates[1]:match("^%d%d%d%d%-%d%d%-%d%d$") then
 			module:log("info", "Store %s looks like an archive store, emptying it...", store);
 			provider:open(store, "archive"):delete(username);
 		end
