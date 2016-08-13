@@ -23,7 +23,7 @@ You can then set some options to configure your desired policy:
   -------------------------------- --------------- -------------------------------------------------------------------------------------------------------------------------------------------------
   block\_registrations\_users      `{ "admin" }`   A list of reserved usernames
   block\_registrations\_matching   `{ }`           A list of [Lua patterns](http://www.lua.org/manual/5.1/manual.html#5.4.1) matching reserved usernames (slower than block\_registrations\_users)
-  block\_registrations\_allow      `nil`           A pattern that registered user accounts MUST match to be allowed
+  block\_registrations\_require    `nil`           A pattern that registered user accounts MUST match to be allowed
 
 Some examples:
 
@@ -31,7 +31,7 @@ Some examples:
     block_registrations_matching = {
       "master$" -- matches anything ending with master: postmaster, hostmaster, webmaster, etc.
     }
-    block_registrations_allow = "^[a-zA-Z0-9_-.]$" -- Allow only simple ASCII characters in usernames
+    block_registrations_require = "^[a-zA-Z0-9_-.]+$" -- Allow only simple ASCII characters in usernames
 
 Compatibility
 =============
