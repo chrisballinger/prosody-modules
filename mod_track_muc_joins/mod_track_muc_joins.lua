@@ -13,7 +13,7 @@ module:hook("presence/full", function (event)
 
 	local from_jid = stanza.attr.from;
 	local room = jid_bare(from_jid);
-	local nick = jid_split(from_jid);
+	local _,_,nick = jid_split(from_jid);
 	local joined = stanza.attr.type;
 	if joined == nil then
 		joined = nick;
