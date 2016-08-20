@@ -1,4 +1,3 @@
-local st = require "util.stanza";
 
 module:depends("blocklist");
 
