@@ -16,6 +16,9 @@ module:hook("iq-set/self/urn:xmpp:blocking:block", function (event)
 				"unknown";
 			local reason = report:get_child_text("reason") or "no reason given";
 			module:log("warn", "Received report of %s from JID '%s', %s", type, jid, reason);
+			module:fire_event(module.name.."/"..type.."-report", {
+				origin = event.origin, stanza = event.stanza,
+				item = item, report = report, reason = reason, });
 		end
 	end
 end, 1);
