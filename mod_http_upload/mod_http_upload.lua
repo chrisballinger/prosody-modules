@@ -24,6 +24,13 @@ end
 -- config
 local file_size_limit = module:get_option_number(module.name .. "_file_size_limit", 1024 * 1024); -- 1 MB
 
+--- sanity
+local parser_body_limit = module:context("*"):get_option_number("http_max_content_size", 10*1024*1024);
+if file_size_limit > parser_body_limit then
+	module:log("warn", "%s_file_size_limit exceeds HTTP parser limit on body size, capping file size to %d B", module.name, parser_body_limit);
+	file_size_limit = parser_body_limit;
+end
+
 -- depends
 module:depends("http");
 module:depends("disco");
