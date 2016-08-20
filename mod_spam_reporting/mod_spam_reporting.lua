@@ -1,3 +1,7 @@
+-- XEP-0377: Spam Reporting for Prosody
+-- Copyright (C) -2016 Kim Alvefur
+--
+-- This file is MIT/X11 licensed.
 
 module:depends("blocklist");
 
