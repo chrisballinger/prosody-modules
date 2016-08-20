@@ -1,25 +1,28 @@
 ---
-labels: Stage-Alpha
 description: HTTP File Upload
-...
+labels: 'Stage-Alpha'
+---
 
 Introduction
 ============
 
-This module implements [XEP-0363], which lets clients upload files over
-HTTP.
+This module implements [XEP-0363], which lets clients upload files
+over HTTP.
 
 Configuration
 =============
 
 mod\_http\_upload relies on Prosodys HTTP server and mod\_http for
-serving HTTP requests. See [Prosodys HTTP server
-documentation](https://prosody.im/doc/http) for information about how to
-configure ports, HTTP Host names etc.
+serving HTTP requests. See [Prosodys HTTP server documentation][doc:http]
+for information about how to configure ports, HTTP Host names etc.
 
-Simply add a new Component definition:
+The module can be added as a new Component definition:
 
-    Component "upload.example.org" "http_upload"
+``` {.lua}
+Component "upload.example.org" "http_upload"
+```
+
+Alternatively it can be added to `modules_enabled` like other modules.
 
 Limits
 ------
@@ -30,7 +33,7 @@ A maximum file size can be set by:
 http_upload_file_size_limit = 123 -- bytes
 ```
 
-Default is 1MB (1024*1024).
+Default is 1MB (1024\*1024).
 
 Path
 ----
