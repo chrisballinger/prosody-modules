@@ -6,7 +6,7 @@ module:add_feature("urn:xmpp:reporting:0");
 module:add_feature("urn:xmpp:reporting:reason:spam:0");
 module:add_feature("urn:xmpp:reporting:reason:abuse:0");
 
-module:hook("iq-get/self/urn:xmpp:blocking:blocklist", function (event)
+module:hook("iq-set/self/urn:xmpp:blocking:block", function (event)
 	for item in event.stanza.tags[1]:childtags("item") do
 		local report = item:get_child("report", "urn:xmpp:reporting:0");
 		local jid = item.attr.jid;
