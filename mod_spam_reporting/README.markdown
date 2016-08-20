@@ -1,6 +1,8 @@
 ---
 depends:
 - 'mod\_blocklist'
+labels:
+- 'Stage-Beta'
 summary: 'XEP-0377: Spam Reporting'
 ---
 
