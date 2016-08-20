@@ -3,6 +3,8 @@
 --
 -- This file is MIT/X11 licensed.
 
+local jid_prep = require "util.jid".prep;
+
 module:depends("blocklist");
 
 module:add_feature("urn:xmpp:reporting:0");
@@ -12,7 +14,7 @@ module:add_feature("urn:xmpp:reporting:reason:abuse:0");
 module:hook("iq-set/self/urn:xmpp:blocking:block", function (event)
 	for item in event.stanza.tags[1]:childtags("item") do
 		local report = item:get_child("report", "urn:xmpp:reporting:0");
-		local jid = item.attr.jid;
+		local jid = jid_prep(item.attr.jid);
 		if report and jid then
 			local type = report:get_child("spam") and "spam" or
 				report:get_child("abuse") and "abuse" or
