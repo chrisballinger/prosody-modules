@@ -10,11 +10,12 @@ module:hook("iq-set/self/urn:xmpp:blocking:block", function (event)
 	for item in event.stanza.tags[1]:childtags("item") do
 		local report = item:get_child("report", "urn:xmpp:reporting:0");
 		local jid = item.attr.jid;
-		if not report or not jid then return end
-		local type = report:get_child("spam") and "spam" or
-			report:get_child("abuse") and "abuse" or
-			"unknown";
-		local reason = report:get_child_text("reason") or "no reason given";
-		module:log("warn", "Received report of %s from JID '%s', %s", type, jid, reason);
+		if report and jid then
+			local type = report:get_child("spam") and "spam" or
+				report:get_child("abuse") and "abuse" or
+				"unknown";
+			local reason = report:get_child_text("reason") or "no reason given";
+			module:log("warn", "Received report of %s from JID '%s', %s", type, jid, reason);
+		end
 	end
 end, 1);
