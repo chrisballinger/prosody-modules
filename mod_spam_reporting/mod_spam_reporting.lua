@@ -19,7 +19,7 @@ module:hook("iq-set/self/urn:xmpp:blocking:block", function (event)
 			local type = report:get_child("spam") and "spam" or
 				report:get_child("abuse") and "abuse" or
 				"unknown";
-			local reason = report:get_child_text("reason") or "no reason given";
+			local reason = report:get_child_text("text") or "no reason given";
 			module:log("warn", "Received report of %s from JID '%s', %s", type, jid, reason);
 			module:fire_event(module.name.."/"..type.."-report", {
 				origin = event.origin, stanza = event.stanza,
