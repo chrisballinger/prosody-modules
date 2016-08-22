@@ -11,7 +11,7 @@
 local st = require"util.stanza";
 local lfs = require"lfs";
 local uuid = require"util.uuid".generate;
-local urlencode = require"util.http".urlencode;
+local url = require "socket.url";
 local dataform = require "util.dataforms".new;
 local t_concat = table.concat;
 local t_insert = table.insert;
@@ -85,9 +85,16 @@ module:hook("iq/host/"..xmlns_http_upload..":request", function (event)
 	reply:tag("slot", { xmlns = xmlns_http_upload });
 	local random = uuid();
 	pending_slots[random.."/"..filename] = origin.full_jid;
-	local url = module:http_url() .. "/" .. random .. "/" .. urlencode(filename);
-	reply:tag("get"):text(url):up();
-	reply:tag("put"):text(url):up();
+	local base_url = module:http_url();
+	local slot_url = url.parse(base_url);
+	slot_url.path = url.parse_path(slot_url.path);
+	t_insert(slot_url.path, random);
+	t_insert(slot_url.path, filename);
+	slot_url.path.is_directory = false;
+	slot_url.path = url.build_path(slot_url.path);
+	slot_url = url.build(slot_url);
+	reply:tag("get"):text(slot_url):up();
+	reply:tag("put"):text(slot_url):up();
 	origin.send(reply);
 	origin.log("debug", "Given upload slot %q", random);
 	return true;
