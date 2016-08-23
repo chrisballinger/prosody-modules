@@ -12,6 +12,10 @@ local dt = require"util.datetime";
 local new_stream = require "util.xmppstream".new;
 local empty = {};
 
+if not dm.append_raw then
+	module:require"datamanager_append_raw";
+end
+
 local archive = {};
 local archive_mt = { __index = archive };
 
