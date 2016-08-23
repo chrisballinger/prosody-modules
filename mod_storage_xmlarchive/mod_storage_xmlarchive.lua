@@ -5,6 +5,7 @@
 --
 -- luacheck: ignore unused self
 
+local lfs = require "lfs";
 local dm = require "core.storagemanager".olddm;
 local hmac_sha256 = require"util.hashes".hmac_sha256;
 local st = require"util.stanza";
@@ -37,13 +38,14 @@ function archive:append(username, _, data, when, with)
 		return nil, err;
 	end
 
+	-- If the day-file is missing then we need to add it to the list of days
+	local first_of_day = not lfs.attributes(dm.getpath(username .. "@" .. day, module.host, self.store, "list"));
+
 	local offset = ok and err;
 
 	local id = day .. "-" .. hmac_sha256(username.."@"..day.."+"..offset, data, true):sub(-16);
 	ok, err = dm.list_append(username.."@"..day, module.host, self.store, { id = id, when = dt.datetime(when), with = with, offset = offset, length = #data });
-	if offset == 0 then
-		-- means the message is at the beginnig of the file, so it's a new day
-		-- so we add this new day to the "index"
+	if ok and first_of_day then
 		ok, err = dm.list_append(username, module.host, self.store, day);
 	end
 	if not ok then
