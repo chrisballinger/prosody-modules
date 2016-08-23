@@ -88,7 +88,7 @@ module:hook("iq/host/"..xmlns_http_upload..":request", function (event)
 	pending_slots[random.."/"..filename] = origin.full_jid;
 	local base_url = module:http_url();
 	local slot_url = url.parse(base_url);
-	slot_url.path = url.parse_path(slot_url.path);
+	slot_url.path = url.parse_path(slot_url.path or "/");
 	t_insert(slot_url.path, random);
 	t_insert(slot_url.path, filename);
 	slot_url.path.is_directory = false;
