@@ -38,6 +38,7 @@ module:depends("disco");
 -- namespace
 local xmlns_http_upload = "urn:xmpp:http:upload";
 
+-- identity and feature advertising
 module:add_identity("store", "file", module:get_option_string("name", "HTTP File Upload"))
 module:add_feature(xmlns_http_upload);
 
