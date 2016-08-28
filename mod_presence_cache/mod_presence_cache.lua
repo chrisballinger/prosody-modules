@@ -79,6 +79,7 @@ local function answer_probe_from_cache(event)
 
 	local username = origin.username;
 	local contact_bare = stanza.attr.to;
+	if not contact_bare then return; end -- probe to self
 
 	local bare_cache_key = username .. "\0" .. contact_bare;
 
