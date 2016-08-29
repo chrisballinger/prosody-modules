@@ -7,6 +7,7 @@ local xmlns_mam     = "urn:xmpp:mam:0";
 local xmlns_delay   = "urn:xmpp:delay";
 local xmlns_forward = "urn:xmpp:forward:0";
 
+local um = require "core.usermanager";
 local st = require "util.stanza";
 local rsm = module:require "rsm";
 local get_prefs = module:require"mamprefs".get;
@@ -206,6 +207,9 @@ end
 
 local function shall_store(user, who)
 	-- TODO Cache this?
+	if not um.user_exists(user, host) then
+		return false;
+	end
 	local prefs = get_prefs(user);
 	local rule = prefs[who];
 	module:log("debug", "%s's rule for %s is %s", user, who, tostring(rule));
@@ -295,7 +299,6 @@ if cleanup_after ~= "never" then
 	cleanup = {};
 
 	pcall(function ()
-		local um = require "core.usermanager";
 		for user in um.users(module.host) do
 			cleanup[user] = true;
 		end
