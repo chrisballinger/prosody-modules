@@ -3,6 +3,8 @@ local base64_decode = require "util.encodings".base64.decode;
 
 local max_seconds = module:get_option_number("log_slow_events_threshold", 0.5);
 
+local measure_slow_event = module:measure("slow_events", "rate");
+
 function event_wrapper(handlers, event_name, event_data)
 	local start = time();
 	local ret = handlers(event_name, event_data);
@@ -44,6 +46,7 @@ function event_wrapper(handlers, event_name, event_data)
 				end
 			end
 		end
+		measure_slow_event();
 		module:log("warn", "Slow event '%s' took %0.2fs: %s", event_name, duration, next(data) and table.concat(data, ", ") or "no recognised data");
 	end
 	return ret;
