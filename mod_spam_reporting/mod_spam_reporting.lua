@@ -22,7 +22,7 @@ module:hook("iq-set/self/urn:xmpp:blocking:block", function (event)
 			local reason = report:get_child_text("text") or "no reason given";
 			module:log("warn", "Received report of %s from JID '%s', %s", type, jid, reason);
 			module:fire_event(module.name.."/"..type.."-report", {
-				origin = event.origin, stanza = event.stanza,
+				origin = event.origin, stanza = event.stanza, jid = jid,
 				item = item, report = report, reason = reason, });
 		end
 	end
