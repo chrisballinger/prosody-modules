@@ -172,7 +172,7 @@ local driver = {};
 function driver:open(store, typ)
     local adapter = adapters[store];
 
-    if adapter and not typ then
+    if adapter and typ == nil or typ == "keyval" then
         return adapter;
     end
     return nil, "unsupported-store";
