@@ -32,8 +32,6 @@ if prosody and prosody.arg then
 	c2s_sessions, s2s_sessions = module:shared("/*/c2s/sessions", "/*/s2s/sessions");
 end
 
-local memory_update_interval = module:get_option_number("statistics_meminfo_interval", 60);
-
 local stats = {
 	total_users = {
 		get = function () return it.count(it.keys(bare_sessions)); end
@@ -90,6 +88,12 @@ local stats = {
 		tostring = "%s%%";
 	};
 };
+
+local memory_update_interval = 60;
+if prosody and prosody.arg then
+	memory_update_interval = module:get_option_number("statistics_meminfo_interval", 60);
+end
+
 
 if has_pposix and pposix.meminfo then
 
