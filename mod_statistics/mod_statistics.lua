@@ -94,6 +94,10 @@ function listener.ondisconnect(conn)
 	sessions[conn] = nil;
 end
 
+function listener.onreadtimeout()
+	return true;
+end
+
 function module.load()
 	if not(prosody and prosody.arg) then
 		return;
