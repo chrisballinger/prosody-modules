@@ -28,7 +28,7 @@ module:hook("presence/full", function (event)
 		return; -- Never sent presence there, can't be a MUC join
 	end
 
-	-- Check for status code 100, meaning it's their own reflected presence
+	-- Check for status code 110, meaning it's their own reflected presence
 	for status in muc_x:childtags("status") do
 		log("debug", "Status code %d", status.attr.code);
 		if status.attr.code == "110" then
