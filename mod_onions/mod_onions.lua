@@ -273,3 +273,11 @@ end
 module:log("debug", "Onions ready and loaded");
 
 module:hook("route/remote", route_to_onion, 200);
+
+module:hook_global("s2s-check-certificate", function (event)
+	local host = event.host;
+	if host and host:find("%.onion$") then
+		return true;
+	end
+end);
+
