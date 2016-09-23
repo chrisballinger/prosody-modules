@@ -272,4 +272,4 @@ end
 
 module:log("debug", "Onions ready and loaded");
 
-hosts[module.host].events.add_handler("route/remote", route_to_onion, 200);
+module:hook("route/remote", route_to_onion, 200);
