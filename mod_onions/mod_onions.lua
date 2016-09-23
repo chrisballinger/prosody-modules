@@ -236,7 +236,7 @@ local function route_to_onion(event)
 	local onion_host = nil;
 	local onion_port = nil;
 
-	if not to_host:find("%.onion(%.?)$") then
+	if not to_host:find("%.onion$") then
 		if onions_map[to_host] then
 			if type(onions_map[to_host]) == "string" then
 				onion_host = onions_map[to_host];
