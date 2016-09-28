@@ -1,5 +1,8 @@
-mod_http_roster_admin
-=====================
+---
+labels:
+- 'Stage-Beta'
+summary: Delegate roster management to an external service
+...
 
 NOTE: THIS MODULE IS RELEASED UNDER THE MOZILLA PUBLIC LICENSE VERSION 2.
 
