@@ -38,7 +38,7 @@ module:hook("route/remote", function (event)
 		end
 		return false;
 	end
-end, 1000);
+end, -9);
 
 
 module:hook("s2s-stream-features", function (event)
