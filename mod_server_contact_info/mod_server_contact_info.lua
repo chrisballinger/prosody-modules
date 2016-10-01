@@ -14,10 +14,10 @@ local valid_types = {
 }
 
 local contact_config = module:get_option("contact_info");
-if not contact_config then -- we'll use admins from the config as default
+if not contact_config or not next(contact_config) then -- we'll use admins from the config as default
 	local admins = module:get_option_inherited_set("admins", {});
 	if admins:empty() then
-		module:log("debug", "No contact_info or admins in config");
+		module:log("error", "No contact_info or admins set in config");
 		return -- Nothing to attach, so we'll just skip it.
 	end
 	module:log("debug", "No contact_info in config, using admins as fallback");
@@ -25,10 +25,7 @@ if not contact_config then -- we'll use admins from the config as default
 		admin = array.collect( admins / function(admin) return "xmpp:" .. admin; end);
 	};
 end
-if not next(contact_config) then
-	module:log("debug", "No contacts, skipping");
-	return -- No use in serving an empty form.
-end
+
 local form_layout = {
 	{ value = "http://jabber.org/network/serverinfo"; type = "hidden"; name = "FORM_TYPE"; };
 };
