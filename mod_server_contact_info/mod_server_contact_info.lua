@@ -1,4 +1,10 @@
--- This plugin implements http://xmpp.org/extensions/xep-0157.html
+-- XEP-0157: Contact Addresses for XMPP Services for Prosody
+--
+-- Copyright (C) 2011-2016 Kim Alvefur
+--
+-- This file is MIT/X11 licensed.
+--
+
 local t_insert = table.insert;
 local array = require "util.array";
 local df_new = require "util.dataforms".new;
@@ -29,6 +35,7 @@ end
 local form_layout = {
 	{ value = "http://jabber.org/network/serverinfo"; type = "hidden"; name = "FORM_TYPE"; };
 };
+
 local form_values = {};
 
 for t in pairs(valid_types) do
