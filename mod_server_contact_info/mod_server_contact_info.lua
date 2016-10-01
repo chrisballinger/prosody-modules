@@ -31,10 +31,19 @@ local form_layout = {
 };
 local form_values = {};
 
-for t,a in pairs(contact_config) do
-	if valid_types[t] and a then
+for t in pairs(valid_types) do
+	local addresses = contact_config[t];
+	if addresses then
 		t_insert(form_layout, { name = t .. "-addresses", type = "list-multi" });
-		form_values[t .. "-addresses"] = type(a) == "table" and a or {a};
+		local values = {};
+		if type(addresses) ~= "table" then
+			values[1] = { value = addresses };
+		else
+			for i, address in ipairs(addresses) do
+				values[i] = { value = address };
+			end
+		end
+		form_values[t .. "-addresses"] = values;
 	end
 end
 
