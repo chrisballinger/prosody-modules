@@ -8,6 +8,6 @@ local st = require "util.stanza";
 module:hook("iq/host/urn:ietf:params:xml:ns:xmpp-bind:bind", function(event)
 	local fixed_stanza = st.clone(event.stanza);
 	fixed_stanza.attr.to = nil;
-	core_process_stanza(event.origin, fixed_stanza);
+	prosody.core_process_stanza(event.origin, fixed_stanza);
 	return true;
 end);
