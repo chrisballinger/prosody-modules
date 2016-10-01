@@ -1,19 +1,25 @@
 ---
 labels:
-- 'Stage-Alpha'
+- 'Stage-Beta'
 summary: Contact Addresses for XMPP Services
-...
+---
 
 Introduction
 ============
 
-This module implements [XEP-0157: Contact Addresses for XMPP
-Services](http://xmpp.org/extensions/xep-0157.html).
+This module lets you advertise various contact addresses for your XMPP
+service via [XEP-0157].
 
 Configuration
 =============
 
-``` lua
+Various types of contact addresses can be set via the single table
+option `contact_info`. Each field is either a string or a list of
+strings. Each string should be an URI.
+
+An example showing all possible fields:
+
+``` {.lua}
 contact_info = {
   abuse = { "mailto:abuse@shakespeare.lit", "xmpp:abuse@shakespeare.lit" };
   admin = { "mailto:admin@shakespeare.lit", "xmpp:admin@shakespeare.lit" };
@@ -24,11 +30,13 @@ contact_info = {
 };
 ```
 
-The default is based on the `admins` config variable.
+If not set, the `admins` option will be used.
 
 Compatibility
 =============
 
-  ------- -------
-  trunk   Works
-  ------- -------
+  ------ ---------------
+  0.10   works
+  0.9    works
+  0.8    does not work
+  ------ ---------------
