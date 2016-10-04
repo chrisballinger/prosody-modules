@@ -6,6 +6,7 @@ local throttle = require "util.throttle";
 local gettime = require "socket".gettime;
 
 local max = module:get_option_number("unsolicited_messages_per_minute", 10);
+local s2s_max = module:get_option_number("unsolicited_s2s_messages_per_minute");
 local multiplier = module:get_option_number("throttle_unsolicited_burst", 1);
 
 function check_subscribed(event)
@@ -50,5 +51,43 @@ end
 
 module:hook("pre-message/bare", check_subscribed, 200);
 module:hook("pre-message/full", check_subscribed, 200);
+
+local full_sessions = prosody.full_sessions;
+
+-- Rooms and throttle creation will differ for s2s
+function check_subscribed_s2s(event)
+	local stanza, origin = event.stanza, event.origin;
+	local log = origin.log or module._log;
+
+	if origin.type ~= "s2sin" then return end
+
+	local to_orig = stanza.attr.to;
+	local from_orig = stanza.attr.from;
+	local from_bare = jid_bare(from_orig);
+
+	local target = full_sessions[to_orig];
+	if target then
+		local rooms = target.rooms_joined;
+		if rooms and rooms[from_bare] then
+			log("debug", "Message to joined room, no limit");
+			return
+		end
+	end
+
+	-- Retrieve or create throttle object
+	local lim = origin.throttle_unsolicited;
+	if not lim then
+		log("debug", "New s2s throttle");
+		lim = throttle.create(s2s_max * multiplier, 60 * multiplier);
+		origin.throttle_unsolicited = lim;
+	end
+
+	return check_subscribed(event);
+end
+
+if s2s_max then
+	module:hook("message/bare", check_subscribed_s2s, 200);
+	module:hook("message/full", check_subscribed_s2s, 200);
+end
 
 module:depends("track_muc_joins");
