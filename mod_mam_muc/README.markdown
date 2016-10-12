@@ -26,17 +26,8 @@ modules_enabled = {
 }
 ```
 
-And configure it to use an archive-capable storage module.
-
-Here's an example that makes *only* mod\_mam\_muc use SQL storage:
-
-``` {.lua}
-storage = {
-    muc_log = "sql"; -- Requires 0.10 or later
-}
-```
-
-For more details see [Prosodys data storage documentation][doc:storage].
+mod\_mam\_muc needs an archive-capable storage module, see
+[Prosodys storage documentation][doc:storage] for how to select one.
 
 Configuration
 =============
