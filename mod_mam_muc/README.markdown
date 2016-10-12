@@ -28,6 +28,7 @@ modules_enabled = {
 
 mod\_mam\_muc needs an archive-capable storage module, see
 [Prosodys storage documentation][doc:storage] for how to select one.
+The store is called "muc\_log".
 
 Configuration
 =============
