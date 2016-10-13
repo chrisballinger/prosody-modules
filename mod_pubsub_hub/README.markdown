@@ -6,7 +6,7 @@ Introduction
 ============
 
 This module implements a
-[PubSubHubbub](http://pubsubhubbub.googlecode.com/svn/trunk/pubsubhubbub-core-0.3.html)
+[PubSubHubbub](http://pubsubhubbub.github.io/PubSubHubbub/pubsubhubbub-core-0.3.html)
 (PuSH) hub, allowing PuSH clients to subscribe to local XMPP
 [Publish-Subscribe](http://xmpp.org/extensions/xep-0060.html) nodes
 stored by [mod\_pubsub](http://prosody.im/doc/modules/mod_pubsub) and
