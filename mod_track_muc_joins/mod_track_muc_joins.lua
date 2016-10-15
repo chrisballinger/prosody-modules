@@ -6,6 +6,7 @@ module:hook("presence/full", function (event)
 	local stanza = event.stanza;
 	local session = sessions[stanza.attr.to];
 	if not session then return end;
+	if not session.directed then return end -- hasn't sent presence yet
 	local log = session.log or module._log;
 
 	local muc_x = stanza:get_child("x", "http://jabber.org/protocol/muc#user");
@@ -24,7 +25,7 @@ module:hook("presence/full", function (event)
 		return;
 	end
 
-	if joined and not session.directed or not session.directed[from_jid] then
+	if joined and not session.directed[from_jid] then
 		return; -- Never sent presence there, can't be a MUC join
 	end
 
