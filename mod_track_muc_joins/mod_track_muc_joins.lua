@@ -44,5 +44,5 @@ module:hook("presence/full", function (event)
 			return;
 		end
 	end
-end);
+end, 1);
 
