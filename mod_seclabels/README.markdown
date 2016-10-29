@@ -7,8 +7,8 @@ summary: Security Labels
 Introduction
 ============
 
-This module implements [XEP-0258: Security Labels in
-XMPP](http://xmpp.org/extensions/xep-0258.htmla).
+This module implements [XEP-0258: Security Labels in XMPP], but not
+actual policy enforcement. See for example [mod_firewall] for that.
 
 Configuration
 =============
