@@ -2,7 +2,7 @@ local io_open = io.open;
 local dm = require "core.storagemanager".olddm;
 
 -- Append a blob of data to a file
-function dm.append(username, host, datastore, ext, data)
+function dm.append_raw(username, host, datastore, ext, data)
 	if type(data) ~= "string" then return; end
 	local filename = dm.getpath(username, host, datastore, ext, true);
 
