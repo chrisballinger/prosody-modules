@@ -3,6 +3,12 @@ local condition_handlers = {};
 
 local jid = require "util.jid";
 
+-- Helper to convert user-input strings (yes/true//no/false) to a bool
+local function string_to_boolean(s)
+	s = s:lower();
+	return s == "yes" or s == "true";
+end
+
 -- Return a code string for a condition that checks whether the contents
 -- of variable with the name 'name' matches any of the values in the
 -- comma/space/pipe delimited list 'values'.
@@ -88,6 +94,15 @@ end
 
 function condition_handlers.LEAVING(zone)
 	return zone_check(zone, "from");
+end
+
+function condition_handlers.IN_ROSTER(yes_no)
+	local in_roster_requirement = string_to_boolean(yes_no);
+	return "not "..(in_roster_requirement and "not" or "").." roster_entry", { "roster_entry" };
+end
+
+function condition_handlers.IN_ROSTER_GROUP(group)
+	return ("not not (roster_entry and roster_entry.groups[%q])"):format(group), { "roster_entry" };
 end
 
 function condition_handlers.PAYLOAD(payload_ns)

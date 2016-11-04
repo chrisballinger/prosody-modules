@@ -123,6 +123,11 @@ local available_deps = {
 			return ("local multi_throttle_%s = rates.%s:multi();"):format(throttle, throttle);
 		end;
 	};
+	roster_entry = {
+		global_code = [[local rostermanager = require "core.rostermanager";]];
+		local_code = [[local roster_entry = (rostermanager.load_roster(to_node, to_host) or {})[bare_from];]];
+		depends = { "split_to", "bare_from" };
+	}
 };
 
 local function include_dep(dependency, code)
