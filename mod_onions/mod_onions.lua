@@ -65,14 +65,11 @@ local function socks5_connect_sent(conn, data)
 		end
 
 		-- this means the server tells us to connect on an IPv4 address
-		local ip1 = byte(data, 5);
-		local ip2 = byte(data, 6);
-		local ip3 = byte(data, 7);
-		local ip4 = byte(data, 8);
+		local ip = string.format("%d.%d.%d.%d", byte(data, 5,8));
 		local port = band(byte(data, 9), lshift(byte(data, 10), 8));
-		module:log("debug", "Should connect to: "..ip1.."."..ip2.."."..ip3.."."..ip4..":"..port);
+		module:log("debug", "Should connect to: %s:%d", ip, port);
 
-		if not (ip1 == 0 and ip2 == 0 and ip3 == 0 and ip4 == 0 and port == 0) then
+		if not (ip == "0.0.0.0" and port == 0) then
 			module:log("debug", "The SOCKS5 proxy tells us to connect to a different IP, don't know how. :(");
 			session:close(false);
 			return;
