@@ -24,11 +24,11 @@ local c = string.char;
 
 module:depends("s2s");
 
-local proxy_ip = module:get_option("onions_socks5_host") or "127.0.0.1";
-local proxy_port = module:get_option("onions_socks5_port") or 9050;
-local forbid_else = module:get_option("onions_only") or false;
-local torify_all = module:get_option("onions_tor_all") or false;
-local onions_map = module:get_option("onions_map") or {};
+local proxy_ip = module:get_option_string("onions_socks5_host", "127.0.0.1");
+local proxy_port = module:get_option_number("onions_socks5_port", 9050);
+local forbid_else = module:get_option_boolean("onions_only", false);
+local torify_all = module:get_option_boolean("onions_tor_all", false);
+local onions_map = module:get_option("onions_map", {});
 
 local sessions = module:shared("sessions");
 
