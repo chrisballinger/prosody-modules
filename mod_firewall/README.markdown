@@ -204,6 +204,27 @@ normalisation or validity checks on the to/from JIDs on an incoming
 stanza. It is not advisable to perform access control or similar rules
 on JIDs in these chains (see the chain documentation for more info).
 
+### Roster
+
+These functions access the roster of the recipient (only). Therefore they cannot (currently)
+be used in some chains, such as for outgoing messages (the recipient may be on another server).
+
+Performance note: this check can potentially cause storage access (especially if the recipient
+is currently offline), so you may want to limit its use in high-traffic situations, and place
+it below other checks (such as a rate limiter).
+
+#### IN_ROSTER
+
+Tests whether the sender is in the recipient's roster.
+
+    IN_ROSTER: yes
+
+#### IN_ROSTER_GROUP
+
+Tests whether the sender is in the recipient's roster, and in the named group.
+
+    IN_ROSTER_GROUP: Friends
+
 ### Time and date
 
 #### TIME
