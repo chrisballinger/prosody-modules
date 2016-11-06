@@ -64,7 +64,7 @@ end, -0.5);
 
 module:add_timer(14400, function (now)
 	for host, time in pairs(notified_about_already) do
-		if time + 86400 > now then
+		if time + 86400 < now then
 			notified_about_already[host] = nil;
 		end
 	end
