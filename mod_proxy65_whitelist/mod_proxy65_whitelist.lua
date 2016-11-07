@@ -22,7 +22,7 @@ local function filter_streamhosts(tag)
 end
 
 module:hook("iq/full", function (event)
-	local stanza, origin = event.stanza, event.origin;
+	local stanza = event.stanza;
 	if stanza.attr.type == "set" then
 		local payload = stanza:get_child("query", "http://jabber.org/protocol/bytestreams");
 		if payload then
