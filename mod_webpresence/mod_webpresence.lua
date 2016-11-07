@@ -29,7 +29,7 @@ local function handle_request(event, path)
     end
     if user and host then
       local user_sessions = hosts[host] and hosts[host].sessions[user];
-      if user_sessions then
+      if user_sessions and user_sessions.top_resources then
         status = user_sessions.top_resources[1];
         if status and status.presence then
           message = status.presence:child_with_name("status");
