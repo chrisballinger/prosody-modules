@@ -8,6 +8,12 @@ if module:get_option_boolean("allow_local_streamhosts", true) then
 	end
 end
 
+module:hook_global("host-activated", function (host)
+	if hosts[host].modules.proxy65 then
+		allowed_streamhosts:add(host);
+	end
+end);
+
 local function filter_streamhosts(tag)
 	if tag.name == "streamhost" and not allowed_streamhosts:contains(tag.attr.jid) then
 		return nil;
