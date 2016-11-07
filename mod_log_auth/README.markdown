@@ -26,7 +26,7 @@ configuration for fail2ban:
     # /etc/fail2ban/filter.d/prosody-auth.conf
     # Fail2Ban configuration file for prosody authentication
     [Definition]
-    failregex = Failed authentication attempt \(not-authorized\) from IP: <HOST>
+    failregex = Failed authentication attempt \(not-authorized\) for user .* from IP: <HOST>
     ignoreregex =
 
 And at the appropriate place (usually the bottom) of
