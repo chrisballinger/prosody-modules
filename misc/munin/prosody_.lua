@@ -1,5 +1,8 @@
 #!/usr/bin/env lua
 
+-- Script for use with mod_statistics
+-- Create symlinks to this named eg prosody_c2s in /etc/munin/plugins
+
 local print = print;
 local pairs = pairs;
 local socket = require"socket";
