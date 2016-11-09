@@ -67,7 +67,7 @@ function driver:append(node, key, stanza, when, with) -- luacheck: ignore 212/ke
 	return today .. "_" .. #data;
 end
 
-function driver:find(node, query)
+function driver:dates(node)
 	local path = datamanager.getpath(node, host, datastore):match("(.*)/");
 
 	local ok, iter, state, var = pcall(lfs.dir, path);
@@ -84,6 +84,12 @@ function driver:find(node, query)
 	end
 	if dates[1] == nil then return noop, 0; end
 	table.sort(dates);
+	return dates;
+end
+
+function driver:find(node, query)
+	local dates, err = self:dates(node);
+	if not dates then return dates, err; end
 
 	return coroutine.wrap(function ()
 		local start_date = query and query.start and os_date(datef, query.start) or dates[1];
