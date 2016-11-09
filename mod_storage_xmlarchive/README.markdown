@@ -3,7 +3,7 @@ labels:
 - 'Stage-Beta'
 - 'Type-Storage'
 - ArchiveStorage
-summary: XML archive storage
+summary: XML file based archive storage
 ...
 
 Introduction
