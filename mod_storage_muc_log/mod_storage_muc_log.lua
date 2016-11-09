@@ -1,3 +1,4 @@
+-- luacheck: ignore 212/self 431/err
 
 local datamanager = require"core.storagemanager".olddm;
 local xml_parse = require"util.xml".parse;
@@ -48,7 +49,9 @@ local function st_with(tag)
 	return with and tag.name .. "<" .. with or tag.name;
 end
 
-function driver:append(node, key, stanza, when, with)
+function driver:append(node, key, stanza, when, with) -- luacheck: ignore 212/key
+	-- luacheck: ignore 311/with
+	-- 'with' doesn't exist in the original mod_muc_log, so gets derived here
 	if type(when) ~= "number" then
 		when, with, stanza = stanza, when, with;
 	end
@@ -83,8 +86,6 @@ function driver:find(node, query)
 	table.sort(dates);
 
 	return coroutine.wrap(function ()
-		local query = query;
-		local dates = dates;
 		local start_date = query and query.start and os_date(datef, query.start) or dates[1];
 		local end_date = query and query["end"] and os_date(datef, query["end"]) or dates[#dates];
 		local start_time = query and query.start and os_date(timef, query.start) or dates[1];
@@ -120,8 +121,8 @@ function driver:find(node, query)
 						inner_start = inner_start + (query and query.reverse and -1 or 1);
 						seek_once = nil;
 					end
-					for i = inner_start, inner_stop, inner_step do
-						item, err = data[i];
+					for i = inner_start, inner_stop, inner_step do -- luacheck: ignore 423/i
+						item, err = data[i], nil;
 						if item then
 							item, err = xml_parse(item);
 						end
