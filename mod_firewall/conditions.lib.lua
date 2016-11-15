@@ -112,6 +112,9 @@ end
 function condition_handlers.INSPECT(path)
 	if path:find("=") then
 		local query, is_pattern_match, value = path:match("(.-)(~?)=(.*)");
+		if not(query:match("#$") or query:match("@[^/]+")) then
+			error("Stanza path does not return a string (append # for text content or @name for value of named attribute)", 0);
+		end
 		if is_pattern_match ~= "" then
 			return ("stanza:find(%q):match(%q)"):format(path:match("(.-)~=(.*)"));
 		else
