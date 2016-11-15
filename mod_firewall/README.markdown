@@ -290,6 +290,18 @@ limit yet. If it is, the condition matches, otherwise it will not.
 **Note:** Reloading mod\_firewall resets the current state of any
 limiters.
 
+#### Dynamic limits
+
+Sometimes you may want to have multiple throttles in a single condition, using some property of the session or stanza
+to determine which throttle to use. For example, you might have a limit for incoming stanzas, but you want to limit by
+sending JID, instead of all incoming stanzas sharing the same limit.
+
+You can use the 'on' keyword for this, like so:
+
+    LIMIT: normal on EXPRESSION
+
+For more information on expressions, see the section later in this document.
+
 ### Session marking
 
 It is possible to 'mark' sessions (see the MARK_ORIGIN action below). To match stanzas from marked sessions, use the
@@ -385,6 +397,8 @@ Example:
     TO: user@example.com
     LOG=[debug] User received: $(stanza)
 
+More info about expressions can be found below.
+
 Chains
 ------
 
@@ -431,3 +445,31 @@ Example of chain use:
   Action                   Description
   ------------------------ ------------------------------------------------------------------------
   `JUMP_CHAIN=name`        Switches chains, and passes the stanza through the rules in chain 'name'. If the new chain causes the stanza to be dropped/redirected, the current chain halts further processing.
+
+Expressions
+-----------
+
+Some conditions and actions in rules support "expressions" in their parameters (their documentation will indicate if this is the case). Most parameters
+are static once the firewall script is loaded and compiled internally, however parameters that allow expressions can be dynamically calculated when a
+rule is being run.
+
+There are two kinds of expression that you can use: stanza expressions, and code expressions.
+
+Stanza expressions are of the form `$<...>`, where `...` is a stanza path. For syntax of stanza paths, see the documentation for the 'INSPECT' condition
+above.
+
+Example:
+
+    LOG=Matched a stanza from $<@from> to $<@to>
+
+If the path does not match (e.g. the element isn't found, or the attribute doesn't exist) it will return the text `<undefined>`. You can override this
+by specifying an alternative default value, using the syntax `$<path||default>`.
+
+Code expressions use `$(...)` syntax. Code expressions are powerful, and allow unconstrained access to Prosody's internal environment. Therefore
+code expressions are typically for advanced use-cases only. You may want to refer to Prosody's [developer documentation](https://prosody.im/doc/developers)
+for more information. In particular, within code expressions you may access the 'session' object, which is the session object of the origin of the stanza,
+and the 'stanza' object, which is the stanza being considered within the current rule. Whatever value the expression returns will be converted to a string.
+
+Example to limit stanzas per session type:
+
+    LIMIT: normal on $(session.type)
