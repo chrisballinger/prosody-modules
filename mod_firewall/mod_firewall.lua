@@ -217,7 +217,11 @@ local function parse_firewall_rules(filename)
 			chain = line:gsub("^::%s*", "");
 			local chain_info = chains[chain];
 			if not chain_info then
-				return nil, errmsg("Unknown chain: "..chain);
+				if chain:match("^user/") then
+					chains[chain] = { type = "event", priority = 1, "firewall/chains/"..chain };
+				else
+					return nil, errmsg("Unknown chain: "..chain);
+				end
 			elseif chain_info.type ~= "event" then
 				return nil, errmsg("Only event chains supported at the moment");
 			end
