@@ -140,7 +140,7 @@ Registration](http://xmpp.org/extensions/xep-0077.html#example-4):
     TYPE: set
     PAYLOAD: jabber:iq:register
     INSPECT: {jabber:iq:register}query/username#=admin
-    BOUNCE=not-allowed The username 'admin' is reserved.
+    BOUNCE=not-allowed (The username 'admin' is reserved.)
 
 That weird string deserves some explanation. It is a path, divided into
 segments by '/'. Each segment describes an element by its name,
