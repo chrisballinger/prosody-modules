@@ -47,10 +47,16 @@ function meta(s, extra)
 	return (s:gsub("$(%b())", [["..tostring(%1).."]])
 		:gsub("$(%b<>)", function (expr)
 			expr = expr:sub(2,-2);
-			if expr:match("^@") then
-				return "\"..stanza.attr["..("%q"):format(expr:sub(2)).."]..\"";
+			local default = expr:match("||([^|]+)$");
+			if default then
+				expr = expr:sub(1, -(#default+2));
+			else
+				default = "<undefined>";
 			end
-			return "\"..stanza:find("..("%q"):format(expr:sub(2, -2))..")..\"";
+			if expr:match("^@") then
+				return "\"..(stanza.attr["..("%q"):format(expr:sub(2)).."] or "..("%q"):format(default)..")..\"";
+			end
+			return "\"..(stanza:find("..("%q"):format(expr:sub(2, -2))..") or "..("%q"):format(default)..")..\"";
 		end)
 		:gsub("$$(%a+)", extra or {})
 		:gsub([[^""%.%.]], "")
