@@ -476,22 +476,25 @@ function module.command(arg)
 			print("local active_definitions = "..serialize(active_definitions)..";");
 			print();
 		end
+		local c = 0;
 		for chain, handler_code in pairs(chain_functions) do
+			c = c + 1;
 			print("---- Chain "..chain:gsub("_", " "));
+			local chain_func_name = "chain_"..tostring(c).."_"..chain:gsub("%p", "_");
 			if not verbose then
-				print(("%s = %s;"):format(chain, handler_code:sub(8)));
+				print(("%s = %s;"):format(chain_func_name, handler_code:sub(8)));
 			else
 
-				print(("local %s = (%s)(active_definitions, fire_event, logger(%q));"):format(chain, handler_code:sub(8), filename));
+				print(("local %s = (%s)(active_definitions, fire_event, logger(%q));"):format(chain_func_name, handler_code:sub(8), filename));
 				print();
 
 				local chain_definition = chains[chain];
 				if chain_definition and chain_definition.type == "event" then
 					for _, event_name in ipairs(chain_definition) do
-						print(("module:hook(%q, %s, %d);"):format(event_name, chain, chain_definition.priority or 0));
+						print(("module:hook(%q, %s, %d);"):format(event_name, chain_func_name, chain_definition.priority or 0));
 					end
 				end
-				print(("module:hook(%q, %s, %d);"):format("firewall/chains/"..chain, chain, chain_definition.priority or 0));
+				print(("module:hook(%q, %s, %d);"):format("firewall/chains/"..chain, chain_func_name, chain_definition.priority or 0));
 			end
 
 			print("---- End of chain "..chain);
