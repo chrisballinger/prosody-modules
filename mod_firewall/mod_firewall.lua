@@ -408,12 +408,21 @@ local function compile_handler(code_string, filename)
 	return chunk;
 end
 
+local function resolve_script_path(script_path)
+	local relative_to = prosody.paths.config;
+	if script_path:match("^module:") then
+		relative_to = module.path:sub(1, -#("/mod_"..module.name..".lua"));
+		script_path = script_path:match("^module:(.+)$");
+	end
+	return resolve_relative_path(relative_to, script_path);
+end
+
 function module.load()
 	if not prosody.arg then return end -- Don't run in prosodyctl
 	active_definitions = {};
 	local firewall_scripts = module:get_option_set("firewall_scripts", {});
 	for script in firewall_scripts do
-		script = resolve_relative_path(prosody.paths.config, script);
+		script = resolve_script_path(script);
 		local chain_functions, err = compile_firewall_rules(script)
 
 		if not chain_functions then
@@ -459,6 +468,7 @@ function module.command(arg)
 	end
 
 	for _, filename in ipairs(arg) do
+		filename = resolve_script_path(filename);
 		print("do -- File "..filename);
 		local chain_functions = assert(compile_firewall_rules(filename));
 		if verbose then
