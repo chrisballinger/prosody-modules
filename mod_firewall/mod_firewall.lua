@@ -460,7 +460,7 @@ function module.command(arg)
 
 	for _, filename in ipairs(arg) do
 		print("do -- File "..filename);
-		local chain_functions = assert(compile_firewall_rules(arg[1]));
+		local chain_functions = assert(compile_firewall_rules(filename));
 		if verbose then
 			print();
 			print("local active_definitions = "..serialize(active_definitions)..";");
