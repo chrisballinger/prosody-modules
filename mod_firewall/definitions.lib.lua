@@ -31,14 +31,14 @@ function definition_handlers.RATE(name, line)
 			local rate = assert(tonumber(line:match("([%d.]+)")), "Unable to parse rate");
 			local burst = tonumber(line:match("%(%s*burst%s+([%d.]+)%s*%)")) or 1;
 			local max_throttles = tonumber(line:match("%(%s*entries%s+([%d]+)%s*%)")) or multirate_cache_size;
-
+			local deny_when_full = not line:match("%(allow overflow%)");
 			return {
 				single = function ()
 					return new_throttle(rate*burst, burst);
 				end;
 				
 				multi = function ()
-					local cache = require "util.cache".new(max_throttles, evict_only_unthrottled);
+					local cache = require "util.cache".new(max_throttles, deny_when_full and evict_only_unthrottled or nil);
 					return {
 						poll_on = function (_, key, amount)
 							assert(key, "no key");

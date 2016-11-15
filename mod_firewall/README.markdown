@@ -302,6 +302,18 @@ You can use the 'on' keyword for this, like so:
 
 For more information on expressions, see the section later in this document.
 
+Each value of 'EXPRESSION' has to be tracked individually in a table, which uses a small amount of memory. To prevent
+memory exhaustion, the number of tracked values is limited to 1000 by default. You can override this by setting the
+maximum number of table entries when you define the rate:
+
+    %RATE normal: 2 (burst 3) (entries 4096)
+
+Old values are automatically removed from the tracking table. However if the tracking table becomes full, new entries
+will be rejected - it will behave as if the rate limit was reached, even for values that have not been seen before. Since
+this opens up a potential denial of service (innocent users may be affected if malicious users can fill up the tracking
+table within the limit period). You can choose to instead "fail open", and allow the rate limit to be temporarily bypassed
+when the table is full. To choose this behaviour, add `(allow overflow)` to the RATE definition.
+
 ### Session marking
 
 It is possible to 'mark' sessions (see the MARK_ORIGIN action below). To match stanzas from marked sessions, use the
