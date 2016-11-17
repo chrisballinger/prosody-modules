@@ -122,12 +122,12 @@ local function c2s_message_handler(event)
 end
 
 -- Stanzas sent by local clients
-module:hook("pre-message/host", c2s_message_handler, 1);
-module:hook("pre-message/bare", c2s_message_handler, 1);
-module:hook("pre-message/full", c2s_message_handler, 1);
+module:hook("pre-message/host", c2s_message_handler, 0.05);
+module:hook("pre-message/bare", c2s_message_handler, 0.05);
+module:hook("pre-message/full", c2s_message_handler, 0.05);
 -- Stanzas to local clients
-module:hook("message/bare", message_handler, 1);
-module:hook("message/full", message_handler, 1);
+module:hook("message/bare", message_handler, 0.05);
+module:hook("message/full", message_handler, 0.05);
 
 module:add_feature(xmlns_carbons);
 module:add_feature(xmlns_carbons_old);
