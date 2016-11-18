@@ -1,7 +1,8 @@
 ---
 labels:
+- 'Stage-Alpha'
 summary: 'Replacement for mod\_vcard with vcard4 support and PEP integration'
-...
+---
 
 Introduction
 ============
