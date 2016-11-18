@@ -122,7 +122,7 @@ local function c2s_message_handler(event)
 end
 
 -- Stanzas sent by local clients
-module:hook("pre-message/host", c2s_message_handler, 0.05);
+module:hook("pre-message/host", c2s_message_handler, 0.05); -- priority between mod_message (0 in 0.9) and mod_firewall (0.1)
 module:hook("pre-message/bare", c2s_message_handler, 0.05);
 module:hook("pre-message/full", c2s_message_handler, 0.05);
 -- Stanzas to local clients
