@@ -4,7 +4,12 @@ local logger = require "util.logger".init;
 local it = require "util.iterators";
 
 local definitions = module:shared("definitions");
-local active_definitions = {};
+local active_definitions = {
+	ZONE = {
+		-- Default zone that includes all local hosts
+		["$local"] = setmetatable({}, { __index = prosody.hosts });
+	}
+};
 
 local default_chains = {
 	preroute = {
