@@ -8,8 +8,7 @@ summary: 'A rule-based stanza filtering module'
 
 **Note:** mod\_firewall is in its very early stages. This documentation
 is liable to change, and some described functionality may be missing,
-incomplete or contain bugs. Feedback is welcome in the comments section
-at the bottom of this page.
+incomplete or contain bugs.
 
 ------------------------------------------------------------------------
 
