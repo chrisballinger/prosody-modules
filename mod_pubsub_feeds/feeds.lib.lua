@@ -64,16 +64,16 @@ local function translate_rss(rss_feed)
 	local feed = st.stanza("feed", { xmlns = "http://www.w3.org/2005/Atom" });
 	local channel = rss_feed:get_child("channel");
 	-- TODO channel properties
-	feed:tag("entry");
 	for item in channel:childtags("item") do
+		feed:tag("entry");
 		for tag in item:childtags() do
 			local translator = rss2atom[tag.name];
 			if translator then
 				translator(feed, tag);
 			end
 		end
+		feed:reset();
 	end
-	feed:reset();
 	return feed;
 end
 
