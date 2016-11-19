@@ -79,7 +79,12 @@ function update_entry(item)
 	local node = item.node;
 	module:log("debug", "parsing %d bytes of data in node %s", #item.data or 0, node)
 	local feed = parse_feed(item.data);
+	local entries = {};
 	for entry in feed:childtags("entry") do
+		table.insert(entries, entry);
+	end
+	for i = #entries, 1, -1 do -- Feeds are usually in reverse order
+		local entry = feed[i];
 		entry.attr.xmlns = xmlns_atom;
 
 		local e_published = entry:get_child_text("published");
