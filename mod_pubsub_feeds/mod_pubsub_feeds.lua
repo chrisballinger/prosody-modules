@@ -84,7 +84,7 @@ function update_entry(item)
 		table.insert(entries, entry);
 	end
 	for i = #entries, 1, -1 do -- Feeds are usually in reverse order
-		local entry = feed[i];
+		local entry = entries[i];
 		entry.attr.xmlns = xmlns_atom;
 
 		local e_published = entry:get_child_text("published");
