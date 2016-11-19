@@ -96,7 +96,14 @@ function update_entry(item)
 		--module:log("debug", "timestamp is %s, item.last_update is %s", tostring(timestamp), tostring(item.last_update));
 		if not timestamp or not item.last_update or timestamp > item.last_update then
 			local id = entry:get_child_text("id");
-			id = id or item.url.."#"..dt_datetime(timestamp); -- Missing id, so make one up
+			if not id then
+				local link = entry:get_child("link");
+				id = link and link.attr.href;
+			end
+			if not id then
+				-- Sigh, no link?
+				id = feed.url .. "#" .. hmac_sha1(feed.url, tostring(entry), true) .. "@" .. dt_datetime(timestamp);
+			end
 			local xitem = st.stanza("item", { id = id }):add_child(entry);
 			-- TODO Put data from /feed into item/source
 
