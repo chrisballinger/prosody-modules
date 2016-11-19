@@ -49,10 +49,7 @@ local feed_list = module:shared("feed_list");
 local refresh_interval;
 
 function module.load()
-	local config = module:get_option("feeds") or {
-		planet_jabber = "http://planet.jabber.org/atom.xml";
-		prosody_blog = "http://blog.prosody.im/feed/atom.xml";
-	};
+	local config = module:get_option("feeds", { });
 	refresh_interval = module:get_option_number("feed_pull_interval", 15) * 60;
 	local ok, nodes = pubsub.service:get_nodes(true);
 	if not ok then nodes = {}; end
