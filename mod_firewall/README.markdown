@@ -57,10 +57,16 @@ This rule will reply with a short message whenever someone tries to send
 a message to someone at any of the hosts defined in the 'myorganisation'
 outside of office hours.
 
-Firewall rules should be written to a `ruleset.pfw` file. Multiple such
-rule files can be specified in the configuration using:
+Specifying rule sets
+--------------------
 
-    firewall_scripts = { "path/to/ruleset.pfw" }
+Firewall rules should be written into text files, e.g. `ruleset.pfw` file.
+One or more rule files can be specified in the configuration using:
+
+    firewall_scripts = { "path/to/ruleset.pfw", "path/to/ruleset2.pfw" }
+
+If multiple files are specified and they both add rules to the same chains,
+each file's rules will be processed in order, but the order of files is undefined.
 
 Conditions
 ----------
