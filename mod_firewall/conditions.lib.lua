@@ -111,14 +111,23 @@ end
 
 function condition_handlers.INSPECT(path)
 	if path:find("=") then
-		local query, is_pattern_match, value = path:match("(.-)(~?)=(.*)");
+		local query, match_type, value = path:match("(.-)([~/$]*)=(.*)");
 		if not(query:match("#$") or query:match("@[^/]+")) then
 			error("Stanza path does not return a string (append # for text content or @name for value of named attribute)", 0);
 		end
-		if is_pattern_match ~= "" then
-			return ("(stanza:find(%q) or ''):match(%q)"):format(path:match("(.-)~=(.*)"));
+		local quoted_value = ("%q"):format(value);
+		if match_type:find("$", 1, true) then
+			match_type = match_type:gsub("%$", "");
+			quoted_value = meta(quoted_value);
+		end
+		if match_type == "~" then -- Lua pattern match
+			return ("(stanza:find(%q) or ''):match(%s)"):format(query, quoted_value);
+		elseif match_type == "/" then -- find literal substring
+			return ("(stanza:find(%q) or ''):find(%s, 1, true)"):format(query, quoted_value);
+		elseif match_type == "" then -- exact match
+			return ("stanza:find(%q) == %s"):format(query, quoted_value);
 		else
-			return ("stanza:find(%q) == %q"):format(path:match("(.-)=(.*)"));
+			error("Unrecognised comparison '"..match_type.."='", 0);
 		end
 	end
 	return ("stanza:find(%q)"):format(path);
