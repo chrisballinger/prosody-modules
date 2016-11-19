@@ -115,6 +115,7 @@ function update_entry(item)
 			end
 			if items[id] then
 				-- Assume that this existing means we've added all new items
+				-- FIXME Entries updated after publishing ...
 				break;
 			end
 			local xitem = st.stanza("item", { id = id }):add_child(entry);
