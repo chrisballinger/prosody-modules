@@ -83,13 +83,14 @@ function update_entry(item)
 	for entry in feed:childtags("entry") do
 		table.insert(entries, entry);
 	end
-	local ok = pubsub.service:get_items(node, true);
+	local ok, items = pubsub.service:get_items(node, true);
 	if not ok then
 		local ok, err = pubsub.service:create(node, true);
 		if not ok then
 			module:log("error", "Could not create node %s: %s", node, err);
 			return;
 		end
+		items = {};
 	end
 	for i = #entries, 1, -1 do -- Feeds are usually in reverse order
 		local entry = entries[i];
@@ -111,6 +112,10 @@ function update_entry(item)
 			if not id then
 				-- Sigh, no link?
 				id = feed.url .. "#" .. hmac_sha1(feed.url, tostring(entry), true) .. "@" .. dt_datetime(timestamp);
+			end
+			if items[id] then
+				-- Assume that this existing means we've added all new items
+				break;
 			end
 			local xitem = st.stanza("item", { id = id }):add_child(entry);
 			-- TODO Put data from /feed into item/source
