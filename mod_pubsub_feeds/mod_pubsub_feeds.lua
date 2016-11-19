@@ -83,6 +83,14 @@ function update_entry(item)
 	for entry in feed:childtags("entry") do
 		table.insert(entries, entry);
 	end
+	local ok = pubsub.service:get_items(node, true);
+	if not ok then
+		local ok, err = pubsub.service:create(node, true);
+		if not ok then
+			module:log("error", "Could not create node %s: %s", node, err);
+			return;
+		end
+	end
 	for i = #entries, 1, -1 do -- Feeds are usually in reverse order
 		local entry = entries[i];
 		entry.attr.xmlns = xmlns_atom;
@@ -110,21 +118,7 @@ function update_entry(item)
 			--module:log("debug", "publishing to %s, id %s", node, id);
 			local ok, err = pubsub.service:publish(node, true, id, xitem);
 			if not ok then
-				if err == "item-not-found" then -- try again
-					--module:log("debug", "got item-not-found, creating %s and trying again", node);
-					local ok, err = pubsub.service:create(node, true);
-					if not ok then
-						module:log("error", "could not create node %s: %s", node, err);
-						return;
-					end
-					local ok, err = pubsub.service:publish(node, true, id, xitem);
-					if not ok then
-						module:log("error", "could not create or publish node %s: %s", node, err);
-						return
-					end
-				else
-					module:log("error", "publishing %s failed: %s", node, err);
-				end
+				module:log("error", "Publishing to node %s failed: %s", node, err);
 			end
 		end
 	end
