@@ -49,7 +49,10 @@ end
 
 -- Run quoted (%q) strings through this to allow them to contain code. e.g.: LOG=Received: $(stanza:top_tag())
 function meta(s, extra)
-	return (s:gsub("$(%b())", [["..tostring(%1).."]])
+	return (s:gsub("$(%b())", function (expr)
+			expr = expr:gsub("\\(.)", "%1");
+			return [["..tostring(]]..expr..[[).."]];
+		end)
 		:gsub("$(%b<>)", function (expr)
 			expr = expr:sub(2,-2);
 			local default = expr:match("||([^|]+)$");
