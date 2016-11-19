@@ -91,6 +91,10 @@ are not part of a rule block):
 
     %ZONE myzone: host1, host2, user@host3, foo.bar.example
 
+There is an automatic zone named `$local`, which automatically includes
+all of the current server's active hosts (including components). It can
+be used to match stanzas entering or leaving the current server.
+
 A host listed in a zone also matches all users on that host (but not
 subdomains).
 
