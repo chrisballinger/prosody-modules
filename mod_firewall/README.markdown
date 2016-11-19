@@ -467,6 +467,8 @@ Example of chain use:
   ------------------------ ------------------------------------------------------------------------
   `JUMP_CHAIN=name`        Switches chains, and passes the stanza through the rules in chain 'name'. If the new chain causes the stanza to be dropped/redirected, the current chain halts further processing.
 
+It is possible to jump to chains defined by other scripts and modules.
+
 Expressions
 -----------
 
