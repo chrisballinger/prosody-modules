@@ -234,6 +234,25 @@ Tests whether the sender is in the recipient's roster, and in the named group.
 
     IN_ROSTER_GROUP: Friends
 
+### Groups
+
+Using Prosody's mod\_groups it is possible to define groups of users on the server. You can
+match based on these groups in firewall rules.
+
+  Condition     Matches
+  ------------- ----------------------------
+  `FROM_GROUP`  When the stanza is being sent from a member of the named group
+  `TO_GROUP`    When the stanza is being sent to a member of the named group
+
+### Admins
+
+Prosody allows certain JIDs to be declared as administrators of a host, component or the whole server.
+
+  Condition      Matches
+  -------------- ----------------------------------
+  FROM_ADMIN_OF  When the sender of the stanza is an admin of the named host on the current server
+  TO_ADMIN_OF    When the recipient of the stanza is an admin of the named host on the current server
+
 ### Time and date
 
 #### TIME
