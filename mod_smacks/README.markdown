@@ -31,6 +31,14 @@ If the client fails to reconnect before the timeout then it is marked
 offline as normal, and any stanzas in the queue are returned to the
 sender as a "recipient-unavailable" error.
 
+If you don't want this behaviour on timeout you can use [mod_smacks_offline]
+or [mod_smacks_noerror] to customize the behaviour further.
+
+This module also provides some events used by [mod_cloud_notify].
+These events are: "smacks-ack-delayed", "smacks-hibernation-start" and
+"smacks-hibernation-end". See [mod_cloud_notify] for details on how this
+events are used there.
+
 Configuration
 =============
 
@@ -39,11 +47,13 @@ Configuration
   `smacks_hibernation_time`      300 (5 minutes)   The number of seconds a disconnected session should stay alive for (to allow reconnect)
   `smacks_enabled_s2s`           false             Enable Stream Management on server connections? *Experimental*
   `smacks_max_unacked_stanzas`   0                 How many stanzas to send before requesting acknowledgement
+  `smacks_max_ack_delay`         60 (1 minute)     The number of seconds an ack must be unanswered to trigger an "smacks-ack-delayed" event
 
 Compatibility
 =============
 
   ----- -----------------------------------
+  0.10  Works
   0.9   Works
   0.8   Works, use version [7693724881b3]
   ----- -----------------------------------
@@ -61,3 +71,6 @@ Clients that support XEP-0198:
 -   Yaxim
 
 [7693724881b3]: //hg.prosody.im/prosody-modules/raw-file/7693724881b3/mod_smacks/mod_smacks.lua
+[mod_smacks_offline]: //modules.prosody.im/mod_smacks_offline
+[mod_smacks_noerror]: //modules.prosody.im/mod_smacks_noerror
+[mod_cloud_notify]: //modules.prosody.im/mod_cloud_notify
