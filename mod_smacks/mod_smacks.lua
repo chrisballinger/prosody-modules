@@ -5,6 +5,7 @@
 -- Copyright (C) 2012-2015 Kim Alvefur
 -- Copyright (C) 2012 Thijs Alkemade
 -- Copyright (C) 2014 Florian Zeitz
+-- Copyright (C) 2016 Thilo Molitor
 --
 -- This project is MIT/X11 licensed. Please see the
 -- COPYING file in the source package for more information.
@@ -33,11 +34,20 @@ local resume_timeout = module:get_option_number("smacks_hibernation_time", 300);
 local s2s_smacks = module:get_option_boolean("smacks_enabled_s2s", false);
 local s2s_resend = module:get_option_boolean("smacks_s2s_resend", false);
 local max_unacked_stanzas = module:get_option_number("smacks_max_unacked_stanzas", 0);
+local delayed_ack_timeout = module:get_option_number("smacks_max_ack_delay", 60);
 local core_process_stanza = prosody.core_process_stanza;
 local sessionmanager = require"core.sessionmanager";
 
 local c2s_sessions = module:shared("/*/c2s/sessions");
 local session_registry = {};
+
+local function delayed_ack_function(session)
+	-- fire event only when configured to do so
+	if delayed_ack_timeout > 0 and session.awaiting_ack and not session.outgoing_stanza_queue == nil then
+		session.log("debug", "Firing event 'smacks-ack-delayed', queue = %d", #session.outgoing_stanza_queue);
+		module:fire_event("smacks-ack-delayed", {origin = session, queue = session.outgoing_stanza_queue});
+	end
+end
 
 local function can_do_smacks(session, advertise_only)
 	if session.smacks then return false, "unexpected-request", "Stream management is already enabled"; end
@@ -92,9 +102,13 @@ local function outgoing_stanza_filter(stanza, session)
 			session.awaiting_ack = false;
 			session.awaiting_ack_timer = module:add_timer(1e-06, function ()
 				if not session.awaiting_ack then
-					session.log("debug", "Sending <r> (after send)");
+					session.log("debug", "Sending <r> (before send)");
 					(session.sends2s or session.send)(st.stanza("r", { xmlns = session.smacks }))
+					session.log("debug", "Sending <r> (after send)");
 					session.awaiting_ack = true;
+					session.delayed_ack_timer = module:add_timer(delayed_ack_timeout, function()
+						delayed_ack_function(session);
+					end);
 				end
 			end);
 		end
@@ -219,6 +233,9 @@ function handle_a(origin, stanza)
 	origin.awaiting_ack = nil;
 	if origin.awaiting_ack_timer then
 		origin.awaiting_ack_timer:stop();
+	end
+	if origin.delayed_ack_timer then
+		origin.delayed_ack_timer:stop();
 	end
 	-- Remove handled stanzas from outgoing_stanza_queue
 	--log("debug", "ACK: h=%s, last=%s", stanza.attr.h or "", origin.last_acknowledged_stanza or "");
@@ -405,12 +422,18 @@ local function handle_read_timeout(event)
 			if session.awaiting_ack_timer then
 				session.awaiting_ack_timer:stop();
 			end
+			if session.delayed_ack_timer then
+				session.delayed_ack_timer:stop();
+			end
 			return false; -- Kick the session
 		end
 		session.log("debug", "Sending <r> (read timeout)");
 		session.awaiting_ack = false;
 		(session.sends2s or session.send)(st.stanza("r", { xmlns = session.smacks }));
 		session.awaiting_ack = true;
+		session.delayed_ack_timer = module:add_timer(delayed_ack_timeout, function()
+			delayed_ack_function(session);
+		end);
 		return true;
 	end
 end
