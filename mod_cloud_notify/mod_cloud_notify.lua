@@ -160,7 +160,7 @@ end
 local function hibernate_session(event)
 	local session = event.origin;
 	local queue = event.queue;
-	-- process already unacked stanzas
+	-- process unacked stanzas
 	for i=1,#queue do
 		process_new_stanza(queue[i], session);
 	end
@@ -174,8 +174,19 @@ local function restore_session(event)
 	filters.remove_filter(session, "stanzas/out", process_new_stanza);
 end
 
+-- smacks ack is delayed
+local function ack_delayed(event)
+	local session = event.origin;
+	local queue = event.queue;
+	-- process unacked stanzas (process_new_stanza will only send push requests for new messages)
+	for i=1,#queue do
+		process_new_stanza(queue[i], session);
+	end
+end
+
 module:hook("smacks-hibernation-start", hibernate_session);
 module:hook("smacks-hibernation-end", restore_session);
+module:hook("smacks-ack-delayed", ack_delayed);
 
 
 module:hook("message/offline/broadcast", function(event)
