@@ -130,16 +130,16 @@ function archive:find(username, query)
 			local q_with, q_start, q_end = query.with, query.start, query["end"];
 			for i = first_item, last_item, step do
 				local item = items[i];
+				if not item then
+					module:log("warn", "data[%q][%d] is nil", dates[d], i);
+					break;
+				end
 				local i_when, i_with = item.when, item.with;
 				if type(i_when) == "string" then
 					i_when = dt.parse(i_when);
 				end
 				if type(i_when) ~= "number" then
 					module:log("warn", "data[%q][%d].when is invalid", dates[d], i);
-					break;
-				end
-				if not item then
-					module:log("warn", "data[%q][%d] is nil", dates[d], i);
 					break;
 				end
 				if xmlfile and in_range
