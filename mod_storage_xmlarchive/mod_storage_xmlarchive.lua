@@ -1,5 +1,5 @@
 -- mod_storage_xmlarchive
--- Copyright (C) 2015 Kim Alvefur
+-- Copyright (C) 2015-2016 Kim Alvefur
 --
 -- This file is MIT/X11 licensed.
 --
