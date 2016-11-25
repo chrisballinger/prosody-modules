@@ -54,6 +54,25 @@ function archive:append(username, _, data, when, with)
 	return id;
 end
 
+function archive:_get_idx(username, id, dates)
+	dates = dates or self:dates(username) or empty;
+	local date = id:sub(1, 10);
+	for d = 1, #dates do
+		if date == dates[d] then
+			module:log("debug", "Loading items from %s", dates[d]);
+			local items = dm.list_load(username .. "@" .. dates[d], module.host, self.store) or empty;
+			for i = 1, #items do
+				if items[i].id == id then
+					return d, i, items;
+				end
+			end
+			return; -- Assuming no duplicates
+		elseif date > dates[d] then
+			return; -- List is assumed to be sorted
+		end
+	end
+end
+
 function archive:find(username, query)
 	username = username or "@";
 	query = query or empty;
@@ -81,35 +100,59 @@ function archive:find(username, query)
 	local start_day, step, last_day = 1, 1, #dates;
 	local count = 0;
 	local rev = query.reverse;
-	local in_range = not (query.after or query.before);
-	if query.after or query.start then
-		local d = query.after and query.after:sub(1, 10) or dt.date(query.start);
+	if query.start then
+		local d = dt.date(query.start);
 		for i = 1, #dates do
 			if dates[i] == d then
 				start_day = i; break;
 			end
 		end
 	end
-	if query.before or query["end"] then
-		local d = query.before and query.before:sub(1, 10) or dt.date(query["end"]);
+	if query["end"] then
+		local d = dt.date(query["end"]);
 		for i = #dates, 1, -1 do
 			if dates[i] == d then
 				last_day = i; break;
 			end
 		end
 	end
-	if rev then
-		start_day, step, last_day = last_day, -step, start_day;
-	end
 	local items, xmlfile;
 	local first_item, last_item;
+	if rev then
+		start_day, step, last_day = last_day, -step, start_day;
+		if query.before then
+			local before_day, before_item, items_ = self:_get_idx(username, query.before, dates);
+			if before_day and before_day <= start_day then
+				if before_item then
+					first_item = before_item - 1;
+				else
+					first_item = #items_;
+				end
+				last_item = 1;
+				start_day = before_day;
+				items = items_;
+			end
+		end
+	elseif query.after then
+		local after_day, after_item, items_ = self:_get_idx(username, query.after, dates);
+		if after_day and after_day >= start_day then
+			if after_item then
+				first_item = after_item + 1;
+			else
+				first_item = 1;
+			end
+			last_item = #items_;
+			start_day = after_day;
+			items = items_;
+		end
+	end
 
 	return function ()
 		if limit and count >= limit then if xmlfile then xmlfile:close() end return; end
 		local filename;
 
 		for d = start_day, last_day, step do
-			if d ~= start_day or not items then
+			if not items then
 				module:log("debug", "Loading items from %s", dates[d]);
 				start_day = d;
 				items = dm.list_load(username .. "@" .. dates[d], module.host, self.store) or empty;
@@ -144,8 +187,7 @@ function archive:find(username, query)
 						return;
 					end
 				end
-				if in_range
-				and (not q_with or i_with == q_with)
+				if  (not q_with or i_with == q_with)
 				and (not q_start or i_when >= q_start)
 				and (not q_end or i_when <= q_end) then
 					count = count + 1;
@@ -164,16 +206,8 @@ function archive:find(username, query)
 						return item.id, stanza, i_when, i_with;
 					end
 				end
-				if (rev and item.id == query.after) or
-					(not rev and item.id == query.before) then
-					in_range = false;
-					limit = count;
-				end
-				if (rev and item.id == query.before) or
-					(not rev and item.id == query.after) then
-					in_range = true;
-				end
 			end
+			items = nil;
 			if xmlfile then
 				xmlfile:close();
 				xmlfile = nil;
