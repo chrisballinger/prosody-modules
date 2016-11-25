@@ -118,13 +118,6 @@ function archive:find(username, query)
 				else
 					first_item, last_item = #items, 1;
 				end
-				local ferr;
-				filename = dm.getpath(username .. "@" .. dates[d], module.host, self.store, "xml");
-				xmlfile, ferr = io.open(filename);
-				if not xmlfile then
-					module:log("error", "Error: %s", ferr);
-					return;
-				end
 			end
 
 			local q_with, q_start, q_end = query.with, query.start, query["end"];
@@ -142,7 +135,16 @@ function archive:find(username, query)
 					module:log("warn", "data[%q][%d].when is invalid", dates[d], i);
 					break;
 				end
-				if xmlfile and in_range
+				if not xmlfile then
+					local ferr;
+					filename = dm.getpath(username .. "@" .. dates[d], module.host, self.store, "xml");
+					xmlfile, ferr = io.open(filename);
+					if not xmlfile then
+						module:log("error", "Error: %s", ferr);
+						return;
+					end
+				end
+				if in_range
 				and (not q_with or i_with == q_with)
 				and (not q_start or i_when >= q_start)
 				and (not q_end or i_when <= q_end) then
@@ -172,10 +174,10 @@ function archive:find(username, query)
 					in_range = true;
 				end
 			end
-		end
-		if xmlfile then
-			xmlfile:close();
-			xmlfile = nil;
+			if xmlfile then
+				xmlfile:close();
+				xmlfile = nil;
+			end
 		end
 	end
 end
