@@ -47,6 +47,7 @@ local formencode = http.formencode;
 
 local feed_list = module:shared("feed_list");
 local refresh_interval;
+local lease_length = tostring(math.floor(module:get_option_number("feed_lease_length", 86400)));
 
 function module.load()
 	local config = module:get_option("feeds", { });
@@ -185,7 +186,7 @@ function subscribe(feed, want)
 		["hub.topic"] = feed.url;
 		["hub.verify"] = "async"; -- COMPAT this is REQUIRED in the 0.3 draft but removed in 0.4
 		["hub.secret"] = feed.secret;
-		--["hub.lease_seconds"] = "";
+		["hub.lease_seconds"] = lease_length;
 	};
 
 	--module:log("debug", "subscription request, body: %s", body);
