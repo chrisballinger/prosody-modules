@@ -105,6 +105,11 @@ function condition_handlers.IN_ROSTER_GROUP(group)
 	return ("not not (roster_entry and roster_entry.groups[%q])"):format(group), { "roster_entry" };
 end
 
+function condition_handlers.SUBSCRIBED()
+	return "rostermanager.is_contact_subscribed(to_node, to_host, bare_from)",
+	       { "rostermanager", "split_to", "bare_from" };
+end
+
 function condition_handlers.PAYLOAD(payload_ns)
 	return ("stanza:get_child(nil, %q)"):format(payload_ns);
 end
