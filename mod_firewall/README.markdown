@@ -234,6 +234,15 @@ Tests whether the sender is in the recipient's roster, and in the named group.
 
     IN_ROSTER_GROUP: Friends
 
+#### SUBSCRIBED
+
+Tests whether the recipient is subscribed to the sender, ie will receive
+presence updates from them.
+
+Note that this *does* work, regardless of direction and which chain is
+used, since both the sender and the recipient will have mirrored roster
+entries.
+
 ### Groups
 
 Using Prosody's mod\_groups it is possible to define groups of users on the server. You can
