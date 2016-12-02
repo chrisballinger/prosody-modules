@@ -11,11 +11,15 @@ local serialize = require"util.json".encode, require"util.json".decode;
 local tostring = tostring;
 local time_now = os.time;
 
+
+local table_name = module:get_option("message_log_sql_table", pcall(require, "util.cache") and "messages" or "prosodyarchive");
+
 local sql, setsql, getsql = {};
 do -- SQL stuff
 local connection;
 local resolve_relative_path = require "core.configmanager".resolve_relative_path;
 local params = module:get_option("message_log_sql", module:get_option("sql"));
+
 
 local function test_connection()
 	if not connection then return nil; end
@@ -46,6 +50,7 @@ local function connect()
 	end
 	return connection;
 end
+
 
 do -- process options to get a db connection
 	local ok;
@@ -138,7 +143,7 @@ local function message_handler(event, c2s)
 	local when = time_now();
 	-- And stash it
 	local ok, err = setsql([[
-	INSERT INTO `prosodyarchive`
+	INSERT INTO `]]..table_name..[[`
 	(`host`, `user`, `store`, `when`, `with`, `resource`, `stanza`)
 	VALUES (?, ?, ?, ?, ?, ?, ?);
 	]], store_host, store_user, "message_log", when, target_bare, target_resource, serialize(st.preserialize(stanza)))
@@ -164,8 +169,8 @@ module:hook("message/full", message_handler, 2);
 -- In the telnet console, run:
 -- >hosts["this host"].modules.mam_sql.environment.create_sql()
 function create_sql()
-	local stm = getsql[[
-	CREATE TABLE `prosodyarchive` (
+	local stm = getsql([[
+	CREATE TABLE `]]..table_name..[[` (
 		`host` TEXT,
 		`user` TEXT,
 		`store` TEXT,
@@ -175,10 +180,10 @@ function create_sql()
 		`resource` TEXT,
 		`stanza` TEXT
 	);
-	CREATE INDEX `hus` ON `prosodyarchive` (`host`, `user`, `store`);
-	CREATE INDEX `with` ON `prosodyarchive` (`with`);
-	CREATE INDEX `thetime` ON `prosodyarchive` (`when`);
-	]];
+	CREATE INDEX `hus` ON `]]..table_name..[[` (`host`, `user`, `store`);
+	CREATE INDEX `with` ON `]]..table_name..[[` (`with`);
+	CREATE INDEX `thetime` ON `]]..table_name..[[` (`when`);
+	]]);
 	stm:execute();
 	sql.commit();
 end
