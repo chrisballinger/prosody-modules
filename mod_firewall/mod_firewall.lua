@@ -305,7 +305,7 @@ local function parse_firewall_rules(filename)
 			end
 			-- Check standard modifiers for the condition (e.g. NOT)
 			local negated;
-			local condition = line:match("^[^:=%.]*");
+			local condition = line:match("^[^:=%.?]*");
 			if condition:find("%f[%w]NOT%f[^%w]") then
 				local s, e = condition:match("%f[%w]()NOT()%f[^%w]");
 				condition = (condition:sub(1,s-1)..condition:sub(e+1, -1)):match("^%s*(.-)%s*$");
