@@ -169,7 +169,7 @@ module:hook("message/full", message_handler, 2);
 -- In the telnet console, run:
 -- >hosts["this host"].modules.mam_sql.environment.create_sql()
 function create_sql()
-	local stm = getsql([[
+	local stm = assert(getsql([[
 	CREATE TABLE `]]..table_name..[[` (
 		`host` TEXT,
 		`user` TEXT,
@@ -183,7 +183,7 @@ function create_sql()
 	CREATE INDEX `hus` ON `]]..table_name..[[` (`host`, `user`, `store`);
 	CREATE INDEX `with` ON `]]..table_name..[[` (`with`);
 	CREATE INDEX `thetime` ON `]]..table_name..[[` (`when`);
-	]]);
+	]]));
 	stm:execute();
 	sql.commit();
 end
