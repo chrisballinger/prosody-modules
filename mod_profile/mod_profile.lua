@@ -143,7 +143,14 @@ module:hook("iq-set/host/vcard-temp:vCard", handle_set);
 local function on_publish(event)
 	if event.actor == true then return end -- Not from a client
 	local node, item = event.node, event.item;
-	local username = jid_split(event.actor);
+	local username, host = jid_split(event.actor);
+	if host ~= module.host then
+		module:log("warn", "on_publish() called for non-local actor");
+		for k,v in pairs(event) do
+			module:log("debug", "event[%q] = %q", tosting(k), tostring(v));
+		end
+		return;
+	end
 	local data = storage:get(username) or {};
 	if node == "urn:xmpp:avatar:data" then
 		local new_photo = item:get_child_text("data", "urn:xmpp:avatar:data");
