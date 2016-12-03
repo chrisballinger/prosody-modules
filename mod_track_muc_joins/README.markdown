@@ -42,3 +42,21 @@ module:hook("message/full", function (event)
     end
 end);
 ```
+
+# Known issues
+
+[XEP 45 § 7.2.3 Presence Broadcast][enter-pres] has the following text:
+
+> In particular, if roomnicks are locked down then the service MUST do
+> one of the following.
+>
+> \[...\]
+>
+> If the user has connected using a MUC client (...), then the service
+> MUST allow the client to enter the room, modify the nick in accordance
+> with the lockdown policy, and **include a status code of "210"** in
+> the presence broadcast that it sends to the new occupant.
+
+This case is not yet handled.
+
+[enter-pres]: http://xmpp.org/extensions/xep-0045.html#enter-pres
