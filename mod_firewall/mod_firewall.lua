@@ -90,7 +90,7 @@ local available_deps = {
 	jid_bare = {
 		global_code = [[local jid_bare = require "util.jid".bare;]];
 	};
-	to = { local_code = [[local to = stanza.attr.to;]] };
+	to = { local_code = [[local to = stanza.attr.to or jid_bare(session.full_jid);]]; depends = { "jid_bare" } };
 	from = { local_code = [[local from = stanza.attr.from;]] };
 	type = { local_code = [[local type = stanza.attr.type;]] };
 	name = { local_code = [[local name = stanza.name]] };
