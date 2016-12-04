@@ -291,7 +291,6 @@ module:hook("muc-get-history", function (event)
 		reverse = true;
 		with = "message<groupchat";
 	}
-	module:log("debug", require"util.serialization".serialize(query))
 	local data, err = archive:find(jid_split(room_jid), query);
 
 	if not data then
@@ -360,7 +359,6 @@ function save_to_history(self, stanza)
 	-- Policy check
 	if not logging_enabled(self) then return end -- Don't log
 
-	module:log("debug", "We're logging this")
 	-- And stash it
 	local with = stanza.name
 	if stanza.attr.type then
