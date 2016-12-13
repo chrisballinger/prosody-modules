@@ -114,7 +114,7 @@ local error_types = {
 local function route_modify(make_new, to, drop)
 	local reroute, deps = "session.send(newstanza)", { "st" };
 	if to then
-		reroute = ("newstanza.attr.to = %q; core_post_stanza(session, newstanza)"):format(to);
+		reroute = ("newstanza.attr.to = %q; core_post_stanza(session, newstanza);"):format(to);
 		deps[#deps+1] = "core_post_stanza";
 	end
 	return ([[local newstanza = st.%s; %s;%s]])
@@ -158,7 +158,7 @@ end
 function action_handlers.LOG(string)
 	local level = string:match("^%[(%a+)%]") or "info";
 	string = string:gsub("^%[%a+%] ?", "");
-	return meta(("(session.log or log)(%q, %q)"):format(level, string));
+	return meta(("(session.log or log)(%q, %q);"):format(level, string));
 end
 
 function action_handlers.RULEDEP(dep)
