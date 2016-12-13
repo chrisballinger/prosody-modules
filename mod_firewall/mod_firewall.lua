@@ -141,7 +141,7 @@ local available_deps = {
 		global_code = [[local rostermanager = require "core.rostermanager";]];
 	};
 	roster_entry = {
-		local_code = [[local roster_entry = (rostermanager.load_roster(to_node, to_host) or {})[bare_from];]];
+		local_code = [[local roster_entry = (to_node and rostermanager.load_roster(to_node, to_host) or {})[bare_from];]];
 		depends = { "rostermanager", "split_to", "bare_from" };
 	};
 };
