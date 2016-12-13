@@ -93,7 +93,7 @@ local available_deps = {
 	to = { local_code = [[local to = stanza.attr.to or jid_bare(session.full_jid);]]; depends = { "jid_bare" } };
 	from = { local_code = [[local from = stanza.attr.from;]] };
 	type = { local_code = [[local type = stanza.attr.type;]] };
-	name = { local_code = [[local name = stanza.name]] };
+	name = { local_code = [[local name = stanza.name;]] };
 	split_to = { -- The stanza's split to address
 		depends = { "jid_split", "to" };
 		local_code = [[local to_node, to_host, to_resource = jid_split(to);]];
