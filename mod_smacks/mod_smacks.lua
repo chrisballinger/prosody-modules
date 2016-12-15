@@ -53,7 +53,7 @@ local function can_do_smacks(session, advertise_only)
 	if session.smacks then return false, "unexpected-request", "Stream management is already enabled"; end
 
 	local session_type = session.type;
-	if session_type == "c2s" then
+	if session.username then
 		if not(advertise_only) and not(session.resource) then -- Fail unless we're only advertising sm
 			return false, "unexpected-request", "Client must bind a resource before enabling stream management";
 		end
