@@ -107,8 +107,8 @@ local available_deps = {
 	group_contains = {
 		global_code = [[local group_contains = module:depends("groups").group_contains]];
 	};
-	is_admin = { global_code = [[local is_admin = require "core.usermanager".is_admin]]};
-	core_post_stanza = { global_code = [[local core_post_stanza = prosody.core_post_stanza]] };
+	is_admin = { global_code = [[local is_admin = require "core.usermanager".is_admin;]]};
+	core_post_stanza = { global_code = [[local core_post_stanza = prosody.core_post_stanza;]] };
 	zone = { global_code = function (zone)
 		assert(idsafe(zone), "Invalid zone name: "..zone);
 		return ("local zone_%s = zones[%q] or {};"):format(zone, zone);
@@ -121,7 +121,7 @@ local available_deps = {
 		end
 		return table.concat(defs, " ");
 	end, depends = { "date_time" }; };
-	timestamp = { global_code = [[local get_time = require "socket".gettime]]; local_code = [[local current_timestamp = get_time()]]; };
+	timestamp = { global_code = [[local get_time = require "socket".gettime;]]; local_code = [[local current_timestamp = get_time();]]; };
 	globalthrottle = {
 		global_code = function (throttle)
 			assert(idsafe(throttle), "Invalid rate limit name: "..throttle);
