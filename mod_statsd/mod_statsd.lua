@@ -7,6 +7,7 @@
 local socket = require "socket"
 local iterators = require "util.iterators"
 local jid = require "util.jid"
+local bare_sessions = prosody.bare_sessions;
 
 local options = module:get_option("statsd") or {}
 
