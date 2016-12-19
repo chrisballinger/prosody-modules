@@ -217,6 +217,7 @@ function handle_http_request(event)
 
 	local feed = feed_list[query.node];
 	if not feed then
+		module:log("debug", "Push for unknown feed %s -- %s", query["hub.topic"], formencode(query));
 		return 404;
 	end
 
