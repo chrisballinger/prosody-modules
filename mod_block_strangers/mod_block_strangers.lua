@@ -7,7 +7,12 @@ local full_sessions = prosody.full_sessions;
 
 local function has_directed_presence(user, jid)
 	local session = full_sessions[user];
-	return session and session.directed[jid];
+	if session then
+		local directed = session.directed;
+		if directed then
+			return directed[jid];
+		end
+	end
 end
 
 function check_subscribed(event)
