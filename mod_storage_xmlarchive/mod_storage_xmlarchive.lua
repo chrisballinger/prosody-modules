@@ -20,11 +20,15 @@ end
 local archive = {};
 local archive_mt = { __index = archive };
 
+local is_stanza = st.is_stanza or function (s)
+	return getmetatable(s) == st.stanza_mt;
+end
+
 function archive:append(username, _, data, when, with)
 	if type(when) ~= "number" then
 		when, with, data = data, when, with;
 	end
-	if getmetatable(data) ~= st.stanza_mt then
+	if not is_stanza(data) then
 		module:log("error", "Attempt to store non-stanza object, traceback: %s", debug.traceback());
 		return nil, "unsupported-datatype";
 	end
