@@ -217,6 +217,11 @@ function handle_http_request(event)
 
 	local feed = feed_list[query.node];
 	if not feed then
+		if query["hub.mode"] == "unsubscribe" then
+			-- Unsubscribe from unknown feed
+			module:log("debug", "Unsubscribe from unknown feed %s -- %s", query["hub.topic"], formencode(query));
+			return query["hub.challenge"];
+		end
 		module:log("debug", "Push for unknown feed %s -- %s", query["hub.topic"], formencode(query));
 		return 404;
 	end
