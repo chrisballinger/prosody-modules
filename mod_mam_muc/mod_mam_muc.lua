@@ -155,22 +155,22 @@ end);
 -- Handle archive queries
 module:hook("iq-set/bare/"..xmlns_mam..":query", function(event)
 	local origin, stanza = event.origin, event.stanza;
-	local room = stanza.attr.to;
-	local room_node = jid_split(room);
+	local room_jid = stanza.attr.to;
+	local room_node = jid_split(room_jid);
 	local orig_from = stanza.attr.from;
 	local query = stanza.tags[1];
 
-	local room_obj = get_room_from_jid(room);
-	if not room_obj then
+	local room = get_room_from_jid(room_jid);
+	if not room then
 		origin.send(st.error_reply(stanza, "cancel", "item-not-found"))
 		return true;
 	end
 	local from = jid_bare(orig_from);
 
 	-- Banned or not a member of a members-only room?
-	local from_affiliation = room_obj:get_affiliation(from);
+	local from_affiliation = room:get_affiliation(from);
 	if from_affiliation == "outcast" -- banned
-		or room_obj:get_members_only() and not from_affiliation then -- members-only, not a member
+		or room:get_members_only() and not from_affiliation then -- members-only, not a member
 		origin.send(st.error_reply(stanza, "auth", "forbidden"))
 		return true;
 	end
