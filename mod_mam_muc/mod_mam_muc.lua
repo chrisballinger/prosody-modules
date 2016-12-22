@@ -354,7 +354,7 @@ end
 
 -- Handle messages
 function save_to_history(self, stanza)
-	local room = jid_split(self.jid);
+	local room_node = jid_split(self.jid);
 
 	-- Policy check
 	if not logging_enabled(self) then return end -- Don't log
@@ -364,7 +364,7 @@ function save_to_history(self, stanza)
 	if stanza.attr.type then
 		with = with .. "<" .. stanza.attr.type
 	end
-	archive:append(room, nil, stanza, time_now(), with);
+	archive:append(room_node, nil, stanza, time_now(), with);
 end
 
 module:hook("muc-broadcast-message", function (event)
@@ -384,8 +384,8 @@ if module:get_option_boolean("muc_log_presences", true) then
 end
 
 module:hook("muc-room-destroyed", function(event)
-	local username = jid_split(event.room.jid);
-	archive:delete(username);
+	local room_node = jid_split(event.room.jid);
+	archive:delete(room_node);
 end);
 
 -- TODO should we perhaps log presence as well?
