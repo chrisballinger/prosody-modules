@@ -388,7 +388,6 @@ module:hook("muc-room-destroyed", function(event)
 	archive:delete(room_node);
 end);
 
--- TODO should we perhaps log presence as well?
 -- And role/affiliation changes?
 
 module:add_feature(xmlns_mam);
