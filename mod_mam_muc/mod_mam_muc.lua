@@ -34,7 +34,7 @@ local get_room_from_jid = rawget(mod_muc, "get_room_from_jid") or
 	end
 
 local getmetatable = getmetatable;
-local function is_stanza(x)
+local is_stanza = st.is_stanza or function(x)
 	return getmetatable(x) == st.stanza_mt;
 end
 
