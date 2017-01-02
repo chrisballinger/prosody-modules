@@ -29,6 +29,18 @@ function map:get(user, key)
 	return env[key];
 end
 
+local keywords = {
+	["do"] = true; ["and"] = true; ["else"] = true; ["break"] = true;
+	["if"] = true; ["end"] = true; ["goto"] = true; ["false"] = true;
+	["in"] = true; ["for"] = true; ["then"] = true; ["local"] = true;
+	["or"] = true; ["nil"] = true; ["true"] = true; ["until"] = true;
+	["elseif"] = true; ["function"] = true; ["not"] = true;
+	["repeat"] = true; ["return"] = true; ["while"] = true;
+
+	-- _ENV is not technically a keyword but we need to treat it as such
+	["_ENV"] = true;
+};
+
 function map:set_keys(user, keyvalues)
 	local keys, values = {}, {};
 	if _VERSION == "Lua 5.1" then
@@ -36,7 +48,7 @@ function map:set_keys(user, keyvalues)
 	end
 	for key, value in pairs(keyvalues) do
 		module:log("debug", "user %s sets %q to %s", user, key, tostring(value))
-		if type(key) ~= "string" or not key:find("^[%a_][%w_]*$") or key == "_ENV" then
+		if type(key) ~= "string" or not key:find("^[%a_][%w_]*$") or keywords[key] then
 			key = "_ENV[" .. dump(key) .. "]";
 		end
 		table.insert(keys, key);
