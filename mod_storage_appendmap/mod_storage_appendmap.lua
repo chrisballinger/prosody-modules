@@ -36,7 +36,7 @@ function map:set_keys(user, keyvalues)
 	end
 	for key, value in pairs(keyvalues) do
 		module:log("debug", "user %s sets %q to %s", user, key, tostring(value))
-		if type(key) ~= "string" or not key:find("^[%w_][%w%d_]*$") or key == "_ENV" then
+		if type(key) ~= "string" or not key:find("^[%a_][%w_]*$") or key == "_ENV" then
 			key = "_ENV[" .. dump(key) .. "]";
 		end
 		table.insert(keys, key);
