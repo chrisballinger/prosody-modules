@@ -8,7 +8,7 @@
 <h1>Glorious statistics!</h1>
 <script>
 
-var evtSource = new EventSource("/streamstats");
+var evtSource = new EventSource("/stats_stream");
 
 evtSource.addEventListener("stats-full", function(e) {
 	var initial_stats = JSON.parse(e.data);
