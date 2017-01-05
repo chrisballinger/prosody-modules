@@ -1,5 +1,7 @@
 ---
 summary: Presence deduplication module
+labels:
+- 'Stage-Stable'
 ...
 
 This module tries to squash incoming identical presence stanzas to save
