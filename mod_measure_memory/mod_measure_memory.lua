@@ -15,7 +15,7 @@ module:hook("stats-update", function ()
 end);
 
 if have_pposix and pposix.meminfo then
-	module:hook_global("stats-update", function ()
+	module:hook("stats-update", function ()
 		local m = measures;
 		for k, v in pairs(pposix.meminfo()) do
 			m[k](v);
