@@ -11,8 +11,11 @@ end
 
 local add_delay = function(stanza, session)
 	if stanza and stanza.name == "message" and stanza:get_child("delay", xmlns_delay) == nil then
-		-- session.log("debug", "adding delay to message %s", tostring(stanza));
-		stanza = stanza:tag("delay", { xmlns = xmlns_delay, from = session.host, stamp = datetime.datetime()});
+		-- only add delay tag to chat or groupchat messages (should we add a delay to anything else, too???)
+		if stanza.attr.type == "chat" or stanza.attr.type == "groupchat" then
+			-- session.log("debug", "adding delay to message %s", tostring(stanza));
+			stanza = stanza:tag("delay", { xmlns = xmlns_delay, from = session.host, stamp = datetime.datetime()});
+		end
 	end
 	return stanza;
 end
