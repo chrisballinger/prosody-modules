@@ -33,8 +33,8 @@ end
 local provider = {};
 
 function provider.test_password(username, password)
-	log("debug", "test password for user %s at host %s", username, host);
 	local url = api_base:gsub("$user", username);
+	log("debug", "Testing password for user %s at host %s with URL %s", username, host, url);
 	local ex = {
 		headers = { Authorization = "Basic "..base64(username..":"..password); };
 	}
