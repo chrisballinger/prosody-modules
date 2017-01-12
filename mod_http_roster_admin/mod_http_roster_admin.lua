@@ -127,6 +127,7 @@ end
 function fetch_roster(username, cb)
 	local x = {headers = {}};
 	x["headers"]["ACCEPT"] = "application/json, text/plain, */*";
+	module:log("debug", "Fetching roster at URL: %s", roster_url:format(username));
 	local ok, err = http.request(
 		roster_url:format(username),
 		x,
@@ -143,7 +144,6 @@ function fetch_roster(username, cb)
 			cb(true, code, json.decode(roster_data));
 		end
 	);
-	module:log("debug", "fetch_roster: ok is %s", ok);
 	if not ok then
 		module:log("error", "Failed to connect to roster API at %s: %s", roster_url:format(username), err);
 		cb(false, 0, err);
