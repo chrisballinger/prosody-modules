@@ -77,9 +77,9 @@ module:hook("iq/host/"..xmlns_http_upload..":request", function (event)
 		return true;
 	elseif filesize > file_size_limit then
 		module:log("debug", "File too large (%d > %d)", filesize, file_size_limit);
-		origin.send(st.error_reply(stanza, "modify", "not-acceptable", "File too large",
-			st.stanza("file-too-large", {xmlns=xmlns_http_upload})
-				:tag("max-file-size"):text(tostring(file_size_limit))));
+		origin.send(st.error_reply(stanza, "modify", "not-acceptable", "File too large")
+			:tag("file-too-large", {xmlns=xmlns_http_upload})
+				:tag("max-file-size"):text(tostring(file_size_limit)));
 		return true;
 	end
 	local reply = st.reply(stanza);
