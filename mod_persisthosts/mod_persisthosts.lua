@@ -18,6 +18,7 @@ module:hook("host-activated", function(host)
 			local fh, err = io.open(path, "w");
 			if fh then
 				fh:write(("VirtualHost%q\n"):format(host));
+				module:fire_event("host-persisted", { host = host, file = fh });
 				fh:close();
 				module:log("info", "Config file for host '%s' created", host);
 			else
