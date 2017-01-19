@@ -510,7 +510,8 @@ end
 --]]
 
 -- Component event handler
-function sms_event_handler(origin, stanza)
+function sms_event_handler(event)
+	local origin, stanza = event.origin, event.stanza;
 	module:log("debug", "Received stanza: "..stanza:pretty_print());
 	local to_node, to_host, to_resource = jid_split(stanza.attr.to);
 
