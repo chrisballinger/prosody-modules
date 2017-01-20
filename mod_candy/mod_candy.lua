@@ -8,6 +8,7 @@ local is_module_loaded = require "core.modulemanager".is_loaded;
 local serve = module:depends"http_files".serve;
 
 local candy_rooms = module:get_option_array("candy_rooms");
+local candy_debug = module:get_option_boolean("candy_debug", false);
 
 local function get_autojoin()
 	if candy_rooms then
@@ -47,6 +48,7 @@ module:provides("http", {
 						autojoin = get_autojoin();
 						version = prosody.version;
 						host = module:get_host();
+						debug = candy_debug;
 						anonymous = module:get_option_string("authentication") == "anonymous";
 					}));
 		end;

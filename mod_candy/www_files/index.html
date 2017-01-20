@@ -16,7 +16,7 @@
 			Candy.init(Prosody.connect_path, {
 				core: {
 					// only set this to true if developing / debugging errors
-					debug: false,
+					debug: Prosody.debug,
 					// autojoin is a *required* parameter if you don't have a plugin (e.g. roomPanel) for it
 					//   true
 					//     -> fetch info from server (NOTE: does only work with openfire server)
