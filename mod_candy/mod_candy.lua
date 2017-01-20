@@ -51,7 +51,8 @@ module:provides("http", {
 					}));
 		end;
 		["GET /*"] = serve(module:get_directory().."/www_files");
-		GET = function(event)
+
+		GET = function(event) -- TODO Remove this, it's done by mod_http in 0.10+
 			event.response.headers.location = event.request.path.."/";
 			return 301;
 		end;
