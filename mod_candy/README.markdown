@@ -28,7 +28,8 @@ directory, for example with curl:
     unzip candy-2.2.0.zip
 
 After the module has been loaded, Candy will by default be reachable
-from `http://example.com:5280/candy/`
+from `http://example.com:5280/candy/`. See [HTTP configuration][doc:http]
+for more.
 
 You can configure what rooms to join using either `candy_rooms` (an
 array) or [mod\_default\_bookmarks]. By default, Candy will attempt to
