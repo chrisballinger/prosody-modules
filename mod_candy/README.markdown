@@ -32,7 +32,9 @@ from `http://example.com:5280/candy/`
 
 You can configure what rooms to join using either `candy_rooms` (an
 array) or [mod\_default\_bookmarks]. By default, Candy will attempt to
-join rooms that the current user has bookmarked. If there are no rooms
+join rooms that the current user has bookmarked.
+If `candy_rooms` is not set, mod\_candy will attempt to find a MUC
+component and join a room called "candy" there.  If there are no rooms
 to join, then Candy will show an emtpy screen.
 
 Compatibility
