@@ -30,8 +30,10 @@ directory, for example with curl:
 After the module has been loaded, Candy will by default be reachable
 from `http://example.com:5280/candy/`
 
-It may be helpful to also enable [mod\_default\_bookmarks] so that Candy
-users always have some room(s) to join, or it will show an empty screen.
+You can configure what rooms to join using either `candy_rooms` (an
+array) or [mod\_default\_bookmarks]. By default, Candy will attempt to
+join rooms that the current user has bookmarked. If there are no rooms
+to join, then Candy will show an emtpy screen.
 
 Compatibility
 =============
