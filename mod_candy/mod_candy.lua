@@ -6,6 +6,17 @@ local is_module_loaded = require "core.modulemanager".is_loaded;
 
 local serve = module:depends"http_files".serve;
 
+local candy_rooms = module:get_option_array("candy_rooms");
+
+local function get_autojoin()
+	if candy_rooms then
+		-- Configured room list, if any
+		return candy_rooms;
+	end
+	-- Check out mod_default_bookmarks
+	return true;
+end
+
 local function get_connect_path()
 	if is_module_loaded(module.host, "websocket") then
 		return module:http_url("websocket", "xmpp-websocket"):gsub("^http", "ws");
@@ -25,6 +36,7 @@ module:provides("http", {
 				.."var Prosody = %s;\n")
 					:format(json_encode({
 						connect_path = get_connect_path();
+						autojoin = get_autojoin();
 						version = prosody.version;
 						host = module:get_host();
 						anonymous = module:get_option_string("authentication") == "anonymous";
