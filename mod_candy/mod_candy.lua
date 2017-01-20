@@ -2,6 +2,7 @@
 -- Copyright (C) 2013-2017 Kim Alvefur
 
 local json_encode = require"util.json".encode;
+local get_host_children = require "core.hostmanager".get_children;
 local is_module_loaded = require "core.modulemanager".is_loaded;
 
 local serve = module:depends"http_files".serve;
@@ -13,6 +14,13 @@ local function get_autojoin()
 		-- Configured room list, if any
 		return candy_rooms;
 	end
+	for subdomain in pairs(get_host_children(module.host)) do
+		-- Attempt autodetect a MUC host
+		if is_module_loaded(subdomain, "muc") then
+			return { "candy@" .. subdomain }
+		end
+	end
+	-- Autojoin bookmarks then?
 	-- Check out mod_default_bookmarks
 	return true;
 end
