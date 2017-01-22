@@ -15,6 +15,7 @@ local new_sasl = require "core.usermanager".get_sasl_handler;
 local user_exists = require "core.usermanager".user_exists;
 local base64 = require"util.encodings".base64;
 local dump = require"util.serialization".serialize;
+local pposix = require "util.pposix";
 
 -- Config
 local default_vhost = module:get_option_string("dovecotauth_host", (next(hosts))); -- TODO Is there a better solution?
