@@ -14,7 +14,6 @@ module:set_global();
 local new_sasl = require "core.usermanager".get_sasl_handler;
 local user_exists = require "core.usermanager".user_exists;
 local base64 = require"util.encodings".base64;
-local new_buffer = module:require"buffer".new;
 local dump = require"util.serialization".serialize;
 
 -- Config
@@ -31,7 +30,7 @@ local sess = { };
 local sess_mt = { __index = sess };
 
 function new_session(conn)
-	local sess = { type = "?", conn = conn, buf = assert(new_buffer()), sasl = {} }
+	local sess = { type = "?", conn = conn, buf = "", sasl = {} }
 	function sess:log(l, m, ...)
 		return module:log(l, self.type..tonumber(tostring(self):match("%x+$"), 16)..": "..m, ...);
 	end
@@ -66,9 +65,11 @@ function sess:feed(data)
 	-- TODO break this up a bit
 	-- module:log("debug", "sess = %s", dump(self));
 	local buf = self.buf;
-	buf:write(data);
-	local line = buf:read("*l")
+	buf = buf .. data;
+	local line, eol = buf:match("(.-)\r?\n()")
 	while line and line ~= "" do
+		buf = buf:sub(eol);
+		self.buf = buf;
 		local part = line:gmatch("[^\t]+");
 		local command = part();
 		if command == "VERSION" then
@@ -138,7 +139,7 @@ function sess:feed(data)
 			self.conn:close();
 			break;
 		end
-		line = buf:read("*l");
+		line, eol = buf:match("(.-)\r?\n()")
 	end
 end
 
