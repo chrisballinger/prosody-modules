@@ -31,11 +31,11 @@ local sess = { };
 local sess_mt = { __index = sess };
 
 function new_session(conn)
-	local sess = { type = "?", conn = conn, buf = "", sasl = {} }
-	function sess:log(l, m, ...)
+	local s = { type = "?", conn = conn, buf = "", sasl = {} }
+	function s:log(l, m, ...)
 		return module:log(l, self.type..tonumber(tostring(self):match("%x+$"), 16)..": "..m, ...);
 	end
-	return setmetatable(sess, sess_mt);
+	return setmetatable(s, sess_mt);
 end
 
 function sess:send(...)
