@@ -149,7 +149,7 @@ end
 local listener = {}
 
 function listener.onconnect(conn)
-	s = new_session(conn);
+	local s = new_session(conn);
 	sessions[conn] = s;
 	local g_sasl = new_sasl(default_vhost, s);
 	s.g_sasl = g_sasl;
