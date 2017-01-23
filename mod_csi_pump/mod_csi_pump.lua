@@ -54,8 +54,9 @@ local function is_important(stanza, session)
 			return false;
 		end
 		local body = stanza:get_child_text("body");
-		if not body then return false; end
 		if st_type == "groupchat" then
+			if stanza:get_child_text("subject") then return true; end
+			if not body then return false; end
 			if body:find(session.username, 1, true) then return true; end
 			local rooms = session.rooms_joined;
 			if not rooms then return false; end
