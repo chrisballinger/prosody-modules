@@ -9,3 +9,6 @@ encountered or the buffer becomes full. Then all queued stanzas are sent
 at the same time. This way, nothing is lost or reordered while still
 allowing for power usage savings by not requiring mobile clients to
 bring up their radio for unimportant stanzas.
+
+Use with other CSI plugins such as [mod_throttle_presence] is *not*
+supported.
