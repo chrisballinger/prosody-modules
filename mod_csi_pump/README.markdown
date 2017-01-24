@@ -1,5 +1,7 @@
 ---
 description: Lossless CSI module
+labels:
+- 'Stage-Alpha'
 ---
 
 Stanzas are queued in a buffer until either an "important" stanza is
