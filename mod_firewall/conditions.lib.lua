@@ -73,6 +73,10 @@ function condition_handlers.TO_EXACTLY(to)
 	return ("to == %q"):format(to), { "to" };
 end
 
+function condition_handlers.TO_SELF()
+	return ("to == nil");
+end
+
 function condition_handlers.TYPE(type)
 	return compile_comparison_list("(type or (name == 'message' and 'normal') or (name == 'presence' and 'available'))", type), { "type", "name" };
 end
