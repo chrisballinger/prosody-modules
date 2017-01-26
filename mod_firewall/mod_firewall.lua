@@ -64,7 +64,7 @@ function meta(s, extra)
 			if expr:match("^@") then
 				return "\"..(stanza.attr["..("%q"):format(expr:sub(2)).."] or "..("%q"):format(default)..")..\"";
 			end
-			return "\"..(stanza:find("..("%q"):format(expr:sub(2, -2))..") or "..("%q"):format(default)..")..\"";
+			return "\"..(stanza:find("..("%q"):format(expr)..") or "..("%q"):format(default)..")..\"";
 		end)
 		:gsub("$$(%a+)", extra or {})
 		:gsub([[^""%.%.]], "")
