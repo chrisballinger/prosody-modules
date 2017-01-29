@@ -13,6 +13,7 @@ local lfs = require"lfs";
 local random_hex = require"util.uuid".get_nibbles;
 local url = require "socket.url";
 local dataform = require "util.dataforms".new;
+local datamanager = require "util.datamanager";
 local t_concat = table.concat;
 local t_insert = table.insert;
 local s_upper = string.upper;
@@ -89,6 +90,7 @@ module:hook("iq/host/"..xmlns_http_upload..":request", function (event)
 	repeat random = random_hex(12);
 	until lfs.mkdir(join_path(storage_path, random)) or not lfs.attributes(join_path(storage_path, random, filename))
 
+	datamanager.list_apppend(origin.username, origin.host, module.name, { filename = join_path(storage_path, random, filename), size = filesize, time = os.time() });
 	pending_slots[random.."/"..filename] = origin.full_jid;
 	local base_url = module:http_url();
 	local slot_url = url.parse(base_url);
