@@ -84,7 +84,11 @@ module:hook("iq/host/"..xmlns_http_upload..":request", function (event)
 	end
 	local reply = st.reply(stanza);
 	reply:tag("slot", { xmlns = xmlns_http_upload });
-	local random = uuid();
+
+	local random;
+	repeat random = uuid();
+	until lfs.mkdir(join_path(storage_path, random))
+
 	pending_slots[random.."/"..filename] = origin.full_jid;
 	local base_url = module:http_url();
 	local slot_url = url.parse(base_url);
@@ -116,11 +120,6 @@ local function upload_data(event, path)
 	if #event.request.body > file_size_limit then
 		module:log("warn", "Uploaded file too large %d bytes", #event.request.body);
 		return 400;
-	end
-	local dirname = join_path(storage_path, random);
-	if not lfs.mkdir(dirname) then
-		module:log("warn", "Could not create directory %s for upload", dirname);
-		return 500;
 	end
 	pending_slots[path] = nil;
 	local full_filename = join_path(dirname, filename);
