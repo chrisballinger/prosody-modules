@@ -18,8 +18,8 @@ local t_concat = table.concat;
 local t_insert = table.insert;
 local s_upper = string.upper;
 
-local function join_path(a, b)
-return a .. package.config:sub(1,1) .. b;
+local function join_path(...)
+	table.concat({ ... }, package.config:sub(1,1));
 end
 
 -- config
