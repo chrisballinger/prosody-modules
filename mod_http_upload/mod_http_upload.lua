@@ -124,7 +124,7 @@ local function upload_data(event, path)
 		return 400;
 	end
 	pending_slots[path] = nil;
-	local full_filename = join_path(dirname, filename);
+	local full_filename = join_path(random, filename);
 	if lfs.attributes(full_filename) then
 		module:log("warn", "File %s exists already, not replacing it", full_filename);
 		return 409;
