@@ -103,7 +103,8 @@ end);
 
 -- http service
 local function upload_data(event, path)
-	if not pending_slots[path] then
+	local uploader = pending_slots[path];
+	if not uploader then
 		module:log("warn", "Attempt to upload to unknown slot %q", path);
 		return; -- 404
 	end
@@ -121,6 +122,7 @@ local function upload_data(event, path)
 		module:log("warn", "Could not create directory %s for upload", dirname);
 		return 500;
 	end
+	pending_slots[path] = nil;
 	local full_filename = join_path(dirname, filename);
 	local fh, ferr = io.open(full_filename, "w");
 	if not fh then
@@ -139,8 +141,7 @@ local function upload_data(event, path)
 		os.remove(full_filename);
 		return 500;
 	end
-	module:log("info", "File uploaded by %s to slot %s", pending_slots[path], random);
-	pending_slots[path] = nil;
+	module:log("info", "File uploaded by %s to slot %s", uploader, random);
 	return 200;
 end
 
