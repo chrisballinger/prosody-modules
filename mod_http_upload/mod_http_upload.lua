@@ -87,7 +87,7 @@ module:hook("iq/host/"..xmlns_http_upload..":request", function (event)
 
 	local random;
 	repeat random = uuid();
-	until lfs.mkdir(join_path(storage_path, random))
+	until lfs.mkdir(join_path(storage_path, random)) or not lfs.attributes(join_path(storage_path, random, filename))
 
 	pending_slots[random.."/"..filename] = origin.full_jid;
 	local base_url = module:http_url();
