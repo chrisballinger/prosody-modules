@@ -123,6 +123,10 @@ local function upload_data(event, path)
 	end
 	pending_slots[path] = nil;
 	local full_filename = join_path(dirname, filename);
+	if lfs.attributes(full_filename) then
+		module:log("warn", "File %s exists already, not replacing it", full_filename);
+		return 409;
+	end
 	local fh, ferr = io.open(full_filename, "w");
 	if not fh then
 		module:log("error", "Could not open file %s for upload: %s", full_filename, ferr);
