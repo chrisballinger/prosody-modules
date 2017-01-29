@@ -10,7 +10,7 @@
 -- imports
 local st = require"util.stanza";
 local lfs = require"lfs";
-local uuid = require"util.uuid".generate;
+local random_hex = require"util.uuid".get_nibbles;
 local url = require "socket.url";
 local dataform = require "util.dataforms".new;
 local t_concat = table.concat;
@@ -86,7 +86,7 @@ module:hook("iq/host/"..xmlns_http_upload..":request", function (event)
 	reply:tag("slot", { xmlns = xmlns_http_upload });
 
 	local random;
-	repeat random = uuid();
+	repeat random = random_hex(12);
 	until lfs.mkdir(join_path(storage_path, random)) or not lfs.attributes(join_path(storage_path, random, filename))
 
 	pending_slots[random.."/"..filename] = origin.full_jid;
