@@ -10,7 +10,7 @@
 -- imports
 local st = require"util.stanza";
 local lfs = require"lfs";
-local random_hex = require"util.uuid".get_nibbles;
+local uuid = require"util.uuid".generate;
 local url = require "socket.url";
 local dataform = require "util.dataforms".new;
 local datamanager = require "util.datamanager";
@@ -87,7 +87,7 @@ module:hook("iq/host/"..xmlns_http_upload..":request", function (event)
 	reply:tag("slot", { xmlns = xmlns_http_upload });
 
 	local random;
-	repeat random = random_hex(12);
+	repeat random = uuid();
 	until lfs.mkdir(join_path(storage_path, random)) or not lfs.attributes(join_path(storage_path, random, filename))
 
 	datamanager.list_append(origin.username, origin.host, module.name, { filename = join_path(storage_path, random, filename), size = filesize, time = os.time() });
