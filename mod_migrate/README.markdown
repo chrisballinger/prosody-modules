@@ -15,7 +15,8 @@ Usage
 
 `<source-store>` would be e.g. `accounts` or `private`. To migrate
 archives, the optional suffix `<store-type>` would be set to `archive`,
-so e.g. `archive2-archive` or `muc_log-archive`.
+so e.g. `archive2-archive` or `muc_log-archive`. Multiple stores can be
+given if separated by commas.
 
 `<target-driver>` is the storage driver to copy data to, sans the
 `mod_storage_` prefix.
@@ -36,9 +37,9 @@ The process is something like this:
 Examples
 ========
 
-    for store in accounts roster private blocklist vcard archive2-archive; do
-      prosodyctl migrate example.com $store sql
-    done
+``` sh
+prosodyctl migrate example.com accounts,roster,private,vcard sql
+```
 
 Compatibility
 =============
