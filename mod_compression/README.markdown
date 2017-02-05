@@ -15,11 +15,11 @@ The XMPP protocol specifies that all clients and servers supporting
 compression must support the "zlib" compression method, and this is what
 Prosody uses. However you will need to install zlib support for Lua on
 your system. There are different ways of doing this depending on your
-system. If in doubt whether it is installed correctly, the command \`lua
--lzlib\` in a console should open a Lua prompt with no errors.
+system. If in doubt whether it is installed correctly, the command
+`lua-lzlib` in a console should open a Lua prompt with no errors.
 
-For more information on obtaining lua-zlib for your platform, see our
-[dependencies page](/doc/depends#lua-zlib "doc:depends"){.wikilink1}.
+For more information on obtaining lua-zlib for your platform, see the
+[dependencies page][doc:depends].
 
 # Usage
 
