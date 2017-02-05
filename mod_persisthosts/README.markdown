@@ -11,4 +11,4 @@ stub configuration files are created. It defaults to `"conf.d"`, and is
 treated as relative to the configuration directiory [^1] unless set to
 an absolute path.
 
-[^1]: usually \`/etc/prosody on \*nix systems
+[^1]: usually `/etc/prosody` on \*nix systems
