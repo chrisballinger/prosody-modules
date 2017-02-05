@@ -1,14 +1,13 @@
-While the bandwidth usage of XMPP isn't great, compressing the data sent
-to/from your server can give significant benefits to those on slow
+While the bandwidth usage of XMPP isn't that much, compressing the data
+sent to/from your server can give significant benefits to those on slow
 connections, such as dial-up or mobile networks. Prosody supports
 compression for client-to-server (if your client supports it) and
 server-to-server streams using the mod\_compression plugin.
 
 # Details
 
-mod\_compression implements
-[XEP-0138](http://xmpp.org/extensions/xep-0138.html "http://xmpp.org/extensions/xep-0138.html"){.urlextern},
-and supports the zlib compression algorithm.
+mod\_compression implements [XEP-0138], and supports the zlib compression
+algorithm.
 
 ## Dependencies
 
@@ -31,15 +30,13 @@ modules_enabled = {
 }
 ```
 
-Configuration
--------------
+## Configuration
 
-  Option               Default   Notes
-  -------------------- --------- --------------------------------------------------------------------------------------------------------------------
-  compression\_level   7         Can be a number from 1 to 9, where 9 is best. Higher compression levels will use more resources but less bandwidth
+The compression level can be set using the `compression_level` option
+which can be a number from 1 to 9. Higher compression levels will use
+more resources but less bandwidth.
 
-Example
--------
+## Example
 
 ``` lua
 modules_enabled = {
