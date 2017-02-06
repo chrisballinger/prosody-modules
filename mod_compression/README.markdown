@@ -16,10 +16,16 @@ compression must support the "zlib" compression method, and this is what
 Prosody uses. However you will need to install zlib support for Lua on
 your system. There are different ways of doing this depending on your
 system. If in doubt whether it is installed correctly, the command
-`lua-lzlib` in a console should open a Lua prompt with no errors.
+`lua -lzlib` in a console should open a Lua prompt with no errors.
 
-For more information on obtaining lua-zlib for your platform, see the
-[dependencies page][doc:depends].
+Debian/Ubuntu
+:   `apt-get install lua-zlib`
+
+LuaRocks
+:   `luarocks install lua-zlib`
+
+Source
+:   <https://github.com/brimworks/lua-zlib>
 
 # Usage
 
