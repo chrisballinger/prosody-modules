@@ -2,10 +2,10 @@ Introduction
 ============
 
 This module produces a list of enabled HTTP "apps" exposed from Prosody
-at `http://example.org:5280/`, e.g. mod\_http\_muc\_log,
-mod\_http\_files or mod\_admin\_web. If you think Prosodys default
-"root" web page (a 404 error usually) is boring, this might be the
-module for you! :)
+at `http://example.org:5280/`, e.g. [mod\_http\_muc\_log],
+[mod\_http\_files][doc:modules:mod_http_files] or
+[mod\_admin\_web]. If you think Prosodys default "root" web page (a
+404 error usually) is boring, this might be the module for you! :)
 
 Configuration
 =============
