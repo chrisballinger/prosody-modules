@@ -30,6 +30,6 @@ Configuration
 Compatibility
 =============
 
-Compatible with trunk after 2014-05-29.
+Requires Prosody **trunk** as of 2014-05-29. Won't work in 0.10.
 
 It depends on the new mod\_pep\_plus for PEP support.
