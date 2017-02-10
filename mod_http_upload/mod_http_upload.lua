@@ -91,7 +91,8 @@ module:hook("iq/host/"..xmlns_http_upload..":request", function (event)
 	until lfs.mkdir(join_path(storage_path, random)) or not lfs.attributes(join_path(storage_path, random, filename))
 
 	datamanager.list_append(origin.username, origin.host, module.name, { filename = join_path(storage_path, random, filename), size = filesize, time = os.time() });
-	pending_slots[random.."/"..filename] = origin.full_jid;
+	local slot = random.."/"..filename;
+	pending_slots[slot] = origin.full_jid;
 	local base_url = module:http_url();
 	local slot_url = url.parse(base_url);
 	slot_url.path = url.parse_path(slot_url.path or "/");
@@ -103,7 +104,7 @@ module:hook("iq/host/"..xmlns_http_upload..":request", function (event)
 	reply:tag("get"):text(slot_url):up();
 	reply:tag("put"):text(slot_url):up();
 	origin.send(reply);
-	origin.log("debug", "Given upload slot %q", random);
+	origin.log("debug", "Given upload slot %q", slot);
 	return true;
 end);
 
