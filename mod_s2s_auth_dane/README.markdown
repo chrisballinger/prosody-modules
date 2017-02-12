@@ -81,3 +81,12 @@ Compatibility
 =============
 
 Requires 0.9 or above.
+
+Known issues
+============
+
+-   A race condition between the DANE lookup and completion of the TLS
+    handshake may cause a crash. This does not happen in **trunk**
+    thanks to better async support.
+
+
