@@ -5,7 +5,7 @@
 -- Copyright (C) 2012-2015 Kim Alvefur
 -- Copyright (C) 2012 Thijs Alkemade
 -- Copyright (C) 2014 Florian Zeitz
--- Copyright (C) 2016 Thilo Molitor
+-- Copyright (C) 2016-2017 Thilo Molitor
 --
 -- This project is MIT/X11 licensed. Please see the
 -- COPYING file in the source package for more information.
@@ -80,6 +80,25 @@ module:hook("s2s-stream-features",
 			end
 		end);
 
+local function request_ack_if_needed(session)
+	local queue = session.outgoing_stanza_queue;
+	if #queue > max_unacked_stanzas and session.awaiting_ack == nil then
+		session.log("debug", "Queuing <r> (in a moment)");
+		session.awaiting_ack = false;
+		session.awaiting_ack_timer = module:add_timer(1e-06, function ()
+			if not session.awaiting_ack then
+				session.log("debug", "Sending <r> (inside timer, before send)");
+				(session.sends2s or session.send)(st.stanza("r", { xmlns = session.smacks }))
+				session.log("debug", "Sending <r> (inside timer, after send)");
+				session.awaiting_ack = true;
+				session.delayed_ack_timer = module:add_timer(delayed_ack_timeout, function()
+					delayed_ack_function(session);
+				end);
+			end
+		end);
+	end
+end
+
 local function outgoing_stanza_filter(stanza, session)
 	local is_stanza = stanza.attr and not stanza.attr.xmlns and not stanza.name:find":";
 	if is_stanza and not stanza._cached then -- Stanza in default stream namespace
@@ -97,21 +116,7 @@ local function outgoing_stanza_filter(stanza, session)
 			session.log("debug", "hibernating, stanza queued");
 			return nil;
 		end
-		if #queue > max_unacked_stanzas and session.awaiting_ack == nil then
-			session.log("debug", "Queuing <r> (in a moment)");
-			session.awaiting_ack = false;
-			session.awaiting_ack_timer = module:add_timer(1e-06, function ()
-				if not session.awaiting_ack then
-					session.log("debug", "Sending <r> (before send)");
-					(session.sends2s or session.send)(st.stanza("r", { xmlns = session.smacks }))
-					session.log("debug", "Sending <r> (after send)");
-					session.awaiting_ack = true;
-					session.delayed_ack_timer = module:add_timer(delayed_ack_timeout, function()
-						delayed_ack_function(session);
-					end);
-				end
-			end);
-		end
+		request_ack_if_needed(session);
 	end
 	return stanza;
 end
@@ -238,7 +243,7 @@ function handle_a(origin, stanza)
 		origin.delayed_ack_timer:stop();
 	end
 	-- Remove handled stanzas from outgoing_stanza_queue
-	--log("debug", "ACK: h=%s, last=%s", stanza.attr.h or "", origin.last_acknowledged_stanza or "");
+	log("debug", "ACK: h=%s, last=%s", stanza.attr.h or "", origin.last_acknowledged_stanza or "");
 	local h = tonumber(stanza.attr.h);
 	if not h then
 		origin:close{ condition = "invalid-xml"; text = "Missing or invalid 'h' attribute"; };
@@ -258,6 +263,7 @@ function handle_a(origin, stanza)
 	end
 	origin.log("debug", "#queue = %d", #queue);
 	origin.last_acknowledged_stanza = origin.last_acknowledged_stanza + handled_stanza_count;
+	request_ack_if_needed(origin)
 	return true;
 end
 module:hook_stanza(xmlns_sm2, "a", handle_a);
