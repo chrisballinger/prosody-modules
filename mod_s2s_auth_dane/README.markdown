@@ -63,12 +63,10 @@ Here's an example using `DANE-EE Cert SHA2-256` for a host named
     xmpp.example.com. IN A 192.0.2.68
     xmpp.example.com. IN AAAA 2001:0db8:0000:0000:4441:4e45:544c:5341
 
-    ; The DANE TLSA records.  These three are equivalent, you would use only one of them.
-    ; First, using symbolic names:
-    _5269._tcp.xmpp.example.com. 300 IN TLSA DANE-EE Cert SHA2-256 E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855
-    ; Using numbers:
+    ; The DANE TLSA records.
     _5269._tcp.xmpp.example.com. 300 IN TLSA 3 0 1 E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855
-    ; Raw binary format, should work even with very old DNS tools:
+
+    ; If your zone file tooling does not support TLSA records, you can try the raw binary format:
     _5269._tcp.xmpp.example.com. 300 IN TYPE52 \# 35 030001E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855
 
 [List of DNSSEC and DANE
@@ -83,3 +81,12 @@ Compatibility
 =============
 
 Requires 0.9 or above.
+
+Known issues
+============
+
+-   A race condition between the DANE lookup and completion of the TLS
+    handshake may cause a crash. This does not happen in **trunk**
+    thanks to better async support.
+
+
