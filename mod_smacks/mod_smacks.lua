@@ -43,10 +43,11 @@ local session_registry = {};
 
 local function delayed_ack_function(session)
 	-- fire event only when configured to do so
-	if delayed_ack_timeout > 0 and session.awaiting_ack and not session.outgoing_stanza_queue == nil then
+	if delayed_ack_timeout > 0 and session.awaiting_ack and not (session.outgoing_stanza_queue == nil) then
 		session.log("debug", "Firing event 'smacks-ack-delayed', queue = %d", #session.outgoing_stanza_queue);
 		module:fire_event("smacks-ack-delayed", {origin = session, queue = session.outgoing_stanza_queue});
 	end
+	session.delayed_ack_timer = nil;
 end
 
 local function can_do_smacks(session, advertise_only)
@@ -96,6 +97,14 @@ local function request_ack_if_needed(session)
 				end);
 			end
 		end);
+	end
+	-- Trigger "smacks-ack-delayed"-event if we added new (ackable) stanzas to the outgoing queue
+	-- and there isn't already a timer for this event running.
+	-- If we wouldn't do this, stanzas added to the queue after the first "smacks-ack-delayed"-event
+	-- would not trigger this event (again).
+	if #queue > max_unacked_stanzas and session.awaiting_ack and session.delayed_ack_timer == nil then
+		session.log("debug", "Calling delayed_ack_function directly (still waiting for ack)");
+		delayed_ack_function(session);
 	end
 end
 
@@ -241,6 +250,7 @@ function handle_a(origin, stanza)
 	end
 	if origin.delayed_ack_timer then
 		origin.delayed_ack_timer:stop();
+		origin.delayed_ack_timer = nil;
 	end
 	-- Remove handled stanzas from outgoing_stanza_queue
 	log("debug", "ACK: h=%s, last=%s", stanza.attr.h or "", origin.last_acknowledged_stanza or "");
@@ -430,6 +440,7 @@ local function handle_read_timeout(event)
 			end
 			if session.delayed_ack_timer then
 				session.delayed_ack_timer:stop();
+				session.delayed_ack_timer = nil;
 			end
 			return false; -- Kick the session
 		end
