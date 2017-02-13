@@ -118,10 +118,14 @@ local function on_publish_metadata(event)
 		local file_webp = io.open("/tmp/Prosody_temp_avatar.webp", "w");
 		file_webp:write(base64.decode(pep_photo:get_child_text("data", "urn:xmpp:avatar:data")));
 		file_webp:close();
-		os.execute("convert /tmp/Prosody_temp_avatar.webp /tmp/Prosody_temp_avatar.png");
+		os.execute("dwebp /tmp/Prosody_temp_avatar.webp -o /tmp/Prosody_temp_avatar.png");
 		local file_png = io.open("/tmp/Prosody_temp_avatar.png", "r");
-		image=base64.encode(file_png:read("*a"));
-		file_png:close();
+		if file_png ~= nil then
+			image=base64.encode(file_png:read("*a"));
+			file_png:close();
+		else
+			module:log("error", "Couldn't access /tmp/Prosody_temp_avatar.png. Are you sure that /tmp is readable and writable and that Prosody can execute the dwebp command?");
+		end
 		os.remove("/tmp/Prosody_temp_avatar.webp");
 		os.remove("/tmp/Prosody_temp_avatar.png");
 	end
