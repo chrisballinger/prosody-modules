@@ -259,12 +259,12 @@ module:hook("iq-set/bare/"..xmlns_mam..":query", function(event)
 		for i = #results, 1, -1 do
 			origin.send(results[i]);
 		end
+		first, last = last, first;
 	end
 
 	-- That's all folks!
 	module:log("debug", "Archive query %s completed", tostring(qid));
 
-	if reverse then first, last = last, first; end
 	origin.send(st.message(msg_reply_attr)
 		:tag("fin", { xmlns = xmlns_mam, queryid = qid, complete = complete })
 			:add_child(rsm.generate {
