@@ -217,7 +217,7 @@ module:hook("iq-set/bare/"..xmlns_mam..":query", function(event)
 		origin.send(st.error_reply(stanza, "cancel", "internal-server-error"));
 		return true;
 	end
-	local total = err;
+	local total = tonumber(err);
 
 	origin.send(st.reply(stanza))
 	local msg_reply_attr = { to = stanza.attr.from, from = stanza.attr.to };
