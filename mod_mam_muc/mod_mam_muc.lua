@@ -14,7 +14,7 @@ local xmlns_forward = "urn:xmpp:forward:0";
 local muc_form_enable_logging = "muc#roomconfig_enablelogging"
 
 local st = require "util.stanza";
-local rsm = module:require "mod_mam/rsm";
+local rsm = require "util.rsm";
 local jid_bare = require "util.jid".bare;
 local jid_split = require "util.jid".split;
 local dataform = require "util.dataforms".new;
