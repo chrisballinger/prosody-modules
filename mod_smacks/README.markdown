@@ -62,7 +62,7 @@ Compatibility
 Clients
 =======
 
-Clients that support XEP-0198:
+Clients that support [XEP-0198]:
 
 -   Gajim
 -   Swift (but not resumption, as of version 2.0 and alphas of 3.0)
