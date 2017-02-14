@@ -190,7 +190,7 @@ module:hook("iq-set/bare/"..xmlns_mam..":query", function(event)
 		local vstart, vend = (qstart and timestamp_parse(qstart)), (qend and timestamp_parse(qend))
 		if (qstart and not vstart) or (qend and not vend) then
 			origin.send(st.error_reply(stanza, "modify", "bad-request", "Invalid timestamp"))
-			return true
+			return true;
 		end
 		qstart, qend = vstart, vend;
 	end
@@ -254,6 +254,7 @@ module:hook("iq-set/bare/"..xmlns_mam..":query", function(event)
 			origin.send(fwd_st);
 		end
 	end
+
 	if reverse then
 		for i = #results, 1, -1 do
 			origin.send(results[i]);
