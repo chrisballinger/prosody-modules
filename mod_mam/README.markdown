@@ -117,12 +117,13 @@ default_archive_policy = true
 Compatibility
 =============
 
-  ------- ---------------
-  trunk   Works
-  0.10    Works
+  ------- -----------------------
+  trunk   Included with Prosody
+  0.10    Included with Prosody
   0.9     Works
   0.8     Does not work
-  ------- ---------------
+  ------- -----------------------
+
 
 [^1]: Might be changed to "mam" at some point
 
