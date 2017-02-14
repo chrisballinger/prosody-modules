@@ -33,11 +33,7 @@ local get_room_from_jid = rawget(mod_muc, "get_room_from_jid") or
 		return rooms[jid];
 	end
 
-local getmetatable = getmetatable;
-local is_stanza = st.is_stanza or function(x)
-	return getmetatable(x) == st.stanza_mt;
-end
-
+local is_stanza = st.is_stanza;
 local tostring = tostring;
 local time_now = os.time;
 local m_min = math.min;
