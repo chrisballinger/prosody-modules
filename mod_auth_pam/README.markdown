@@ -3,13 +3,19 @@ labels:
 - 'Stage-Alpha'
 - 'Type-Auth'
 summary: PAM authentication module
-...
+---
 
 Introduction
 ============
 
 This module makes Prosody authenticate users against PAM (Linux
 Pluggable Authentication Modules)
+
+Dependencies
+============
+
+The module depends on [lua-pam](https://github.com/devurandom/lua-pam)
+and [LuaPosix](https://github.com/luaposix/luaposix).
 
 Setup
 =====
