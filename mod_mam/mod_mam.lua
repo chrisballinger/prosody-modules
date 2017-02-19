@@ -37,7 +37,7 @@ if global_default_policy ~= "roster" then
 	global_default_policy = module:get_option_boolean("default_archive_policy", global_default_policy);
 end
 
-local archive_store = "archive2";
+local archive_store = module:get_option_string("archive_store", "archive2");
 local archive = assert(module:open_store(archive_store, "archive"));
 
 if archive.name == "null" or not archive.find then
