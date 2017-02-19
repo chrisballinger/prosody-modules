@@ -320,14 +320,20 @@ if cleanup_after ~= "never" then
 		return false;
 	end
 
+	-- Set of known users to do message expiry for
+	-- Populated either below or when new messages are added
 	cleanup = {};
 
+	-- Iterating over users is not supported by all authentication modules
+	-- Catch and ignore error if not supported
 	pcall(function ()
+		-- If this works, then we schedule cleanup for all known users on startup
 		for user in um.users(module.host) do
 			cleanup[user] = true;
 		end
 	end);
 
+	-- At odd intervals, delete old messages for one user
 	module:add_timer(math.random(10, 60), function()
 		local user = next(cleanup);
 		if user then
