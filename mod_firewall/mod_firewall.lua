@@ -47,24 +47,71 @@ function idsafe(name)
 	return name:match("^%a[%w_]*$")
 end
 
+local meta_funcs = {
+	bare = function (code)
+		return "jid_bare("..code..")", {"jid_bare"};
+	end;
+	node = function (code)
+		return "(jid_split("..code.."))", {"jid_split"};
+	end;
+	host = function (code)
+		return "(select(2, jid_split("..code..")))", {"jid_split"};
+	end;
+	resource = function (code)
+		return "(select(3, jid_split("..code..")))", {"jid_split"};
+	end;
+};
+
 -- Run quoted (%q) strings through this to allow them to contain code. e.g.: LOG=Received: $(stanza:top_tag())
-function meta(s, extra)
+function meta(s, deps, extra)
 	return (s:gsub("$(%b())", function (expr)
 			expr = expr:gsub("\\(.)", "%1");
 			return [["..tostring(]]..expr..[[).."]];
 		end)
 		:gsub("$(%b<>)", function (expr)
 			expr = expr:sub(2,-2);
-			local default = expr:match("||([^|]+)$");
-			if default then
-				expr = expr:sub(1, -(#default+2));
-			else
-				default = "<undefined>";
+			local func_chain = expr:match("|[%w|]+$");
+			if func_chain then
+				expr = expr:sub(1, -1-#func_chain);
 			end
+			local code;
 			if expr:match("^@") then
-				return "\"..(stanza.attr["..("%q"):format(expr:sub(2)).."] or "..("%q"):format(default)..")..\"";
+				-- Skip stanza:find() for simple attribute lookup
+				local attr_name = expr:sub(2);
+				if deps and (attr_name == "to" or attr_name == "from" or attr_name == "type") then
+					-- These attributes may be cached in locals
+					code = attr_name;
+					table.insert(deps, attr_name);
+				else
+					code = "stanza.attr["..("%q"):format(attr_name).."]";
+				end
+			else
+				code = "(stanza:find("..("%q"):format(expr)..") or "..("%q"):format("<undefined>")..")";
 			end
-			return "\"..(stanza:find("..("%q"):format(expr)..") or "..("%q"):format(default)..")..\"";
+			if func_chain then
+				for func_name in func_chain:gmatch("|(%w+)") do
+					if code == "to" or code == "from" then
+						if func_name == "bare" then
+							code = "bare_"..code;
+							table.insert(deps, code);
+						elseif func_name == "node" or func_name == "host" or func_name == "resource" then
+							table.insert(deps, "split_"..code);
+							code = code.."_"..func_name;
+						end
+					else
+						assert(meta_funcs[func_name], "unknown function: "..func_name);
+						local new_code, new_deps = meta_funcs[func_name](code);
+						code = new_code;
+						if new_deps and #new_deps > 0 then
+							assert(deps, "function not supported here: "..func_name);
+							for _, dep in ipairs(new_deps) do
+								table.insert(deps, dep);
+							end
+						end
+					end
+				end
+			end
+			return "\"..(("..code..") or \"<undefined>\")..\"";
 		end)
 		:gsub("$$(%a+)", extra or {})
 		:gsub([[^""%.%.]], "")
