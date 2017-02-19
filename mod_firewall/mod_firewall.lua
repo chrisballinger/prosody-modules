@@ -153,7 +153,7 @@ local function include_dep(dependency, code)
 		module:log("error", "Dependency not found: %s", dep);
 		return;
 	end
-	if code.included_deps[dep] then
+	if code.included_deps[dep] ~= nil then
 		if code.included_deps[dep] ~= true then
 			module:log("error", "Circular dependency on %s", dep);
 		end
