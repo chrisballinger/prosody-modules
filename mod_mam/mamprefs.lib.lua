@@ -2,10 +2,12 @@
 -- Copyright (C) 2011-2013 Kim Alvefur
 --
 -- This file is MIT/X11 licensed.
+-- luacheck: ignore 122/prosody
 
 local global_default_policy = module:get_option("default_archive_policy", true);
 
 do
+	-- luacheck: ignore 211/prefs_format
 	local prefs_format = {
 		[false] = "roster",
 		-- default ::= true | false | "roster"
@@ -15,7 +17,7 @@ do
 	};
 end
 
-local sessions = hosts[module.host].sessions;
+local sessions = prosody.hosts[module.host].sessions;
 local prefs = module:open_store("archive2_prefs");
 
 local function get_prefs(user)
