@@ -124,17 +124,18 @@ function condition_handlers.INSPECT(path)
 		if not(query:match("#$") or query:match("@[^/]+")) then
 			error("Stanza path does not return a string (append # for text content or @name for value of named attribute)", 0);
 		end
+		local meta_deps = {};
 		local quoted_value = ("%q"):format(value);
 		if match_type:find("$", 1, true) then
 			match_type = match_type:gsub("%$", "");
-			quoted_value = meta(quoted_value);
+			quoted_value = meta(quoted_value, meta_deps);
 		end
 		if match_type == "~" then -- Lua pattern match
-			return ("(stanza:find(%q) or ''):match(%s)"):format(query, quoted_value);
+			return ("(stanza:find(%q) or ''):match(%s)"):format(query, quoted_value), meta_deps;
 		elseif match_type == "/" then -- find literal substring
-			return ("(stanza:find(%q) or ''):find(%s, 1, true)"):format(query, quoted_value);
+			return ("(stanza:find(%q) or ''):find(%s, 1, true)"):format(query, quoted_value), meta_deps;
 		elseif match_type == "" then -- exact match
-			return ("stanza:find(%q) == %s"):format(query, quoted_value);
+			return ("stanza:find(%q) == %s"):format(query, quoted_value), meta_deps;
 		else
 			error("Unrecognised comparison '"..match_type.."='", 0);
 		end
@@ -220,6 +221,7 @@ end
 
 function condition_handlers.LIMIT(spec)
 	local name, param = spec:match("^(%w+) on (.+)$");
+	local meta_deps = {};
 
 	if not name then
 		name = spec:match("^%w+$");
@@ -227,13 +229,13 @@ function condition_handlers.LIMIT(spec)
 			error("Unable to parse LIMIT specification");
 		end
 	else
-		param = meta(("%q"):format(param));
+		param = meta(("%q"):format(param), meta_deps);
 	end
 
 	if not param then
-		return ("not global_throttle_%s:poll(1)"):format(name), { "globalthrottle:"..name };
+		return ("not global_throttle_%s:poll(1)"):format(name), { "globalthrottle:"..name, unpack(meta_deps) };
 	end
-	return ("not multi_throttle_%s:poll_on(%s, 1)"):format(name, param), { "multithrottle:"..name };	
+	return ("not multi_throttle_%s:poll_on(%s, 1)"):format(name, param), { "multithrottle:"..name, unpack(meta_deps) };	
 end
 
 function condition_handlers.ORIGIN_MARKED(name_and_time)
