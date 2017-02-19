@@ -252,4 +252,15 @@ function condition_handlers.ORIGIN_MARKED(name_and_time)
 	return ("not not session.firewall_marked_"..idsafe(name));
 end
 
+-- CHECK LIST: spammers contains $<@from>
+function condition_handlers.CHECK_LIST(list_condition)
+	local list_name, expr = list_condition:match("(%S+) contains (.+)$");
+	if not list_name and expr then
+		error("Error parsing list check, syntax: LISTNAME contains EXPRESSION");
+	end
+	local meta_deps = {};
+	expr = meta(("%q"):format(expr), meta_deps);
+	return ("list_%s:contains(%s) == true"):format(list_name, expr), { "list:"..list_name, unpack(meta_deps) };
+end
+
 return condition_handlers;

@@ -191,6 +191,12 @@ local available_deps = {
 		local_code = [[local roster_entry = (to_node and rostermanager.load_roster(to_node, to_host) or {})[bare_from];]];
 		depends = { "rostermanager", "split_to", "bare_from" };
 	};
+	list = { global_code = function (list)
+			assert(idsafe(list), "Invalid list name: "..list);
+			assert(active_definitions.LIST[list], "Unknown list: "..list);
+			return ("local list_%s = lists[%q];"):format(list, list);
+		end
+	};
 };
 
 local function include_dep(dependency, code)
