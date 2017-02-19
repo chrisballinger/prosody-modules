@@ -141,7 +141,6 @@ local function handle_mam_query(event)
 	local before, after = qset and qset.before, qset and qset.after;
 	if type(before) ~= "string" then before = nil; end
 
-
 	-- Load all the data!
 	local data, err = archive:find(origin.username, {
 		start = qstart; ["end"] = qend; -- Time range
@@ -267,6 +266,7 @@ local function message_handler(event, c2s)
 		log("debug", "Not archiving stanza: %s (type)", stanza:top_tag());
 		return;
 	end
+
 	-- or if hints suggest we shouldn't
 	if not stanza:get_child("store", "urn:xmpp:hints") then -- No hint telling us we should store
 		if stanza:get_child("no-permanent-store", "urn:xmpp:hints")
