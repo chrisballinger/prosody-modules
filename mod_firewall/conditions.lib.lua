@@ -255,7 +255,7 @@ end
 -- CHECK LIST: spammers contains $<@from>
 function condition_handlers.CHECK_LIST(list_condition)
 	local list_name, expr = list_condition:match("(%S+) contains (.+)$");
-	if not list_name and expr then
+	if not (list_name and expr) then
 		error("Error parsing list check, syntax: LISTNAME contains EXPRESSION");
 	end
 	local meta_deps = {};
