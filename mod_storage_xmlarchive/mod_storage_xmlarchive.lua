@@ -83,9 +83,7 @@ function archive:find(username, query)
 
 	local result;
 	local function cb(_, stanza)
-		if result then
-			module:log("warn", "Multiple items in chunk");
-		end
+		assert(not result, "Multiple items in chunk");
 		result = stanza;
 	end
 
