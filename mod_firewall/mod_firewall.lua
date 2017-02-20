@@ -325,7 +325,7 @@ local function parse_firewall_rules(filename)
 				end
 				local f, err = io.open(fn);
 				if not f then return nil, errmsg(err); end
-				val = f:read("*a"):gsub("\r?\n", " "):gsub("%s+5", "");
+				val = f:read("*a"):gsub("\r?\n", " "):gsub("%s+$", "");
 			end
 			if not val then
 				return nil, errmsg("No value given for definition");
