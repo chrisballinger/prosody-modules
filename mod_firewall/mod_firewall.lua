@@ -220,14 +220,26 @@ local function include_dep(dependency, code)
 	end
 	if dep_info.global_code then
 		if dep_param ~= "" then
-			table.insert(code.global_header, dep_info.global_code(dep_param));
+			local global_code, deps = dep_info.global_code(dep_param);
+			if deps then
+				for _, dep in ipairs(deps) do
+					include_dep(dep, code);
+				end
+			end
+			table.insert(code.global_header, global_code);
 		else
 			table.insert(code.global_header, dep_info.global_code);
 		end
 	end
 	if dep_info.local_code then
 		if dep_param ~= "" then
-			table.insert(code, "\n\t\t-- "..dep.."\n\t\t"..dep_info.local_code(dep_param).."\n");
+			local local_code, deps = dep_info.local_code(dep_param);
+			if deps then
+				for _, dep in ipairs(deps) do
+					include_dep(dep, code);
+				end
+			end
+			table.insert(code, "\n\t\t-- "..dep.."\n\t\t"..local_code.."\n");
 		else
 			table.insert(code, "\n\t\t-- "..dep.."\n\t\t"..dep_info.local_code.."\n");
 		end
