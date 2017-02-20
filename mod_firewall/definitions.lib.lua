@@ -96,12 +96,15 @@ local list_backends = {
 				self.hash_function = hashes[opts.hash];
 			end
 			local etag;
+			local failure_count = 0;
+			local retry_intervals = { 60, 120, 300 };
 			local function update_list()
 				http.request(url, {
 					headers = {
 						["If-None-Match"] = etag;
 					};
 				}, function (body, code, response)
+					local next_poll = poll_interval;
 					if code == 200 and body then
 						etag = response.headers.etag;
 						local items = {};
@@ -112,16 +115,18 @@ local list_backends = {
 						module:log("debug", "Fetched updated list from <%s>", url);
 					elseif code == 304 then
 						module:log("debug", "List at <%s> is unchanged", url);
-					else
+					elseif code == 0 or (code >= 400 and code <=599) then
 						module:log("warn", "Failed to fetch list from <%s>: %d %s", url, code, tostring(body));
+						next_poll = 300;
+						failure_count = failure_count + 1;
+						next_poll = retry_intervals[failure_count] or retry_intervals[#retry_intervals];
 					end
-					if poll_interval > 0 then
-						timer.add_task(poll_interval, update_list);
+					if next_poll > 0 then
+						timer.add_task(next_poll+math.random(0, 60), update_list);
 					end
 				end);
 			end
 			update_list();
-			timer.add_task(0, update_list);
 		end;
 		contains = function (self, item)
 			if self.hash_function then
