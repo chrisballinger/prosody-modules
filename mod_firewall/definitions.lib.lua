@@ -170,4 +170,16 @@ function definition_handlers.LIST(list_name, list_definition)
 	return create_list(list_backend, list_definition:match("^%S+"), opts);
 end
 
+function definition_handlers.PATTERN(name, pattern)
+	local ok, err = pcall(string.match, "", pattern);
+	if not ok then
+		error("Invalid pattern '"..name.."': "..err);
+	end
+	return pattern;
+end
+
+function definition_handlers.SEARCH(name, pattern)
+	return pattern;
+end
+
 return definition_handlers;
