@@ -139,6 +139,30 @@ local list_backends = {
 			return self.items and self.items[item] == true;
 		end;
 	};
+	file = {
+		init = function (list_backend, file_spec, opts)
+			local filename = file_spec:gsub("^file:");
+			local file, err = io.open(filename);
+			if not file then
+				module:log("warn", "Failed to open list from %s: %s", filename, err);
+				return;
+			end
+			local items = {};
+			for line in file:lines() do
+				items[line] = true;
+			end
+			self.items = items;
+		end;
+		add = function (self, item)
+			self.items[item] = true;
+		end;
+		remove = function (self, item)
+			self.items[item] = nil;
+		end;
+		contains = function (self, item)
+			return self.items and self.items[item] == true;
+		end;
+	};
 };
 list_backends.https = list_backends.http;
 
