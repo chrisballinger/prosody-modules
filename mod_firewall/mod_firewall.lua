@@ -85,8 +85,10 @@ function meta(s, deps, extra)
 				else
 					code = "stanza.attr["..("%q"):format(attr_name).."]";
 				end
+			elseif expr:match("^%w+#$") then
+				code = ("stanza:get_child_text(%q)"):format(expr:sub(1, -2));
 			else
-				code = "(stanza:find("..("%q"):format(expr)..") or "..("%q"):format("<undefined>")..")";
+				code = ("stanza:find(%q)"):format(expr);
 			end
 			if func_chain then
 				for func_name in func_chain:gmatch("|(%w+)") do
@@ -111,7 +113,7 @@ function meta(s, deps, extra)
 					end
 				end
 			end
-			return "\"..(("..code..") or \"<undefined>\")..\"";
+			return "\"..tostring(("..code..") or \"<undefined>\")..\"";
 		end)
 		:gsub("$$(%a+)", extra or {})
 		:gsub([[^""%.%.]], "")
