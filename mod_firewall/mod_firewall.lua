@@ -219,7 +219,7 @@ local available_deps = {
 		end;
 	};
 	scan_list = {
-		global_code = [[local function scan_list(list, items) for item in pairs(items) do if list:contains(item) then return true; end end]];
+		global_code = [[local function scan_list(list, items) for item in pairs(items) do if list:contains(item) then return true; end end end]];
 	}
 };
 
