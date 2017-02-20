@@ -8,7 +8,7 @@ local active_definitions = {
 	ZONE = {
 		-- Default zone that includes all local hosts
 		["$local"] = setmetatable({}, { __index = prosody.hosts });
-	}
+	};
 };
 
 local default_chains = {
@@ -44,7 +44,7 @@ end
 
 -- Returns the input if it is safe to be used as a variable name, otherwise nil
 function idsafe(name)
-	return name:match("^%a[%w_]*$")
+	return name:match("^%a[%w_]*$");
 end
 
 local meta_funcs = {
