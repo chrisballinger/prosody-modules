@@ -187,4 +187,11 @@ function action_handlers.UNMARK_ORIGIN(name)
 	return [[session.firewall_marked_]]..idsafe(name)..[[ = nil;]]
 end
 
+function action_handlers.ADD_TO(spec)
+	local list_name, value = spec:match("(%S+) (.+)");
+	local meta_deps = {};
+	value = meta(("%q"):format(value), meta_deps);
+	return ("list_%s:add(%s);"):format(list_name, value), { "list:"..list_name, unpack(meta_deps) };
+end
+
 return action_handlers;
