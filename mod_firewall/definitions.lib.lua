@@ -148,10 +148,15 @@ local list_backends = {
 				return;
 			end
 			local items = {};
+			local n = 0;
 			for line in file:lines() do
-				items[line] = true;
+				if not items[line] then
+					n = n + 1;
+					items[line] = true;
+				end
 			end
 			self.items = items;
+			module:log("debug", "Loaded %d items from %s", n, filename);
 		end;
 		add = function (self, item)
 			self.items[item] = true;
