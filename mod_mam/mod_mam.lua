@@ -286,8 +286,9 @@ local function message_handler(event, c2s)
 		log("debug", "Archiving stanza: %s", stanza:top_tag());
 
 		-- And stash it
-		local ok, id = archive:append(store_user, nil, stanza, time_now(), with);
+		local ok = archive:append(store_user, nil, stanza, time_now(), with);
 		if ok then
+			local id = ok;
 			if cleanup then cleanup[store_user] = true; end
 			module:fire_event("archive-message-added", { origin = origin, stanza = stanza, for_user = store_user, id = id });
 		end
