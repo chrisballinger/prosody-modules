@@ -136,6 +136,7 @@ local list_backends = {
 		end;
 	};
 };
+list_backends.https = list_backends.http;
 
 local function create_list(list_backend, list_def, opts)
 	if not list_backends[list_backend] then
