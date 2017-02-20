@@ -5,8 +5,10 @@
 
 local xmlns_mam0    = "urn:xmpp:mam:0";
 local xmlns_mam1    = "urn:xmpp:mam:1";
+local xmlns_mam2    = "urn:xmpp:mam:2";
 local xmlns_delay   = "urn:xmpp:delay";
 local xmlns_forward = "urn:xmpp:forward:0";
+local xmlns_st_id   = "urn:xmpp:sid:0";
 
 local um = require "core.usermanager";
 local st = require "util.stanza";
@@ -17,6 +19,7 @@ local prefs_to_stanza = module:require"mamprefsxml".tostanza;
 local prefs_from_stanza = module:require"mamprefsxml".fromstanza;
 local jid_bare = require "util.jid".bare;
 local jid_split = require "util.jid".split;
+local jid_prepped_split = require "util.jid".prepped_split;
 local dataform = require "util.dataforms".new;
 local host = module.host;
 
@@ -78,6 +81,7 @@ end
 
 module:hook("iq/self/"..xmlns_mam0..":prefs", handle_prefs);
 module:hook("iq/self/"..xmlns_mam1..":prefs", handle_prefs);
+module:hook("iq/self/"..xmlns_mam2..":prefs", handle_prefs);
 
 local query_form = dataform {
 	{ name = "FORM_TYPE"; type = "hidden"; value = xmlns_mam0; };
@@ -97,6 +101,7 @@ end
 
 module:hook("iq-get/self/"..xmlns_mam0..":query", handle_get_form);
 module:hook("iq-get/self/"..xmlns_mam1..":query", handle_get_form);
+module:hook("iq-get/self/"..xmlns_mam2..":query", handle_get_form);
 
 -- Handle archive queries
 local function handle_mam_query(event)
@@ -221,6 +226,7 @@ local function handle_mam_query(event)
 end
 module:hook("iq-set/self/"..xmlns_mam0..":query", handle_mam_query);
 module:hook("iq-set/self/"..xmlns_mam1..":query", handle_mam_query);
+module:hook("iq-set/self/"..xmlns_mam2..":query", handle_mam_query);
 
 local function has_in_roster(user, who)
 	local roster = rm_load_roster(user, host);
@@ -261,6 +267,22 @@ local function message_handler(event, c2s)
 	local orig_to = stanza.attr.to or orig_from;
 	-- Stanza without 'to' are treated as if it was to their own bare jid
 
+	-- Whos storage do we put it in?
+	local store_user = c2s and origin.username or jid_split(orig_to);
+	-- And who are they chatting with?
+	local with = jid_bare(c2s and orig_to or orig_from);
+
+	-- Filter out <stanza-id> that claim to be from us
+	stanza:maptags(function (tag)
+		if tag.name == "stanza-id" and tag.attr.xmlns == xmlns_st_id then
+			local by_user, by_host, res = jid_prepped_split(tag.attr.by);
+			if not res and by_host == module.host and by_user == store_user then
+				return nil;
+			end
+		end
+		return tag;
+	end);
+
 	-- We store chat messages or normal messages that have a body
 	if not(orig_type == "chat" or (orig_type == "normal" and stanza:get_child("body")) ) then
 		log("debug", "Not archiving stanza: %s (type)", stanza:top_tag());
@@ -276,11 +298,6 @@ local function message_handler(event, c2s)
 		end
 	end
 
-	-- Whos storage do we put it in?
-	local store_user = c2s and origin.username or jid_split(orig_to);
-	-- And who are they chatting with?
-	local with = jid_bare(c2s and orig_to or orig_from);
-
 	-- Check with the users preferences
 	if shall_store(store_user, with) then
 		log("debug", "Archiving stanza: %s", stanza:top_tag());
@@ -289,6 +306,7 @@ local function message_handler(event, c2s)
 		local ok = archive:append(store_user, nil, stanza, time_now(), with);
 		if ok then
 			local id = ok;
+			stanza:tag("stanza-id", { xmlns = xmlns_st_id, by = store_user.."@"..host, id = id }):up();
 			if cleanup then cleanup[store_user] = true; end
 			module:fire_event("archive-message-added", { origin = origin, stanza = stanza, for_user = store_user, id = id });
 		end
@@ -300,6 +318,18 @@ end
 local function c2s_message_handler(event)
 	return message_handler(event, true);
 end
+
+local function strip_stanza_id(event)
+	local strip_by = jid_bare(event.origin.full_jid);
+	event.stanza:maptags(function(tag)
+		if not ( tag.attr.xmlns == xmlns_st_id and tag.attr.by == strip_by ) then
+			return tag;
+		end
+	end);
+end
+
+module:hook("pre-message/bare", strip_stanza_id, 0.01);
+module:hook("pre-message/full", strip_stanza_id, 0.01);
 
 local cleanup_after = module:get_option_string("archive_expires_after", "1w");
 local cleanup_interval = module:get_option_number("archive_cleanup_interval", 4 * 60 * 60);
@@ -366,5 +396,7 @@ module:add_feature(xmlns_mam0); -- COMPAT with XEP-0313 v 0.1
 module:hook("account-disco-info", function(event)
 	(event.reply or event.stanza):tag("feature", {var=xmlns_mam0}):up();
 	(event.reply or event.stanza):tag("feature", {var=xmlns_mam1}):up();
+	(event.reply or event.stanza):tag("feature", {var=xmlns_mam2}):up();
+	(event.reply or event.stanza):tag("feature", {var=xmlns_st_id}):up();
 end);
 
