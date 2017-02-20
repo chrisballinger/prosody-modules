@@ -128,6 +128,10 @@ local list_backends = {
 			end
 			update_list();
 		end;
+		add = function ()
+		end;
+		remove = function ()
+		end;
 		contains = function (self, item)
 			if self.hash_function then
 				item = self.hash_function(item);
