@@ -263,4 +263,13 @@ function condition_handlers.CHECK_LIST(list_condition)
 	return ("list_%s:contains(%s) == true"):format(list_name, expr), { "list:"..list_name, unpack(meta_deps) };
 end
 
+-- SCAN: body for word in badwords
+function condition_handlers.SCAN(scan_expression)
+	local search_name, pattern_name, list_name = scan_expression:match("(%S+) for (%S+) in (%S+)$");
+	if not (search_name) then
+		error("Error parsing SCAN expression, syntax: SEARCH for PATTERN in LIST");
+	end
+	return ("scan_list(%s, %s)"):format(list_name, "tokens_"..search_name.."_"..pattern_name), { "scan_list", "tokens:"..search_name.."_"..pattern_name, "list:"..list_name };
+end
+
 return condition_handlers;

@@ -199,6 +199,28 @@ local available_deps = {
 			return ("local list_%s = lists[%q];"):format(list, list);
 		end
 	};
+	search = {
+		local_code = function (search_name)
+			local search_path = assert(active_definitions.SEARCH[search_name], "Undefined search path: "..search_name);
+			return ("local search_%s = tostring(stanza:find(%q) or \"\")"):format(search_name, search_path);
+		end;
+	};
+	tokens = {
+		local_code = function (search_and_pattern)
+			local search_name, pattern_name = search_and_pattern:match("^([^%-]+)_(.+)$");
+			local code = ([[local tokens_%s_%s = {};
+			if search_%s then
+				for s in search_%s:gmatch(patterns.%s) do
+					tokens_%s_%s[s] = true;
+				end
+			end
+			]]):format(search_name, pattern_name, search_name, search_name, pattern_name, search_name, pattern_name);
+			return code, { "search:"..search_name };
+		end;
+	};
+	scan_list = {
+		global_code = [[local function scan_list(list, items) for item in pairs(items) do if list:contains(item) then return true; end end]];
+	}
 };
 
 local function include_dep(dependency, code)
