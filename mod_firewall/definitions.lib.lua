@@ -140,8 +140,8 @@ local list_backends = {
 		end;
 	};
 	file = {
-		init = function (list_backend, file_spec, opts)
-			local filename = file_spec:gsub("^file:");
+		init = function (self, file_spec, opts)
+			local filename = file_spec:gsub("^file:", "");
 			local file, err = io.open(filename);
 			if not file then
 				module:log("warn", "Failed to open list from %s: %s", filename, err);
