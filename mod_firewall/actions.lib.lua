@@ -155,6 +155,15 @@ function action_handlers.REPLY(with)
 	return route_modify(("reply(stanza):body(%q)"):format(with));
 end
 
+function action_handlers.FORWARD(where)
+	local code = [[
+		local newstanza = st.stanza("message", { to = %q }):tag("forwarded", { xmlns = "urn:xmpp:forward:0" });
+		local tmp_stanza = st.clone(stanza); tmp_stanza.attr.xmlns = "jabber:client"; newstanza:add_child(tmp_stanza);
+		core_post_stanza(session, newstanza);
+	]];
+	return code:format(where);
+end
+
 function action_handlers.LOG(string)
 	local level = string:match("^%[(%a+)%]") or "info";
 	string = string:gsub("^%[%a+%] ?", "");
