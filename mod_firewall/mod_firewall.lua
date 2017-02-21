@@ -70,6 +70,11 @@ function meta(s, deps, extra)
 		end)
 		:gsub("$(%b<>)", function (expr)
 			expr = expr:sub(2,-2);
+			local default = "<undefined>";
+			expr = expr:gsub("||(%b\"\")$", function (s)
+				default = s:sub(2,-2);
+				return "";
+			end);
 			local func_chain = expr:match("|[%w|]+$");
 			if func_chain then
 				expr = expr:sub(1, -1-#func_chain);
@@ -113,13 +118,12 @@ function meta(s, deps, extra)
 					end
 				end
 			end
-			return "\"..tostring(("..code..") or \"<undefined>\")..\"";
+			return "\"..tostring("..code.." or "..("%q"):format(default)..")..\"";
 		end)
 		:gsub("$$(%a+)", extra or {})
 		:gsub([[^""%.%.]], "")
 		:gsub([[%.%.""$]], ""));
 end
-
 
 -- Dependency locations:
 -- <type lib>
