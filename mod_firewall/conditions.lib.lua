@@ -100,8 +100,9 @@ function condition_handlers.LEAVING(zone)
 	return zone_check(zone, "from");
 end
 
+-- IN ROSTER? (parameter is deprecated)
 function condition_handlers.IN_ROSTER(yes_no)
-	local in_roster_requirement = string_to_boolean(yes_no);
+	local in_roster_requirement = string_to_boolean(yes_no or "yes"); -- COMPAT w/ older scripts
 	return "not "..(in_roster_requirement and "not" or "").." roster_entry", { "roster_entry" };
 end
 
