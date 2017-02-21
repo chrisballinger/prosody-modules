@@ -209,17 +209,23 @@ local available_deps = {
 			return ("local search_%s = tostring(stanza:find(%q) or \"\")"):format(search_name, search_path);
 		end;
 	};
+	pattern = {
+		local_code = function (pattern_name)
+			local pattern = assert(active_definitions.PATTERN[pattern_name], "Undefined pattern: "..pattern_name);
+			return ("local pattern_%s = %q"):format(pattern_name, pattern);
+		end;
+	};
 	tokens = {
 		local_code = function (search_and_pattern)
 			local search_name, pattern_name = search_and_pattern:match("^([^%-]+)_(.+)$");
 			local code = ([[local tokens_%s_%s = {};
 			if search_%s then
-				for s in search_%s:gmatch(patterns.%s) do
+				for s in search_%s:gmatch(pattern_%s) do
 					tokens_%s_%s[s] = true;
 				end
 			end
 			]]):format(search_name, pattern_name, search_name, search_name, pattern_name, search_name, pattern_name);
-			return code, { "search:"..search_name };
+			return code, { "search:"..search_name, "pattern:"..pattern_name };
 		end;
 	};
 	scan_list = {
