@@ -366,7 +366,7 @@ local function parse_firewall_rules(filename)
 				active_definitions[what] = {};
 			end
 			active_definitions[what][name] = ret;
-		elseif line:find("^[^%s:]+[%.=]") then
+		elseif line:find("^[%w_ ]+[%.=]") then
 			-- Action
 			if state == nil then
 				-- This is a standalone action with no conditions
@@ -374,7 +374,7 @@ local function parse_firewall_rules(filename)
 			end
 			state = "actions";
 			-- Action handlers?
-			local action = line:match("^[%w_]+");
+			local action = line:match("^[%w_ ]+"):upper():gsub(" ", "_");
 			if not action_handlers[action] then
 				return nil, ("Unknown action on line %d: %s"):format(line_no, action or "<unknown>");
 			end
