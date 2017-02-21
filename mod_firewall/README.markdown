@@ -80,6 +80,11 @@ For example:
     NOT FROM: user@example.com
     KIND NOT: message
 
+Some conditions do not take parameters, and these should end with just a
+question mark, like:
+
+    IN ROSTER?
+
 ### Zones
 
 A 'zone' is one or more hosts or JIDs. It is possible to match when a
@@ -105,6 +110,53 @@ The following zone-matching conditions are supported:
   `ENTERING`   When a stanza is entering the named zone
   `LEAVING`    When a stanza is leaving the named zone
 
+### Lists
+
+It is possible to create or load lists of strings for use in scripts. For example, you might load a JID blacklist,
+a list of malware URLs or simple words that you want to filter messages on.
+
+  List type    Example
+  -----------  -----------------------
+  memory       %LIST spammers: memory
+  file         %LIST spammers: file:/etc/spammers.txt
+  http         %LIST spammers: http://example.com/spammers.txt
+
+#### CHECK LIST
+
+Checks whether a simple expression is found in a given list.
+
+Example:
+
+    %LIST blacklist: file:/etc/prosody/blacklist.txt
+
+    # Rule to block presence subscription requests from blacklisted JIDs
+    KIND: presence
+    TYPE: subscribe
+    CHECK LIST: blacklist contains $<@from>
+    BOUNCE=policy-violation (Your JID is blacklisted)
+
+#### SCAN
+
+SCAN allows you to search inside a stanza for a given pattern, and check each result against a list. For example,
+you could scan a message body for words and check if any of the words are found in a given list.
+
+Before using SCAN, you need to define a search location and a pattern. The search location uses the same 'path'
+format as documented under the 'INSPECT' condition. Patterns can be any valid Lua pattern.
+
+To use the above example:
+
+    # Define a search location called 'body' which fetches the text of the 'body' element
+    %SEARCH body: body#
+    # Define a pattern called 'word' which matches any sequence of letters
+    %PATTERN word: [A-Za-z]+
+    # Finally, we also need our list of "bad" words:
+    %LIST badwords: file:/etc/prosody/bad_words.txt
+    
+    # Now we can use these to SCAN incoming stanzas
+    # If it finds a match, bounce the stanza
+    SCAN: body for word in badwords
+    BOUNCE=policy-violation (This word is not allowed!)
+
 ### Stanza matching
 
   Condition   Matches
@@ -126,47 +178,6 @@ The following zone-matching conditions are supported:
 the protocol. Available presence is signalled by the omission of a type.
 Similarly, a message stanza with no type is equivalent to one of type
 'normal'. mod\_firewall handles these cases for you automatically.
-
-#### INSPECT
-
-INSPECT takes a 'path' through the stanza to get a string (an attribute
-value or text content). An example is the best way to explain. Let's
-check that a user is not trying to register an account with the username
-'admin'. This stanza comes from [XEP-0077: In-band
-Registration](http://xmpp.org/extensions/xep-0077.html#example-4):
-
-``` xml
-<iq type='set' id='reg2'>
-  <query xmlns='jabber:iq:register'>
-    <username>bill</username>
-    <password>Calliope</password>
-    <email>bard@shakespeare.lit</email>
-  </query>
-</iq>
-```
-
-    KIND: iq
-    TYPE: set
-    PAYLOAD: jabber:iq:register
-    INSPECT: {jabber:iq:register}query/username#=admin
-    BOUNCE=not-allowed (The username 'admin' is reserved.)
-
-That weird string deserves some explanation. It is a path, divided into
-segments by '/'. Each segment describes an element by its name,
-optionally prefixed by its namespace in curly braces ('{...}'). If the
-path ends with a '\#' then the text content of the last element will be
-returned. If the path ends with '@name' then the value of the attribute
-'name' will be returned.
-
-You can use INSPECT to test for the existence of an element or attribute,
-or you can see if it is equal to a string by appending `=STRING` (as in the
-example above). Finally,you can also test whether it matches a given Lua
-pattern by using `~=PATTERN`.
-
-INSPECT is somewhat slower than the other stanza matching conditions. To
-minimise performance impact, always place it below other faster
-condition checks where possible (e.g. above we first checked KIND, TYPE
-and PAYLOAD matched before INSPECT).
 
 ### Sender/recipient matching
 
@@ -213,6 +224,47 @@ normalisation or validity checks on the to/from JIDs on an incoming
 stanza. It is not advisable to perform access control or similar rules
 on JIDs in these chains (see the chain documentation for more info).
 
+#### INSPECT
+
+INSPECT takes a 'path' through the stanza to get a string (an attribute
+value or text content). An example is the best way to explain. Let's
+check that a user is not trying to register an account with the username
+'admin'. This stanza comes from [XEP-0077: In-band
+Registration](http://xmpp.org/extensions/xep-0077.html#example-4):
+
+``` xml
+<iq type='set' id='reg2'>
+  <query xmlns='jabber:iq:register'>
+    <username>bill</username>
+    <password>Calliope</password>
+    <email>bard@shakespeare.lit</email>
+  </query>
+</iq>
+```
+
+    KIND: iq
+    TYPE: set
+    PAYLOAD: jabber:iq:register
+    INSPECT: {jabber:iq:register}query/username#=admin
+    BOUNCE=not-allowed (The username 'admin' is reserved.)
+
+That weird string deserves some explanation. It is a path, divided into
+segments by '/'. Each segment describes an element by its name,
+optionally prefixed by its namespace in curly braces ('{...}'). If the
+path ends with a '\#' then the text content of the last element will be
+returned. If the path ends with '@name' then the value of the attribute
+'name' will be returned.
+
+You can use INSPECT to test for the existence of an element or attribute,
+or you can see if it is equal to a string by appending `=STRING` (as in the
+example above). Finally,you can also test whether it matches a given Lua
+pattern by using `~=PATTERN`.
+
+INSPECT is somewhat slower than the other stanza matching conditions. To
+minimise performance impact, always place it below other faster
+condition checks where possible (e.g. above we first checked KIND, TYPE
+and PAYLOAD matched before INSPECT).
+
 ### Roster
 
 These functions access the roster of the recipient (only). Therefore they cannot (currently)
@@ -222,17 +274,17 @@ Performance note: this check can potentially cause storage access (especially if
 is currently offline), so you may want to limit its use in high-traffic situations, and place
 it below other checks (such as a rate limiter).
 
-#### IN_ROSTER
+#### IN ROSTER
 
 Tests whether the sender is in the recipient's roster.
 
-    IN_ROSTER: yes
+    IN ROSTER?
 
-#### IN_ROSTER_GROUP
+#### IN ROSTER GROUP
 
 Tests whether the sender is in the recipient's roster, and in the named group.
 
-    IN_ROSTER_GROUP: Friends
+    IN ROSTER GROUP: Friends
 
 #### SUBSCRIBED
 
@@ -250,8 +302,20 @@ match based on these groups in firewall rules.
 
   Condition     Matches
   ------------- ----------------------------
-  `FROM_GROUP`  When the stanza is being sent from a member of the named group
-  `TO_GROUP`    When the stanza is being sent to a member of the named group
+  `FROM GROUP`  When the stanza is being sent from a member of the named group
+  `TO GROUP`    When the stanza is being sent to a member of the named group
+
+#### SENT DIRECTED PRESENCE TO SENDER
+
+This condition matches if the recipient of a stanza has previously sent directed presence to the sender of the stanza. This
+is often done in XMPP to exchange presence information with JIDs that are not on your roster, such as MUC rooms.
+
+This condition does not take a parameter - end the condition name with a question mark:
+
+    # Rule to bounce messages from senders not in the roster who haven't been sent directed presence
+    NOT IN ROSTER?
+    NOT SENT DIRECTED PRESENCE TO SENDER?
+    BOUNCE=service-unavailable
 
 ### Admins
 
@@ -259,8 +323,8 @@ Prosody allows certain JIDs to be declared as administrators of a host, componen
 
   Condition      Matches
   -------------- ----------------------------------
-  FROM_ADMIN_OF  When the sender of the stanza is an admin of the named host on the current server
-  TO_ADMIN_OF    When the recipient of the stanza is an admin of the named host on the current server
+  FROM ADMIN OF  When the sender of the stanza is an admin of the named host on the current server
+  TO ADMIN OF    When the recipient of the stanza is an admin of the named host on the current server
 
 ### Time and date
 
@@ -358,19 +422,19 @@ It is possible to 'mark' sessions (see the MARK_ORIGIN action below). To match s
 
   Condition                       Description
   ------------------------------- ---------------------------------------------------------------
-  ORIGIN_MARKED: markname         Matches if the origin has been marked with 'markname'.
-  ORIGIN_MARKED: markname (Xs)    Matches if the origin has been marked with 'markname' within the past X seconds.
+  ORIGIN MARKED: markname         Matches if the origin has been marked with 'markname'.
+  ORIGIN MARKED: markname (Xs)    Matches if the origin has been marked with 'markname' within the past X seconds.
 
 Example usage:
 
     # This rule drops messages from sessions that have been marked as spammers in the past hour
-    ORIGIN_MARKED: spammer (3600s)
+    ORIGIN MARKED: spammer (3600s)
     DROP.
 
     # This rule marks the origin session as a spammer if they send a message to a honeypot JID
     KIND: message
     TO: honeypot@example.com
-    MARK_ORIGIN=spammer
+    MARK ORIGIN=spammer
 
 Actions
 -------
@@ -423,8 +487,8 @@ It is possible to mark sessions, and then use these marks to match rules later o
 
   Action                   Description
   ------------------------ --------------------------------------------------------------------------
-  `MARK_ORIGIN=mark`        Marks the originating session with the given flag.
-  `UNMARK_ORIGIN=mark`      Removes the given mark from the origin session (if it is set).
+  `MARK ORIGIN=mark`        Marks the originating session with the given flag.
+  `UNMARK ORIGIN=mark`      Removes the given mark from the origin session (if it is set).
 
 **Note:** Marks apply to sessions, not JIDs. E.g. if marking in a rule that matches a stanza received
 over s2s, it is the s2s session that is marked.
@@ -493,7 +557,7 @@ Example of chain use:
 
   Action                   Description
   ------------------------ ------------------------------------------------------------------------
-  `JUMP_CHAIN=name`        Switches chains, and passes the stanza through the rules in chain 'name'. If the new chain causes the stanza to be dropped/redirected, the current chain halts further processing.
+  `JUMP CHAIN=name`        Switches chains, and passes the stanza through the rules in chain 'name'. If the new chain causes the stanza to be dropped/redirected, the current chain halts further processing.
 
 It is possible to jump to chains defined by other scripts and modules.
 
@@ -506,6 +570,8 @@ rule is being run.
 
 There are two kinds of expression that you can use: stanza expressions, and code expressions.
 
+### Stanza expressions
+
 Stanza expressions are of the form `$<...>`, where `...` is a stanza path. For syntax of stanza paths, see the documentation for the 'INSPECT' condition
 above.
 
@@ -513,8 +579,27 @@ Example:
 
     LOG=Matched a stanza from $<@from> to $<@to>
 
-If the path does not match (e.g. the element isn't found, or the attribute doesn't exist) it will return the text `<undefined>`. You can override this
-by specifying an alternative default value, using the syntax `$<path||default>`.
+There are built in functions which can be applied to the output of a stanza expression, by appending the pipe ('|') operator, followed by the function
+name. These functions are:
+
+  Function     Description
+  ------------ ---------------------------------------
+  bare         Given a JID, strip any resource
+  node         Return the node ('user part') of a JID
+  host         Return the host ('domain') part of a JID
+  resource     Return the resource part of a JID
+
+For example, to apply a rate limit to stanzas per sender domain:
+
+    LIMIT normal on $<@from|domain>
+
+If the path does not match (e.g. the element isn't found, or the attribute doesn't exist) or any of the functions fail to produce an output (e.g. an invalid
+JID was passed to a function that only handles valid JIDs) the expression will return the text `<undefined>`. You can override this by ending the expression
+with a double pipe ('||') followed by a quoted string to use as a default instead. E.g. to default to the string "normal" when there is no 'type' attribute:
+
+    LOG=Stanza type is $<@type||"normal">
+
+### Code expressions
 
 Code expressions use `$(...)` syntax. Code expressions are powerful, and allow unconstrained access to Prosody's internal environment. Therefore
 code expressions are typically for advanced use-cases only. You may want to refer to Prosody's [developer documentation](https://prosody.im/doc/developers)
