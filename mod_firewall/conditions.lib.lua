@@ -279,4 +279,23 @@ function condition_handlers.SCAN(scan_expression)
 	return ("scan_list(list_%s, %s)"):format(list_name, "tokens_"..search_name.."_"..pattern_name), { "scan_list", "tokens:"..search_name.."_"..pattern_name, "list:"..list_name };
 end
 
+local valid_comp_ops = { [">"] = ">", ["<"] = "<", ["="] = "==", ["=="] = "==", ["<="] = "<=", [">="] = ">=" };
+function condition_handlers.COUNT(count_expression)
+	local pattern_name, search_name, comparator_expression = count_expression:match("(%S+) in (%S+) (.+)$");
+	if not (pattern_name) then
+		error("Error parsing COUNT expression, syntax: PATTERN in SEARCH COMPARATOR");
+	end
+	local value;
+	comparator_expression = comparator_expression:gsub("%d+", function (value_string)
+		value = tonumber(value_string);
+		return "";
+	end);
+	if not value then
+		error("Error parsing COUNT expression, expected value");
+	end
+	local comp_op = comparator_expression:gsub("%s+", "");
+	assert(valid_comp_ops[comp_op], "Error parsing COUNT expression, unknown comparison operator: "..comp_op);
+	return ("it_count(search_%s:gmatch(pattern_%s)) %s %d"):format(search_name, pattern_name, comp_op, value), { "it_count", "search:"..search_name, "pattern:"..pattern_name };
+end
+
 return condition_handlers;
