@@ -157,6 +157,21 @@ To use the above example:
     SCAN: body for word in badwords
     BOUNCE=policy-violation (This word is not allowed!)
 
+#### COUNT
+
+COUNT is similar to SCAN, in that it uses a defined SEARCH and breaks it up according to a PATTERN. Then it
+counts the number of results.
+
+For example, to block every message with more than one URL:
+
+    # Define a search location called 'body' which fetches the text of the 'body' element
+    %SEARCH body: body#
+    # Define a pattern called 'url' which matches HTTP links
+    %PATTERN url: https?://%S+
+    
+    COUNT: url in body > 1
+    BOUNCE=policy-violation (Up to one HTTP URL is allowed in messages)
+
 ### Stanza matching
 
   Condition   Matches
