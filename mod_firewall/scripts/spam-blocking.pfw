@@ -1,0 +1,54 @@
+#### Anti-spam ruleset
+
+#### General rules for all incoming stanzas ####
+::deliver
+
+# Pass stanzas that a user sends to their own account
+TO SELF?
+PASS.
+
+# Pass stanzas that are addressed to a valid full JID
+TO FULL JID?
+PASS.
+
+# Pass stanzas from contacts
+SUBSCRIBED?
+PASS.
+
+# Run extra rules that apply to messages only
+KIND: message
+JUMP_CHAIN=user/check_spam_message
+
+# Run extra rules that apply to presence stanzas only
+KIND: presence
+JUMP CHAIN=user/check_spam_presence
+
+#### Rules for messages ####
+::user/check_spam_message
+
+# Non-chat message types often generate pop-ups in clients,
+# so we won't accept them from strangers
+NOT TYPE: chat
+JUMP CHAIN=user/reject_spam
+
+# This chain can be used by other scripts
+# and modules that analyze message content
+JUMP CHAIN=user/check_spam_message_content
+
+#### Rules for presence stanzas ####
+::user/check_spam_presence
+
+# We don't want to receive presence from random strangers,
+# but still allow subscription requests
+NOT TYPE: subscribe
+DROP.
+
+# This chain can be used by other scripts
+# and modules to filter subscription requests
+JUMP CHAIN=user/check_subscription_request
+
+#### Stanzas reaching this chain will be rejected ####
+::user/reject_spam
+
+LOG=Rejecting suspected spam: $(stanza:top_tag())
+BOUNCE=policy-violation
