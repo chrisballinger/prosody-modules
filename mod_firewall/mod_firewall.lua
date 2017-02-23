@@ -504,7 +504,7 @@ local function process_firewall_rules(ruleset)
 			table.insert(code.global_header, 1, "local "..name:lower().."s = definitions."..name..";");
 		end
 
-		local code_string = "return function (definitions, fire_event, log)\n\t"
+		local code_string = "return function (definitions, fire_event, log, module)\n\t"
 			..table.concat(code.global_header, "\n\t")
 			.."\n\tlocal db = require 'util.debug';\n\n\t"
 			.."return function (event)\n\t\t"
@@ -534,7 +534,7 @@ local function compile_handler(code_string, filename)
 	local function fire_event(name, data)
 		return module:fire_event(name, data);
 	end
-	chunk = chunk()(active_definitions, fire_event, logger(filename)); -- Returns event handler with 'zones' upvalue.
+	chunk = chunk()(active_definitions, fire_event, logger(filename), module); -- Returns event handler with 'zones' upvalue.
 	return chunk;
 end
 
