@@ -151,6 +151,7 @@ local available_deps = {
 	st = { global_code = [[local st = require "util.stanza";]]};
 	it = { global_code = [[local it = require "util.iterators";]]};
 	it_count = { global_code = [[local it_count = it.count;]], depends = { "it" } };
+	current_host = { global_code = [[local current_host = module.host;]] };
 	jid_split = {
 		global_code = [[local jid_split = require "util.jid".split;]];
 	};
