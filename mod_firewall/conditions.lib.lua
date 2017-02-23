@@ -267,6 +267,10 @@ function condition_handlers.SENT_DIRECTED_PRESENCE_TO_SENDER()
 	return "not not session.directed[from]", { "from" };
 end
 
+function condition_handlers.TO_FULL_JID()
+	return "not not full_sessions[to]", { "to" };
+end
+
 -- CHECK LIST: spammers contains $<@from>
 function condition_handlers.CHECK_LIST(list_condition)
 	local list_name, expr = list_condition:match("(%S+) contains (.+)$");
