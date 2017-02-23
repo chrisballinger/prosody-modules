@@ -125,6 +125,14 @@ function meta(s, deps, extra)
 		:gsub([[%.%.""$]], ""));
 end
 
+local escape_chars = {
+	a = "\a", b = "\b", f = "\f", n = "\n", r = "\r", t = "\t",
+	v = "\v", ["\\"] = "\\", ["\""] = "\"", ["\'"] = "\'"
+};
+function stripslashes(s)
+	return (s:gsub("\\(.)", escape_chars));
+end
+
 -- Dependency locations:
 -- <type lib>
 -- <type global>
