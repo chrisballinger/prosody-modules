@@ -38,6 +38,11 @@ JUMP CHAIN=user/check_spam_message_content
 #### Rules for presence stanzas ####
 ::user/check_spam_presence
 
+# These may be received if rosters get out of sync, and are harmless
+# because they will not be routed to the client unless necessary
+TYPE: unsubscribe|unsubscribed
+PASS.
+
 # We don't want to receive presence from random strangers,
 # but still allow subscription requests
 NOT TYPE: subscribe
