@@ -263,10 +263,8 @@ function condition_handlers.ORIGIN_MARKED(name_and_time)
 	return ("not not session.firewall_marked_"..idsafe(name));
 end
 
-function condition_handlers.SENT_DIRECTED_PRESENCE_TO_SENDER(jid)
-	local meta_deps = {};
-	jid = meta(("%q"):format(jid), meta_deps);
-	return "not not session.directed[jid]", meta_deps;
+function condition_handlers.SENT_DIRECTED_PRESENCE_TO_SENDER()
+	return "not not session.directed[from]", { "from" };
 end
 
 -- CHECK LIST: spammers contains $<@from>
