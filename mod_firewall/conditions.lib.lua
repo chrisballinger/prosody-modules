@@ -162,6 +162,14 @@ function condition_handlers.TO_ADMIN_OF(host)
 	return ("is_admin(bare_to, %s)"):format(host ~= "*" and host or nil), { "is_admin", "bare_to" };
 end
 
+function condition_handlers.FROM_ADMIN()
+	return ("is_admin(bare_from, from_host)"):format(host ~= "*" and host or nil), { "is_admin", "bare_from", "split_from" };
+end
+
+function condition_handlers.TO_ADMIN()
+	return ("is_admin(bare_to, to_host)"):format(host ~= "*" and host or nil), { "is_admin", "bare_to", "split_to" };
+end
+
 local day_numbers = { sun = 0, mon = 2, tue = 3, wed = 4, thu = 5, fri = 6, sat = 7 };
 
 local function current_time_check(op, hour, minute)
