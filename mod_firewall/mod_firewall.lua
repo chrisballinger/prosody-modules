@@ -377,7 +377,7 @@ local function parse_firewall_rules(filename)
 			if not val then
 				return nil, errmsg("No value given for definition");
 			end
-
+			val = stripslashes(val);
 			local ok, ret = pcall(definition_handlers[what], name, val);
 			if not ok then
 				return nil, errmsg(ret);
