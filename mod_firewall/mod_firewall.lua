@@ -125,6 +125,10 @@ function meta(s, deps, extra)
 		:gsub([[%.%.""$]], ""));
 end
 
+function metaq(s, ...)
+	return meta(("%q"):format(s), ...);
+end
+
 local escape_chars = {
 	a = "\a", b = "\b", f = "\f", n = "\n", r = "\r", t = "\t",
 	v = "\v", ["\\"] = "\\", ["\""] = "\"", ["\'"] = "\'"
