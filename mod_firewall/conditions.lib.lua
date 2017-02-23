@@ -66,11 +66,13 @@ function condition_handlers.FROM(from)
 end
 
 function condition_handlers.FROM_EXACTLY(from)
-	return ("from == %q"):format(from), { "from" };
+	local metadeps = {};
+	return ("from == %s"):format(metaq(from, metadeps)), { "from", unpack(metadeps) };
 end
 
 function condition_handlers.TO_EXACTLY(to)
-	return ("to == %q"):format(to), { "to" };
+	local metadeps = {};
+	return ("to == %s"):format(metaq(to, metadeps)), { "to", unpack(metadeps) };
 end
 
 function condition_handlers.TO_SELF()
