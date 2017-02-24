@@ -2,14 +2,13 @@
 labels:
 - 'Stage-Alpha'
 - 'Type-Auth'
-summary: 'XEP-0233: Domain-Based Service Names in XMPP SASL Negotiation'
+summary: 'XEP-0233: XMPP Server Registration for use with Kerberos V5'
 ...
 
 Introduction
 ============
 
-This module implements [XEP-0233: Domain-Based Service Names in XMPP
-SASL Negotiation](http://xmpp.org/extensions/xep-0233.html).
+This module implements the hostname advertising method from [XEP-0233].
 
 Configuration
 =============
