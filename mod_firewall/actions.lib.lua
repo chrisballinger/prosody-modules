@@ -50,11 +50,19 @@ local function compile_xml(data)
 end
 
 function action_handlers.PASS()
-	return "do return end"
+	return "do return pass_return end"
 end
 
 function action_handlers.DROP()
 	return "do return true end";
+end
+
+function action_handlers.DEFAULT()
+	return "do return false end";
+end
+
+function action_handlers.RETURN()
+	return "do return end"
 end
 
 function action_handlers.STRIP(tag_desc)
@@ -185,7 +193,16 @@ function action_handlers.JUMP_EVENT(name)
 end
 
 function action_handlers.JUMP_CHAIN(name)
-	return ("if fire_event(%q, event) then return true; end"):format("firewall/chains/"..name);
+	return ([[do
+		local ret = fire_event(%q, event);
+		log('debug', 'chain \"%%s\" returned %%s', %q, tostring(ret));
+		if ret ~= nil then
+			if ret == false then
+				return pass_return;
+			end
+			return ret;
+		end
+	end]]):format("firewall/chains/"..name, name);
 end
 
 function action_handlers.MARK_ORIGIN(name)
