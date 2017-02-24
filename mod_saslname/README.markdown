@@ -8,7 +8,9 @@ summary: 'XEP-0233: XMPP Server Registration for use with Kerberos V5'
 Introduction
 ============
 
-This module implements the hostname advertising method from [XEP-0233].
+This module implements a manual method for advertsing the Kerberos
+principal name as per [XEP-0233]. It could be used in conjection with
+a Kerberos authentication module.
 
 Configuration
 =============
