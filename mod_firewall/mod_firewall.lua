@@ -71,8 +71,8 @@ function meta(s, deps, extra)
 		:gsub("$(%b<>)", function (expr)
 			expr = expr:sub(2,-2);
 			local default = "<undefined>";
-			expr = expr:gsub("||(%b\"\")$", function (s)
-				default = s:sub(2,-2);
+			expr = expr:gsub("||(%b\"\")$", function (default_string)
+				default = stripslashes(default_string:sub(2,-2));
 				return "";
 			end);
 			local func_chain = expr:match("|[%w|]+$");
