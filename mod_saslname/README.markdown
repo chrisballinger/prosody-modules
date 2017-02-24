@@ -1,6 +1,6 @@
 ---
 labels:
-- 'Stage-Alpha'
+- 'Stage-Stable'
 - 'Type-Auth'
 summary: 'XEP-0233: XMPP Server Registration for use with Kerberos V5'
 ...
