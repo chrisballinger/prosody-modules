@@ -126,7 +126,7 @@ local function route_modify(make_new, to, drop)
 		deps[#deps+1] = "core_post_stanza";
 	end
 	return ([[local newstanza = st.%s; %s;%s]])
-		:format(make_new, reroute, drop and " return true;" or ""), deps;
+		:format(make_new, reroute, drop and " do return true end" or ""), deps;
 end
 
 function action_handlers.BOUNCE(with)
