@@ -76,7 +76,8 @@ function condition_handlers.TO_EXACTLY(to)
 end
 
 function condition_handlers.TO_SELF()
-	return ("to == nil");
+	-- Intentionally not using 'to' here, as that defaults to bare JID when nil
+	return ("stanza.attr.to == nil");
 end
 
 function condition_handlers.TYPE(type)
