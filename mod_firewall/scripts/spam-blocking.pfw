@@ -26,8 +26,6 @@
 #### General rules for all incoming stanzas ######################
 ::deliver
 
-LOG=Considering $(stanza:top_tag())
-
 # Pass stanzas that a user sends to their own account
 TO SELF?
 PASS.
