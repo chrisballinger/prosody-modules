@@ -474,8 +474,9 @@ and rules (this may change in the future).
 
   Action                  Description
   ----------------------- ---------------------------------------------------------------------------------------------------------------------------------------------------------
-  `PASS.`                 Stop executing actions and rules on this stanza, and let it through this chain.
+  `PASS.`                 Stop executing actions and rules on this stanza, and let it through this chain and any calling chains.
   `DROP.`                 Stop executing actions and rules on this stanza, and discard it.
+  `DEFAULT.`              Stop executing actions and rules on this stanza, prevent any other scripts/modules from handling it, to trigger the appropriate default "unhandled stanza" behaviour. Do not use in custom chains (it is treated as PASS).
   `REDIRECT=jid`          Redirect the stanza to the given JID.
   `REPLY=text`            Reply to the stanza (assumed to be a message) with the given text.
   `BOUNCE.`               Bounce the stanza with the default error (usually service-unavailable)
@@ -532,7 +533,7 @@ Chains
 
 Rules are grouped into "chains", which are injected at particular points in Prosody's routing code.
 
-Available chains are:
+Available built-in chains are:
 
   Chain          Description
   -------------- -------------------------------------------------------------------------------------------
@@ -573,6 +574,7 @@ Example of chain use:
   Action                   Description
   ------------------------ ------------------------------------------------------------------------
   `JUMP CHAIN=name`        Switches chains, and passes the stanza through the rules in chain 'name'. If the new chain causes the stanza to be dropped/redirected, the current chain halts further processing.
+  `RETURN.`                Stops executing the current chain and returns to the parent chain. For built-in chains, equivalent to PASS. RETURN is implicit at the end of every chain.
 
 It is possible to jump to chains defined by other scripts and modules.
 
