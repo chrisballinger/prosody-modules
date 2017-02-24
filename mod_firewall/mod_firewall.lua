@@ -269,8 +269,8 @@ local function include_dep(dependency, code)
 		if dep_param ~= "" then
 			local global_code, deps = dep_info.global_code(dep_param);
 			if deps then
-				for _, dep in ipairs(deps) do
-					include_dep(dep, code);
+				for _, dep_dep in ipairs(deps) do
+					include_dep(dep_dep, code);
 				end
 			end
 			table.insert(code.global_header, global_code);
@@ -282,8 +282,8 @@ local function include_dep(dependency, code)
 		if dep_param ~= "" then
 			local local_code, deps = dep_info.local_code(dep_param);
 			if deps then
-				for _, dep in ipairs(deps) do
-					include_dep(dep, code);
+				for _, dep_dep in ipairs(deps) do
+					include_dep(dep_dep, code);
 				end
 			end
 			table.insert(code, "\n\t\t-- "..dep.."\n\t\t"..local_code.."\n");
