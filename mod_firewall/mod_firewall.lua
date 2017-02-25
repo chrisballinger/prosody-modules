@@ -97,14 +97,13 @@ function meta(s, deps, extra)
 			end
 			if func_chain then
 				for func_name in func_chain:gmatch("|(%w+)") do
-					if code == "to" or code == "from" then
-						if func_name == "bare" then
-							code = "bare_"..code;
-							table.insert(deps, code);
-						elseif func_name == "node" or func_name == "host" or func_name == "resource" then
-							table.insert(deps, "split_"..code);
-							code = code.."_"..func_name;
-						end
+					-- to/from are already available in local variables, use those if possible
+					if (code == "to" or code == "from") and func_name == "bare" then
+						code = "bare_"..code;
+						table.insert(deps, code);
+					elseif (code == "to" or code == "from") and (func_name == "node" or func_name == "host" or func_name == "resource") then
+						table.insert(deps, "split_"..code);
+						code = code.."_"..func_name;
 					else
 						assert(meta_funcs[func_name], "unknown function: "..func_name);
 						local new_code, new_deps = meta_funcs[func_name](code);
