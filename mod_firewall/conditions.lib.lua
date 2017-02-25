@@ -164,11 +164,11 @@ function condition_handlers.TO_ADMIN_OF(host)
 end
 
 function condition_handlers.FROM_ADMIN()
-	return ("is_admin(bare_from, from_host)"):format(host ~= "*" and host or nil), { "is_admin", "bare_from", "split_from" };
+	return ("is_admin(bare_from, current_host)"), { "is_admin", "bare_from", "current_host" };
 end
 
 function condition_handlers.TO_ADMIN()
-	return ("is_admin(bare_to, to_host)"):format(host ~= "*" and host or nil), { "is_admin", "bare_to", "split_to" };
+	return ("is_admin(bare_to, current_host)"), { "is_admin", "bare_to", "current_host" };
 end
 
 local day_numbers = { sun = 0, mon = 2, tue = 3, wed = 4, thu = 5, fri = 6, sat = 7 };
