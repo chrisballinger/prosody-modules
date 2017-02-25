@@ -549,35 +549,39 @@ local function resolve_script_path(script_path)
 	return resolve_relative_path(relative_to, script_path);
 end
 
+function load_script(script)
+	script = resolve_script_path(script);
+	local chain_functions, err = compile_firewall_rules(script)
+	
+	if not chain_functions then
+		module:log("error", "Error compiling %s: %s", script, err or "unknown error");
+	else
+		for chain, handler_code in pairs(chain_functions) do
+			local new_handler, err = compile_handler(handler_code, "mod_firewall::"..chain);
+			if not new_handler then
+				module:log("error", "Compilation error for %s: %s", script, err);
+			else
+				local chain_definition = chains[chain];
+				if chain_definition and chain_definition.type == "event" then
+					local handler = new_handler(chain_definition.pass_return);
+					for _, event_name in ipairs(chain_definition) do
+						module:hook(event_name, handler, chain_definition.priority);
+					end
+				elseif not chain:sub(1, 5) == "user/" then
+					module:log("warn", "Unknown chain %q", chain);
+				end
+				module:hook("firewall/chains/"..chain, new_handler(false));
+			end
+		end
+	end
+end
+
 function module.load()
 	if not prosody.arg then return end -- Don't run in prosodyctl
 	active_definitions = {};
 	local firewall_scripts = module:get_option_set("firewall_scripts", {});
 	for script in firewall_scripts do
-		script = resolve_script_path(script);
-		local chain_functions, err = compile_firewall_rules(script)
-
-		if not chain_functions then
-			module:log("error", "Error compiling %s: %s", script, err or "unknown error");
-		else
-			for chain, handler_code in pairs(chain_functions) do
-				local new_handler, err = compile_handler(handler_code, "mod_firewall::"..chain);
-				if not new_handler then
-					module:log("error", "Compilation error for %s: %s", script, err);
-				else
-					local chain_definition = chains[chain];
-					if chain_definition and chain_definition.type == "event" then
-						local handler = new_handler(chain_definition.pass_return);
-						for _, event_name in ipairs(chain_definition) do
-							module:hook(event_name, handler, chain_definition.priority);
-						end
-					elseif not chain:sub(1, 5) == "user/" then
-						module:log("warn", "Unknown chain %q", chain);
-					end
-					module:hook("firewall/chains/"..chain, new_handler(false));
-				end
-			end
-		end
+		load_script(script);
 	end
 	-- Replace contents of definitions table (shared) with active definitions
 	for k in it.keys(definitions) do definitions[k] = nil; end
