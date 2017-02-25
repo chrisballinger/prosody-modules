@@ -122,11 +122,11 @@ local error_types = {
 local function route_modify(make_new, to, drop)
 	local reroute, deps = "session.send(newstanza)", { "st" };
 	if to then
-		reroute = ("newstanza.attr.to = %q; core_post_stanza(session, newstanza);"):format(to);
+		reroute = ("newstanza.attr.to = %q; core_post_stanza(session, newstanza)"):format(to);
 		deps[#deps+1] = "core_post_stanza";
 	end
-	return ([[local newstanza = st.%s; %s;%s]])
-		:format(make_new, reroute, drop and " do return true end" or ""), deps;
+	return ([[do local newstanza = st.%s; %s;%s end]])
+		:format(make_new, reroute, drop and " return true" or ""), deps;
 end
 
 function action_handlers.BOUNCE(with)
