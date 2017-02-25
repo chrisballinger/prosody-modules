@@ -196,12 +196,14 @@ Similarly, a message stanza with no type is equivalent to one of type
 
 ### Sender/recipient matching
 
-  Condition   Matches
-  ----------- -------------------------------------------------------
-  `FROM`      The JID in the 'from' attribute matches the given JID
-  `TO`        The JID in the 'to' attribute matches the given JID
+  Condition     Matches
+  ------------- -------------------------------------------------------
+  `FROM`        The JID in the 'from' attribute matches the given JID.
+  `TO`          The JID in the 'to' attribute matches the given JID.
+  `TO SELF`     The stanza is sent by any of a user's resources to their own bare JID.
+  `TO FULL JID` The stanza is addressed to a valid full JID on the local server (full JIDs include a resource at the end, and only exist for the lifetime of a single session, therefore the recipient must be online, or this check will not match).
 
-These conditions both accept wildcards in the JID when the wildcard
+The TO and FROM conditions both accept wildcards in the JID when the wildcard
 expression is enclosed in angle brackets ('\<...\>'). For example:
 
     # All users at example.com
@@ -336,10 +338,12 @@ This condition does not take a parameter - end the condition name with a questio
 
 Prosody allows certain JIDs to be declared as administrators of a host, component or the whole server.
 
-  Condition      Matches
-  -------------- ----------------------------------
-  FROM ADMIN OF  When the sender of the stanza is an admin of the named host on the current server
-  TO ADMIN OF    When the recipient of the stanza is an admin of the named host on the current server
+  Condition        Matches
+  ---------------- -------------------------------------------------------------------------------------
+  `TO ADMIN`       When the recipient of the stanza is admin of the current host
+  `FROM ADMIN`     When the sender of the stanza is admin of the current host
+  `FROM ADMIN OF`  When the sender of the stanza is an admin of the named host on the current server
+  `TO ADMIN OF`    When the recipient of the stanza is an admin of the named host on the current server
 
 ### Time and date
 
@@ -483,6 +487,7 @@ and rules (this may change in the future).
   `BOUNCE=error`          Bounce the stanza with the given error (MUST be a defined XMPP stanza error, see [RFC6120](http://xmpp.org/rfcs/rfc6120.html#stanzas-error-conditions).
   `BOUNCE=error (text)`   As above, but include the supplied human-readable text with a description of the error
   `COPY=jid`              Make a copy of the stanza and send the copy to the specified JID. The copied stanza flows through Prosody's routing code, and as such is affected by firewall rules. Be careful to avoid loops.
+  `FORWARD=jid`           Forward a copy of the stanza to the given JID (using XEP-0297). The stanza will be sent from the current host's JID.
 
 **Note:** It is incorrect behaviour to reply to an 'error' stanza with another error, so BOUNCE will simply act the same as 'DROP' for stanzas that should not be bounced (error stanzas and iq results).
 
