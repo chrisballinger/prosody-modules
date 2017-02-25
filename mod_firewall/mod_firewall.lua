@@ -5,7 +5,11 @@ local logger = require "util.logger".init;
 local it = require "util.iterators";
 local set = require "util.set";
 
+-- [definition_type] = definition_factory(param)
 local definitions = module:shared("definitions");
+
+-- When a definition instance has been instantiated, it lives here
+-- [definition_type][definition_name] = definition_object
 local active_definitions = {
 	ZONE = {
 		-- Default zone that includes all local hosts
