@@ -21,6 +21,7 @@ local function compile_comparison_list(name, values)
 end
 
 function condition_handlers.KIND(kind)
+	assert(kind, "Expected stanza kind to match against");
 	return compile_comparison_list("name", kind), { "name" };
 end
 
@@ -81,6 +82,7 @@ function condition_handlers.TO_SELF()
 end
 
 function condition_handlers.TYPE(type)
+	assert(type, "Expected 'type' value to match against");
 	return compile_comparison_list("(type or (name == 'message' and 'normal') or (name == 'presence' and 'available'))", type), { "type", "name" };
 end
 
