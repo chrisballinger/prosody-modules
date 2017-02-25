@@ -156,11 +156,11 @@ function condition_handlers.TO_GROUP(group_name)
 end
 
 function condition_handlers.FROM_ADMIN_OF(host)
-	return ("is_admin(bare_from, %s)"):format(host ~= "*" and host or nil), { "is_admin", "bare_from" };
+	return ("is_admin(bare_from, %s)"):format(host ~= "*" and metaq(host) or nil), { "is_admin", "bare_from" };
 end
 
 function condition_handlers.TO_ADMIN_OF(host)
-	return ("is_admin(bare_to, %s)"):format(host ~= "*" and host or nil), { "is_admin", "bare_to" };
+	return ("is_admin(bare_to, %s)"):format(host ~= "*" and metaq(host) or nil), { "is_admin", "bare_to" };
 end
 
 function condition_handlers.FROM_ADMIN()
