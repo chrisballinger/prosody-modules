@@ -604,6 +604,11 @@ function load_script(script)
 	module:log("debug", "Loaded %s", script);
 end
 
+--COMPAT w/0.9 (no module:unhook()!)
+local function module_unhook(event, handler)
+	return module:unhook_object_event((hosts[module.host] or prosody).events, event, handler);
+end
+
 function unload_script(script, is_reload)
 	script = resolve_script_path(script);
 	local script_info = loaded_scripts[script];
@@ -612,7 +617,7 @@ function unload_script(script, is_reload)
 	end
 	local events_hooked = script_info.events_hooked;
 	for event_name, event_handler in pairs(events_hooked) do
-		module:unhook(event_name, event_handler);
+		module_unhook(event_name, event_handler);
 		events_hooked[event_name] = nil;
 	end
 	loaded_scripts[script] = nil;
