@@ -291,7 +291,7 @@ function condition_handlers.SCAN(scan_expression)
 	if not (search_name) then
 		error("Error parsing SCAN expression, syntax: SEARCH for PATTERN in LIST");
 	end
-	return ("scan_list(list_%s, %s)"):format(list_name, "tokens_"..search_name.."_"..pattern_name), { "scan_list", "tokens:"..search_name.."_"..pattern_name, "list:"..list_name };
+	return ("scan_list(list_%s, %s)"):format(list_name, "tokens_"..search_name.."_"..pattern_name), { "scan_list", "tokens:"..search_name.."-"..pattern_name, "list:"..list_name };
 end
 
 local valid_comp_ops = { [">"] = ">", ["<"] = "<", ["="] = "==", ["=="] = "==", ["<="] = "<=", [">="] = ">=" };

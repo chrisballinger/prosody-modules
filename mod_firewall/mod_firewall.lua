@@ -237,7 +237,7 @@ local available_deps = {
 	};
 	tokens = {
 		local_code = function (search_and_pattern)
-			local search_name, pattern_name = search_and_pattern:match("^([^%-]+)_(.+)$");
+			local search_name, pattern_name = search_and_pattern:match("^([^%-]+)-(.+)$");
 			local code = ([[local tokens_%s_%s = {};
 			if search_%s then
 				for s in search_%s:gmatch(pattern_%s) do
