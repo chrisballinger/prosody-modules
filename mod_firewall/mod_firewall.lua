@@ -260,13 +260,13 @@ local function include_dep(dependency, code)
 		module:log("error", "Dependency not found: %s", dep);
 		return;
 	end
-	if code.included_deps[dep] ~= nil then
-		if code.included_deps[dep] ~= true then
+	if code.included_deps[dependency] ~= nil then
+		if code.included_deps[dependency] ~= true then
 			module:log("error", "Circular dependency on %s", dep);
 		end
 		return;
 	end
-	code.included_deps[dep] = false; -- Pending flag (used to detect circular references)
+	code.included_deps[dependency] = false; -- Pending flag (used to detect circular references)
 	for _, dep_dep in ipairs(dep_info.depends or {}) do
 		include_dep(dep_dep, code);
 	end
@@ -296,7 +296,7 @@ local function include_dep(dependency, code)
 			table.insert(code, "\n\t\t-- "..dep.."\n\t\t"..dep_info.local_code.."\n");
 		end
 	end
-	code.included_deps[dep] = true;
+	code.included_deps[dependency] = true;
 end
 
 local definition_handlers = module:require("definitions");
