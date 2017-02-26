@@ -119,7 +119,6 @@ local list_backends = {
 						module:log("debug", "List at <%s> is unchanged", url);
 					elseif code == 0 or (code >= 400 and code <=599) then
 						module:log("warn", "Failed to fetch list from <%s>: %d %s", url, code, tostring(body));
-						next_poll = 300;
 						failure_count = failure_count + 1;
 						next_poll = retry_intervals[failure_count] or retry_intervals[#retry_intervals];
 					end
