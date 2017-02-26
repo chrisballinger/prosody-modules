@@ -8,6 +8,8 @@ local http = require "net.http";
 local timer = require "util.timer";
 local set = require"util.set";
 local new_throttle = require "util.throttle".create;
+local hashes = require "util.hashes";
+local jid = require "util.jid";
 
 local multirate_cache_size = module:get_option_number("firewall_multirate_cache_limit", 1000);
 
@@ -171,6 +173,18 @@ local list_backends = {
 };
 list_backends.https = list_backends.http;
 
+local normalize_functions = {
+	upper = string.upper, lower = string.lower;
+	md5 = hashes.md5, sha1 = hashes.sha1, sha256 = hashes.sha256;
+	prep = jid.prep, bare = jid.bare;
+};
+
+local function wrap_list_method(list_method, filter)
+	return function (self, item)
+		return list_method(self, filter(item));
+	end
+end
+
 local function create_list(list_backend, list_def, opts)
 	if not list_backends[list_backend] then
 		error("Unknown list type '"..list_backend.."'", 0);
@@ -178,6 +192,38 @@ local function create_list(list_backend, list_def, opts)
 	local list = setmetatable({}, { __index = list_backends[list_backend] });
 	if list.init then
 		list:init(list_def, opts);
+	end
+	if opts.filter then
+		local filters = {};
+		for func_name in opts.filter:gmatch("[%w_]+") do
+			if func_name == "log" then
+				table.insert(filters, function (s)
+					--print("&&&&&", s);
+					module:log("debug", "Checking list <%s> for: %s", list_def, s);
+					return s;
+				end);
+			else
+				assert(normalize_functions[func_name], "Unknown list filter: "..func_name);
+				table.insert(filters, normalize_functions[func_name]);
+			end
+		end
+
+		local filter;
+		local n = #filters;
+		if n == 1 then
+			filter = filters[1];
+		else
+			function filter(s)
+				for i = 1, n do
+					s = filters[i](s or "");
+				end
+				return s;
+			end
+		end
+
+		list.add = wrap_list_method(list.add, filter);
+		list.remove = wrap_list_method(list.remove, filter);
+		list.contains = wrap_list_method(list.contains, filter);
 	end
 	return list;
 end
