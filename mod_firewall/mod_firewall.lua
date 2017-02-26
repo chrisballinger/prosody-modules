@@ -672,6 +672,11 @@ function module.command(arg)
 	local verbose = arg[1] == "-v";
 	if verbose then table.remove(arg, 1); end
 
+	if arg[1] == "test" then
+		table.remove(arg, 1);
+		return module:require("test")(arg);
+	end
+
 	local serialize = require "util.serialization".serialize;
 	if verbose then
 		print("local logger = require \"util.logger\".init;");
