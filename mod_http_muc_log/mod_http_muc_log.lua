@@ -50,7 +50,7 @@ local get_link do
 	end
 end
 
-local function public_room(room)
+local function public_room(room) -- : boolean
 	if type(room) == "string" then
 		room = get_room(room);
 	end
@@ -63,11 +63,13 @@ end
 local function sort_Y(a,b) return a.year > b.year end
 local function sort_m(a,b) return a.n > b.n end
 
+-- Time zone hack?
 local t_diff = os_time(os_date("*t")) - os_time(os_date("!*t"));
 local function time(t)
 	return os_time(t) + t_diff;
 end
 
+-- Fetch one item
 local function find_once(room, query, retval)
 	if query then query.limit = 1; else query = { limit = 1 }; end
 	local iter, err = archive:find(room, query);
@@ -78,12 +80,15 @@ local function find_once(room, query, retval)
 	return iter();
 end
 
+-- Produce the calendar view
 local function years_page(event, path)
 	local response = event.response;
 
 	local room = nodeprep(path:match("^(.*)/$"));
 	if not room or not public_room(room) then return end
 
+	-- Collect each date that has messages
+	-- convert it to a year / month / day tree
 	local date_list = archive.dates and archive:dates(room);
 	local dates = mt.new();
 	if date_list then
@@ -93,6 +98,7 @@ local function years_page(event, path)
 			dates:set(t.year, t.month, t.day, when);
 		end
 	else
+		-- Collect date the hard way
 		module:log("debug", "Find all dates with messages");
 		local next_day;
 		repeat
@@ -106,6 +112,7 @@ local function years_page(event, path)
 
 	local years = {};
 
+	-- Wrangle Y/m/d tree into year / month / week / day tree for calendar view
 	for current_year, months_t in pairs(dates.data) do
 		local t = { year = current_year, month = 1, day = 1 };
 		local months = { };
@@ -140,6 +147,8 @@ local function years_page(event, path)
 	end
 	table.sort(years, sort_Y);
 
+	-- Phew, all wrangled, all that's left is rendering it with the template
+
 	response.headers.content_type = "text/html; charset=utf-8";
 	return render(template, {
 		title = get_room(room):get_name();
@@ -151,9 +160,12 @@ local function years_page(event, path)
 	});
 end
 
+-- Produce the chat log view
 local function logs_page(event, path)
 	local response = event.response;
 
+	-- FIXME In the year, 252525, if MUC is still alive,
+	-- if Prosody can survive... Enjoy this Y10k bug
 	local room, date = path:match("^(.-)/(%d%d%d%d%-%d%d%-%d%d)$");
 	room = nodeprep(room);
 	if not room then
