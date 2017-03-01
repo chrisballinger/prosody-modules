@@ -39,6 +39,17 @@ The web interface would then be reachable at the address:
 See [the page about Prosodys HTTP server][doc:http] for info about the
 address.
 
+## Styling
+
+The default HTML template lives in `http_muc_log.html` in the same
+directory as the module, but can be changed by setting
+`http_muc_log_template` to point to a different file. The same template,
+with different input is used for every view.
+
+The module uses [util.interpolation][doc:developers:util:interpolation]
+for rendering templates, with the pattern `"%b{}"` and HTML / XML
+escaping enabled.
+
 Compatibility
 =============
 
