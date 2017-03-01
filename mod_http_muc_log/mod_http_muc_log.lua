@@ -184,11 +184,10 @@ local function logs_page(event, path)
 	end
 
 	local first, last;
-	local verb, subject, body;
 	for key, item, when in iter do
-		body = item:get_child_text("body");
-		subject = item:get_child_text("subject");
-		verb = nil;
+		local body = item:get_child_text("body");
+		local subject = item:get_child_text("subject");
+		local verb = nil;
 		if subject then
 			verb, body = "set the topic to", subject;
 		elseif body and body:sub(1,4) == "/me " then
