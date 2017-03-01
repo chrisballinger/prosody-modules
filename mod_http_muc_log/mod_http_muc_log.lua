@@ -225,7 +225,7 @@ local function logs_page(event, path)
 	else
 
 		module:log("debug", "Find next date with messages");
-		local next_when = find_once(room, { after = last }, 3);
+		next_when = find_once(room, { after = last }, 3);
 		if next_when then
 			next_when = datetime.date(next_when);
 			module:log("debug", "Next message: %s", next_when);
@@ -234,7 +234,7 @@ local function logs_page(event, path)
 		end
 
 		module:log("debug", "Find prev date with messages");
-		local prev_when = find_once(room, { before = first, reverse = true }, 3);
+		prev_when = find_once(room, { before = first, reverse = true }, 3);
 		if prev_when then
 			prev_when = datetime.date(prev_when);
 			module:log("debug", "Previous message: %s", prev_when);
