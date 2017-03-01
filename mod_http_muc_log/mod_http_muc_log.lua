@@ -215,10 +215,10 @@ local function logs_page(event, path)
 	local next_when, prev_when = "", "";
 	local date_list = archive.dates and archive:dates(room);
 	if date_list then
-		for i = 1, #date_list do
-			if date_list[i] == date then
-				next_when = date_list[i+1] or "";
-				prev_when = date_list[i-1] or "";
+		for j = 1, #date_list do
+			if date_list[j] == date then
+				next_when = date_list[j+1] or "";
+				prev_when = date_list[j-1] or "";
 				break;
 			end
 		end
