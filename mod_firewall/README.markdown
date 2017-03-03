@@ -317,10 +317,33 @@ entries.
 Using Prosody's mod\_groups it is possible to define groups of users on the server. You can
 match based on these groups in firewall rules.
 
-  Condition     Matches
-  ------------- ----------------------------
-  `FROM GROUP`  When the stanza is being sent from a member of the named group
-  `TO GROUP`    When the stanza is being sent to a member of the named group
+  Condition         Matches
+  ----------------- ----------------------------
+  `FROM GROUP`      When the stanza is being sent from a member of the named group
+  `TO GROUP`        When the stanza is being sent to a member of the named group
+  `CROSSING GROUPS` When the stanza is being sent between users of different named groups
+
+#### CROSSING GROUPS
+
+The `CROSSING GROUPS` condition takes a comma-separated list of groups to check. If the
+sender and recipient are not in the same group (only the listed groups are checked), then the
+this condition matches and the stanza is deemed to be crossing between groups.
+
+For example, if you had three groups: Engineering, Marketing and Employees. All users are
+members of the 'Employees' group, and the others are for employees of the named department only.
+
+To prevent employees in the marketing department from communicating with engineers, you could use
+the following rule:
+
+```
+CROSSING GROUPS: Marketing, Engineering
+BOUNCE=policy-violation (no communication between these groups is allowed!)
+```
+
+This works, even though both the users are in the 'Employees' group, because that group is not listed
+in the condition.
+
+In the above example, a user who is member of both groups is not restricted.
 
 #### SENT DIRECTED PRESENCE TO SENDER
 

@@ -157,6 +157,16 @@ function condition_handlers.TO_GROUP(group_name)
 	return ("group_contains(%q, bare_to)"):format(group_name), { "group_contains", "bare_to" };
 end
 
+function condition_handlers.CROSSING_GROUPS(group_names)
+	local code = {};
+	for group_name in group_names:gmatch("([^, ][^,]+)") do
+		group_name = group_name:match("^%s*(.-)%s*$"); -- Trim leading/trailing whitespace
+		-- Just check that's it is crossing from outside group to inside group
+		table.insert(code, ("(group_contains(%q, bare_to) and group_contains(%q, bare_from))"):format(group_name, group_name))
+	end
+	return "not "..table.concat(code, " or "), { "group_contains", "bare_to", "bare_from" };
+end
+
 function condition_handlers.FROM_ADMIN_OF(host)
 	return ("is_admin(bare_from, %s)"):format(host ~= "*" and metaq(host) or nil), { "is_admin", "bare_from" };
 end
