@@ -45,7 +45,7 @@ function archive:append(username, _, data, when, with)
 	-- If the day-file is missing then we need to add it to the list of days
 	local first_of_day = not lfs.attributes(dm.getpath(username .. "@" .. day, module.host, self.store, "list"));
 
-	local offset = ok and err;
+	local offset = ok and err or 0;
 
 	local id = day .. "-" .. hmac_sha256(username.."@"..day.."+"..offset, data, true):sub(-16);
 	ok, err = dm.list_append(username.."@"..day, module.host, self.store, { id = id, when = dt.datetime(when), with = with, offset = offset, length = #data });
