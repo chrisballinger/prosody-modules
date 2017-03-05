@@ -48,7 +48,8 @@ function archive:append(username, _, data, when, with)
 	local offset = ok and err or 0;
 
 	local id = day .. "-" .. hmac_sha256(username.."@"..day.."+"..offset, data, true):sub(-16);
-	ok, err = dm.list_append(username.."@"..day, module.host, self.store, { id = id, when = dt.datetime(when), with = with, offset = offset, length = #data });
+	ok, err = dm.list_append(username.."@"..day, module.host, self.store,
+		{ id = id, when = dt.datetime(when), with = with, offset = offset, length = #data });
 	if ok and first_of_day then
 		ok, err = dm.list_append(username, module.host, self.store, day);
 	end
