@@ -88,15 +88,15 @@ function archive:find(username, query)
 		result = stanza;
 	end
 
-	local stream_sess = { notopen = true };
+	local stream_session = { notopen = true };
 	local stream_callbacks = { handlestanza = cb, stream_ns = "jabber:client", default_ns = "jabber:client" };
-	local stream = new_stream(stream_sess, stream_callbacks);
+	local stream = new_stream(stream_session, stream_callbacks);
 	local dates = dm.list_load(username, module.host, self.store) or empty;
 	local function reset_stream()
 		stream:reset();
-		stream_sess.notopen = true;
+		stream_session.notopen = true;
 		stream:feed(st.stanza("stream", { xmlns = "jabber:client" }):top_tag());
-		stream_sess.notopen = nil;
+		stream_session.notopen = nil;
 	end
 	reset_stream();
 
