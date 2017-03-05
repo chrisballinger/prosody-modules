@@ -4,6 +4,15 @@ read_globals = {
 	"hosts",
 	"import",
 
+	-- Module instance
+	"module.name",
+	"module.host",
+	"module._log",
+	"module.log",
+	"module.event_handlers",
+	"module.reloading",
+	"module.saved_state",
+
 	-- Module API
 	"module.add_extension",
 	"module.add_feature",
