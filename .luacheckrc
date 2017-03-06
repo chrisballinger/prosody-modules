@@ -64,7 +64,18 @@ read_globals = {
 	"module.wrap_global",
 	"module.wrap_object_event",
 }
-globals = { "_M" }
+globals = {
+	"_M",
+
+	-- Methods that can be set on module API
+	"module.unload",
+	"module.add_host",
+	"module.load",
+	"module.add_host",
+	"module.save",
+	"module.restore",
+	"module.command",
+}
 allow_defined_top = true
 unused_secondaries = false
 codes = true
