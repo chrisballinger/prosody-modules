@@ -12,6 +12,9 @@ read_globals = {
 	"module.event_handlers",
 	"module.reloading",
 	"module.saved_state",
+	"module.environment",
+	"module.global",
+	"module.path",
 
 	-- Module API
 	"module.add_extension",
