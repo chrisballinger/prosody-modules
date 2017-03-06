@@ -91,6 +91,12 @@ PASS.
 
 JUMP CHAIN=user/spam_check_message_custom
 
+# Type 'groupchat' messages addressed to an offline full JID are harmless,
+# and should be routed normally to handle MUC 'ghosts' correctly
+TO: <*>@<*>/<*>
+TYPE: groupchat
+PASS.
+
 # Non-chat message types often generate pop-ups in clients,
 # so we won't accept them from strangers
 NOT TYPE: chat
@@ -106,6 +112,11 @@ JUMP CHAIN=user/spam_check_message_content
 ::user/spam_check_presence
 
 JUMP CHAIN=user/spam_check_presence_custom
+
+# Presence to offline full JIDs is harmless, and should be routed
+# normally to handle MUC 'ghosts' correctly
+TO: <*>@<*>/<*>
+PASS.
 
 # These may be received if rosters get out of sync and are harmless
 # because they will not be routed to the client unless necessary
