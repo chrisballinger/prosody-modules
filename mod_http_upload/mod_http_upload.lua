@@ -148,7 +148,7 @@ local function upload_data(event, path)
 		return 500;
 	end
 	module:log("info", "File uploaded by %s to slot %s", uploader, random);
-	return 200;
+	return 201;
 end
 
 -- FIXME Duplicated from net.http.server
