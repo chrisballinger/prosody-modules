@@ -280,6 +280,7 @@ function condition_handlers.SENT_DIRECTED_PRESENCE_TO_SENDER()
 	return "not not session.directed[from]", { "from" };
 end
 
+-- TO FULL JID?
 function condition_handlers.TO_FULL_JID()
 	return "not not full_sessions[to]", { "to" };
 end
@@ -304,6 +305,7 @@ function condition_handlers.SCAN(scan_expression)
 	return ("scan_list(list_%s, %s)"):format(list_name, "tokens_"..search_name.."_"..pattern_name), { "scan_list", "tokens:"..search_name.."-"..pattern_name, "list:"..list_name };
 end
 
+-- COUNT: lines in body < 10
 local valid_comp_ops = { [">"] = ">", ["<"] = "<", ["="] = "==", ["=="] = "==", ["<="] = "<=", [">="] = ">=" };
 function condition_handlers.COUNT(count_expression)
 	local pattern_name, search_name, comparator_expression = count_expression:match("(%S+) in (%S+) (.+)$");
