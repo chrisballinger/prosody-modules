@@ -492,7 +492,7 @@ function handle_resume(session, stanza, xmlns_sm)
 		-- Ok, we need to re-send any stanzas that the client didn't see
 		-- ...they are what is now left in the outgoing stanza queue
 		local queue = original_session.outgoing_stanza_queue;
-		module:fire_event("smacks-hibernation-end", {origin = session, queue = queue});
+		module:fire_event("smacks-hibernation-end", {origin = session, resumed = original_session, queue = queue});
 		session.log("debug", "#queue = %d", #queue);
 		for i=1,#queue do
 			session.send(queue[i]);
