@@ -67,4 +67,4 @@ Should work with 0.9+.
 [^1]: The service which is expected to forward notifications to
     something like Google Cloud Messaging or Apple Notification Service
 [here]: https://mail.jabber.org/pipermail/standards/2016-February/030925.html
-[^2]: //hg.prosody.im/prosody-modules/file/tip/mod_cloud_notify/business_rules.md
+[^2]: //hg.prosody.im/prosody-modules/file/tip/mod_cloud_notify/business_rules.markdown
