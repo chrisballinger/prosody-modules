@@ -63,6 +63,9 @@ read_globals = {
 	"module.wrap_event",
 	"module.wrap_global",
 	"module.wrap_object_event",
+
+	-- mod_http API
+	"module.http_url",
 }
 globals = {
 	"_M",
