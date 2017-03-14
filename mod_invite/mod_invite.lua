@@ -3,7 +3,6 @@ local uuid_new = require "util.uuid".generate;
 local jid_split = require "util.jid".split;
 local jid_join = require "util.jid".join;
 local http_formdecode = require "net.http".formdecode;
-local http_urlencode = require "net.http".urlencode;
 local usermanager = require "core.usermanager";
 local rostermanager = require "core.rostermanager";
 local tohtml = require "util.stanza".xml_escape
