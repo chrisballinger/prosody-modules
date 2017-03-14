@@ -88,7 +88,7 @@ function handle_form(event)
 	end
 
 	local registering = { username = prepped_username , host = module.host, allowed = true }
-	
+
 	module:fire_event("user-registering", registering);
 
 	if not registering.allowed then
