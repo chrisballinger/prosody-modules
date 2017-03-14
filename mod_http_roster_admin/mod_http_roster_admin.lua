@@ -22,6 +22,9 @@ local rm = require "core.rostermanager";
 local st = require "util.stanza";
 local array = require "util.array";
 
+local bare_sessions = prosody.bare_sessions;
+local storagemanager = require "core.storagemanager";
+
 local host = module.host;
 local sessions = hosts[host].sessions;
 
@@ -213,13 +216,14 @@ module:hook("iq-get/self/jabber:iq:roster:query", function(event)
 		
 		-- Are we the first callback to handle the downloaded roster?
 		local first = roster[false].downloaded == nil;
-		
 		if first then
 			-- Fill out new roster
 			for jid, friend in pairs(friends) do
 				roster[jid] = friend_to_roster_item(friend);
 			end
 		end
+
+		roster[false].downloaded = true;
 		
 		-- Send full roster to client
 		session.send(build_roster_reply(stanza, roster));
@@ -290,6 +294,14 @@ function handle_refresh_multi(event)
 	return true;
 end
 
+module:hook("resource-unbind", function (event)
+	local user_bare_jid = event.session.username.."@"..event.session.host;
+	if not bare_sessions[user_bare_jid] then -- User went offline
+		-- We don't need this user's info cached anymore, clear it.
+		module:log("debug", "Purging the roster for %s", user_bare_jid);
+		storagemanager.open(event.session.host, "roster", "keyval").store[event.session.username] = nil;
+	end
+end);
 
 module:provides("http", {
 	route = {
