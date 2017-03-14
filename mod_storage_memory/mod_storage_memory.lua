@@ -1,3 +1,5 @@
+local auto_purge_enabled = module:get_option_boolean("storage_memory_temporary", false);
+local auto_purge_stores = module:get_option_set("storage_memory_temporary_stores", {});
 
 local memory = setmetatable({}, {
 	__index = function(t, k)
@@ -169,6 +171,27 @@ function driver:open(store, typ)
 		return setmetatable({ store = memory[store] }, store_mt);
 	end
 	return nil, "unsupported-store";
+end
+
+if auto_purge_enabled then
+	module:hook("resource-unbind", function (event)
+		local user_bare_jid = event.session.username.."@"..event.session.host;
+		if not prosody.bare_sessions[user_bare_jid] then -- User went offline
+			module:log("debug", "Clearing store for offline user %s", user_bare_jid);
+			local f, s, v;
+			if auto_purge_stores:empty() then
+				f, s, v = pairs(memory);
+			else
+				f, s, v = auto_purge_stores:items();
+			end
+
+			for store_name in f, s, v do
+				if memory[store_name] then
+					memory[store_name][event.session.username] = nil;
+				end
+			end
+		end
+	end);
 end
 
 module:provides("storage", driver);
