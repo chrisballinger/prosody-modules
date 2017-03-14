@@ -109,7 +109,8 @@ function handle_form(event)
 
 		invite_storage:set(nil, tokens);
 
-		return apply_template(template, { classes = "alert-success", message = "Your account has been created! You can now log in using an XMPP client." })
+		return apply_template(template, { classes = "alert-success",
+			message = "Your account has been created! You can now log in using an XMPP client." })
 	else
 		module:log("debug", "Registration failed: " .. tostring(err));
 
