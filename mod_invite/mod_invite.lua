@@ -28,7 +28,7 @@ local function apply_template(template, args)
 		end)
 end
 
-function generate_page(event, display_options)
+function generate_page(event)
 	local request, response = event.request, event.response;
 
 	local tokens = invite_storage:get() or {};
@@ -58,7 +58,7 @@ function subscribe(user1, user2)
 	rostermanager.process_inbound_subscription_approval(user2, module.host, user1_jid);
 end
 
-function handle_form(event, display_options)
+function handle_form(event)
 	local request, response = event.request, event.response;
 	local form_data = http_formdecode(request.body);
 	local user, password, token = form_data["user"], form_data["password"], form_data["token"];
@@ -125,7 +125,7 @@ module:provides("http", {
 	};
 });
 
-function invite_command_handler(self, data, state)
+function invite_command_handler(_, data)
 	local uuid = uuid_new();
 
 	local user, host = jid_split(data.from);
