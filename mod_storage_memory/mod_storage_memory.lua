@@ -9,6 +9,11 @@ local memory = setmetatable({}, {
 
 local NULL = {};
 
+local function _purge_store(self, username)
+	self.store[username or NULL] = nil;
+	return true;
+end
+
 local keyval_store = {};
 keyval_store.__index = keyval_store;
 
@@ -20,6 +25,8 @@ function keyval_store:set(username, data)
 	self.store[username or NULL] = data;
 	return true;
 end
+
+keyval_store.purge = _purge_store;
 
 local map_store = {};
 map_store.__index = map_store;
@@ -54,6 +61,8 @@ function map_store:set_keys(username, keydatas)
 	end
 	return true;
 end
+
+map_store.purge = _purge_store;
 
 local archive_store = {};
 archive_store.__index = archive_store;
@@ -143,6 +152,8 @@ function archive_store:delete(username, query)
 	end
 	return true;
 end
+
+archive_store.purge = _purge_store;
 
 local stores = {
 	keyval = keyval_store;
