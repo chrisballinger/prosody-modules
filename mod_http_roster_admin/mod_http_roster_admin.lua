@@ -294,15 +294,6 @@ function handle_refresh_multi(event)
 	return true;
 end
 
-module:hook("resource-unbind", function (event)
-	local user_bare_jid = event.session.username.."@"..event.session.host;
-	if not bare_sessions[user_bare_jid] then -- User went offline
-		-- We don't need this user's info cached anymore, clear it.
-		module:log("debug", "Purging the roster for %s", user_bare_jid);
-		storagemanager.open(event.session.host, "roster", "keyval").store[event.session.username] = nil;
-	end
-end);
-
 module:provides("http", {
 	route = {
 		["POST /refresh"] = handle_refresh_multi;
