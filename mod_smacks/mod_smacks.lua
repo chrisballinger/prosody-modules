@@ -213,7 +213,7 @@ local function wrap_session_out(session, resume)
 			session.resumption_token = nil;
 		end
 		-- send out last ack as per revision 1.5.2 of XEP-0198
-		if session.smacks then
+		if session.smacks and session.conn then
 			(session.sends2s or session.send)(st.stanza("a", { xmlns = session.smacks, h = tostring(session.handled_stanza_count) }));
 		end
 		return session_close(...);
@@ -409,7 +409,6 @@ module:hook("pre-resource-unbind", function (event)
 			end);
 			return true; -- Postpone destruction for now
 		end
-
 	end
 end);
 
@@ -470,6 +469,7 @@ function handle_resume(session, stanza, xmlns_sm)
 		original_session.ip = session.ip;
 		original_session.conn = session.conn;
 		original_session.send = session.send;
+		original_session.close = session.close;
 		original_session.filter = session.filter;
 		original_session.filter.session = original_session;
 		original_session.filters = session.filters;
@@ -482,7 +482,7 @@ function handle_resume(session, stanza, xmlns_sm)
 		-- Similar for connlisteners
 		c2s_sessions[session.conn] = original_session;
 
-		session.send(st.stanza("resumed", { xmlns = xmlns_sm,
+		original_session.send(st.stanza("resumed", { xmlns = xmlns_sm,
 			h = original_session.handled_stanza_count, previd = id }));
 
 		-- Fake an <a> with the h of the <resume/> from the client
@@ -493,11 +493,15 @@ function handle_resume(session, stanza, xmlns_sm)
 		-- ...they are what is now left in the outgoing stanza queue
 		local queue = original_session.outgoing_stanza_queue;
 		module:fire_event("smacks-hibernation-end", {origin = session, resumed = original_session, queue = queue});
-		session.log("debug", "#queue = %d", #queue);
+		original_session.log("debug", "#queue = %d", #queue);
 		for i=1,#queue do
-			session.send(queue[i]);
+			original_session.send(queue[i]);
 		end
-		session.log("debug", "#queue = %d -- after send", #queue);
+		original_session.log("debug", "#queue = %d -- after send", #queue);
+		function session.send(stanza)
+			session.log("warn", "Tried to send stanza on old session migrated by smacks resume (maybe there is a bug?): %s", tostring(stanza));
+			return false;
+		end
 	else
 		module:log("warn", "Client %s@%s[%s] tried to resume stream for %s@%s[%s]",
 			session.username or "?", session.host or "?", session.type,
