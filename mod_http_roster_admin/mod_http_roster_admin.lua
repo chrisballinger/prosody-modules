@@ -22,9 +22,6 @@ local rm = require "core.rostermanager";
 local st = require "util.stanza";
 local array = require "util.array";
 
-local bare_sessions = prosody.bare_sessions;
-local storagemanager = require "core.storagemanager";
-
 local host = module.host;
 local sessions = hosts[host].sessions;
 
