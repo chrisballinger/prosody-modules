@@ -138,33 +138,36 @@ module:hook("s2s-stream-features",
 			end
 		end);
 
-local function request_ack_if_needed(session)
+local function request_ack_if_needed(session, force)
 	local queue = session.outgoing_stanza_queue;
-	if #queue > max_unacked_stanzas and session.awaiting_ack == nil then
-		session.log("debug", "Queuing <r> (in a moment)");
-		session.awaiting_ack = false;
-		session.awaiting_ack_timer = stoppable_timer(1e-06, function ()
-			if not session.awaiting_ack then
-				session.log("debug", "Sending <r> (inside timer, before send)");
-				(session.sends2s or session.send)(st.stanza("r", { xmlns = session.smacks }))
-				session.log("debug", "Sending <r> (inside timer, after send)");
-				session.awaiting_ack = true;
-				if not session.delayed_ack_timer then
-					session.delayed_ack_timer = stoppable_timer(delayed_ack_timeout, function()
-						delayed_ack_function(session);
-					end);
+	if session.awaiting_ack == nil then
+		if (#queue > max_unacked_stanzas and session.last_queue_count ~= #queue) or force then
+			session.log("debug", "Queuing <r> (in a moment)");
+			session.awaiting_ack = false;
+			session.awaiting_ack_timer = stoppable_timer(1e-06, function ()
+				if not session.awaiting_ack then
+					session.log("debug", "Sending <r> (inside timer, before send)");
+					(session.sends2s or session.send)(st.stanza("r", { xmlns = session.smacks }))
+					session.log("debug", "Sending <r> (inside timer, after send)");
+					session.awaiting_ack = true;
+					if not session.delayed_ack_timer then
+						session.delayed_ack_timer = stoppable_timer(delayed_ack_timeout, function()
+							delayed_ack_function(session);
+						end);
+					end
 				end
-			end
-		end);
+			end);
+		end
+		-- Trigger "smacks-ack-delayed"-event if we added new (ackable) stanzas to the outgoing queue
+		-- and there isn't already a timer for this event running.
+		-- If we wouldn't do this, stanzas added to the queue after the first "smacks-ack-delayed"-event
+		-- would not trigger this event (again).
+		if #queue > max_unacked_stanzas and session.awaiting_ack and session.delayed_ack_timer == nil then
+			session.log("debug", "Calling delayed_ack_function directly (still waiting for ack)");
+			delayed_ack_function(session);
+		end
 	end
-	-- Trigger "smacks-ack-delayed"-event if we added new (ackable) stanzas to the outgoing queue
-	-- and there isn't already a timer for this event running.
-	-- If we wouldn't do this, stanzas added to the queue after the first "smacks-ack-delayed"-event
-	-- would not trigger this event (again).
-	if #queue > max_unacked_stanzas and session.awaiting_ack and session.delayed_ack_timer == nil then
-		session.log("debug", "Calling delayed_ack_function directly (still waiting for ack)");
-		delayed_ack_function(session);
-	end
+	session.last_queue_count = #queue;
 end
 
 local function outgoing_stanza_filter(stanza, session)
@@ -184,7 +187,7 @@ local function outgoing_stanza_filter(stanza, session)
 			session.log("debug", "hibernating, stanza queued");
 			return nil;
 		end
-		request_ack_if_needed(session);
+		request_ack_if_needed(session, false);
 	end
 	return stanza;
 end
@@ -337,7 +340,7 @@ function handle_a(origin, stanza)
 	end
 	origin.log("debug", "#queue = %d", #queue);
 	origin.last_acknowledged_stanza = origin.last_acknowledged_stanza + handled_stanza_count;
-	request_ack_if_needed(origin)
+	request_ack_if_needed(origin, false)
 	return true;
 end
 module:hook_stanza(xmlns_sm2, "a", handle_a);
@@ -502,6 +505,7 @@ function handle_resume(session, stanza, xmlns_sm)
 			session.log("warn", "Tried to send stanza on old session migrated by smacks resume (maybe there is a bug?): %s", tostring(stanza));
 			return false;
 		end
+		request_ack_if_needed(original_session, true);
 	else
 		module:log("warn", "Client %s@%s[%s] tried to resume stream for %s@%s[%s]",
 			session.username or "?", session.host or "?", session.type,
