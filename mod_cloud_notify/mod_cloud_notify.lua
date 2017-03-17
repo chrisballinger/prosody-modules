@@ -7,7 +7,8 @@
 local st = require"util.stanza";
 local jid = require"util.jid";
 local dataform = require"util.dataforms".new;
-local filters = require "util.filters";
+local filters = require"util.filters";
+local hashes = require"util.hashes";
 
 local xmlns_push = "urn:xmpp:push:0";
 
@@ -57,31 +58,37 @@ end)();
 local function handle_push_error(event)
 	local stanza = event.stanza;
 	local error_type, condition = stanza:get_error();
-	local push_identifier = stanza.attr.id;
 	local node = jid.split(stanza.attr.to);
 	local from = stanza.attr.from;
 	local user_push_services = push_store:get(node);
 	
-	if user_push_services[push_identifier] and user_push_services[push_identifier].jid == from and error_type ~= "wait" then
-		push_errors[push_identifier] = push_errors[push_identifier] + 1;
-		module:log("info", "Got error of type '%s' (%s) for identifier '%s':"
-			.."error count for this identifier is now at %s", error_type, condition, push_identifier,
-			tostring(push_errors[push_identifier]));
-		if push_errors[push_identifier] >= max_push_errors then
-			module:log("warn", "Disabling push notifications for identifier '%s'", push_identifier);
-			-- remove push settings from sessions
-			for _, session in pairs(host_sessions[node].sessions) do
-				if session.push_identifier == push_identifier then
-					session.push_identifier = nil;
-					session.push_settings = nil;
+	for push_identifier, _ in pairs(user_push_services) do
+		if hashes.sha256(push_identifier, true) == stanza.attr.id then
+			if user_push_services[push_identifier] and user_push_services[push_identifier].jid == from and error_type ~= "wait" then
+				push_errors[push_identifier] = push_errors[push_identifier] + 1;
+				module:log("info", "Got error of type '%s' (%s) for identifier '%s': "
+					.."error count for this identifier is now at %s", error_type, condition, push_identifier,
+					tostring(push_errors[push_identifier]));
+				if push_errors[push_identifier] >= max_push_errors then
+					module:log("warn", "Disabling push notifications for identifier '%s'", push_identifier);
+					-- remove push settings from sessions
+					for _, session in pairs(host_sessions[node].sessions) do
+						if session.push_identifier == push_identifier then
+							session.push_identifier = nil;
+							session.push_settings = nil;
+						end
+					end
+					-- save changed global config
+					push_store:set_identifier(node, push_identifier, nil);
+					push_errors[push_identifier] = nil;
+					-- unhook iq handlers for this identifier
+					module:unhook("iq-error/bare/"..hashes.sha256(push_identifier, true), handle_push_error);
+					module:unhook("iq-result/bare/"..hashes.sha256(push_identifier, true), handle_push_success);
 				end
+			elseif user_push_services[push_identifier] and user_push_services[push_identifier].jid == from and error_type == "wait" then
+				module:log("debug", "Got error of type '%s' (%s) for identifier '%s': "
+					.."NOT increasing error count for this identifier", error_type, condition, push_identifier);
 			end
-			-- save changed global config
-			push_store:set_identifier(node, push_identifier, nil);
-			push_errors[push_identifier] = nil;
-			-- unhook iq handlers for this identifier
-			module:unhook("iq-error/bare/"..push_identifier, handle_push_error);
-			module:unhook("iq-result/bare/"..push_identifier, handle_push_success);
 		end
 	end
 	return true;
@@ -89,14 +96,17 @@ end
 
 local function handle_push_success(event)
 	local stanza = event.stanza;
-	local push_identifier = stanza.attr.id;
 	local node = jid.split(stanza.attr.to);
 	local from = stanza.attr.from;
 	local user_push_services = push_store:get(node);
 	
-	if user_push_services[push_identifier] and user_push_services[push_identifier].jid == from and push_errors[push_identifier] then
-		push_errors[push_identifier] = 0;
-		module:log("debug", "Push succeeded, error count for identifier '%s' is now at %s", push_identifier, tostring(push_errors[push_identifier]));
+	for push_identifier, _ in pairs(user_push_services) do
+		if hashes.sha256(push_identifier, true) == stanza.attr.id then
+			if user_push_services[push_identifier] and user_push_services[push_identifier].jid == from and push_errors[push_identifier] then
+				push_errors[push_identifier] = 0;
+				module:log("debug", "Push succeeded, error count for identifier '%s' is now at %s", push_identifier, tostring(push_errors[push_identifier]));
+			end
+		end
 	end
 	return true;
 end
@@ -139,7 +149,7 @@ local function push_enable(event)
 	else
 		origin.push_identifier = push_identifier;
 		origin.push_settings = push_service;
-		origin.log("info", "Push notifications enabled (%s)", tostring(origin.push_identifier));
+		origin.log("info", "Push notifications enabled for %s (%s)", tostring(stanza.attr.from), tostring(origin.push_identifier));
 		origin.send(st.reply(stanza));
 	end
 	return true;
@@ -191,20 +201,21 @@ local push_form = dataform {
 local function handle_notify_request(stanza, node, user_push_services)
 	if not user_push_services or not #user_push_services then return end
 	
-	if stanza and stanza._notify then
-		module:log("debug", "Already sent push notification to %s@%s for this stanza, not doing it again", node, module.host);
-		return;
-	end
-	if stanza then
-		stanza._notify = true;
-	end
-
 	for push_identifier, push_info in pairs(user_push_services) do
+		if stanza then
+			if not stanza._push_notify then stanza._push_notify = {}; end
+			if stanza._push_notify[push_identifier] then
+				module:log("debug", "Already sent push notification for %s@%s to %s (%s)", node, module.host, push_info.jid, tostring(push_info.node));
+				return;
+			end
+			stanza._push_notify[push_identifier] = true;
+		end
+		
 		-- increment count and save it
 		push_info.count = push_info.count + 1;
 		push_store:set_identifier(node, push_identifier, push_info);
 		-- construct push stanza
-		local push_publish = st.iq({ to = push_info.jid, from = node .. "@" .. module.host, type = "set", id = push_identifier })
+		local push_publish = st.iq({ to = push_info.jid, from = node .. "@" .. module.host, type = "set", id = hashes.sha256(push_identifier, true) })
 			:tag("pubsub", { xmlns = "http://jabber.org/protocol/pubsub" })
 				:tag("publish", { node = push_info.node })
 					:tag("item")
@@ -230,8 +241,8 @@ local function handle_notify_request(stanza, node, user_push_services)
 		-- handle push errors for this node
 		if push_errors[push_identifier] == nil then
 			push_errors[push_identifier] = 0;
-			module:hook("iq-error/bare/"..push_identifier, handle_push_error);
-			module:hook("iq-result/bare/"..push_identifier, handle_push_success);
+			module:hook("iq-error/bare/"..hashes.sha256(push_identifier, true), handle_push_error);
+			module:hook("iq-result/bare/"..hashes.sha256(push_identifier, true), handle_push_success);
 		end
 		module:send(push_publish);
 	end
@@ -254,7 +265,7 @@ end, 1);
 -- publish on unacked smacks message
 local function process_smacks_stanza(stanza, session)
 	if session.push_identifier then
-		session.log("debug", "Invoking cloud handle_notify_request for smacks queued stanza...");
+		session.log("debug", "Invoking cloud handle_notify_request for smacks queued stanza");
 		local user_push_services = {[session.push_identifier] = session.push_settings};
 		local node = get_push_settings(stanza, session);
 		handle_notify_request(stanza, node, user_push_services);
@@ -363,6 +374,7 @@ module:hook("cloud-notify-ping", send_ping);
 -- 	push_store:set(origin.username, user_push_services);
 -- end, 1);
 
+module:log("info", "Module loaded");
 function module.unload()
 	module:unhook("account-disco-info", account_dico_info);
 	module:unhook("iq-set/self/"..xmlns_push..":enable", push_enable);
@@ -375,7 +387,9 @@ function module.unload()
 	module:unhook("cloud-notify-ping", send_ping);
 	
 	for push_identifier, _ in pairs(push_errors) do
-		module:hook("iq-error/bare/"..push_identifier, handle_push_error);
-		module:hook("iq-result/bare/"..push_identifier, handle_push_success);
+		module:hook("iq-error/bare/"..hashes.sha256(push_identifier, true), handle_push_error);
+		module:hook("iq-result/bare/"..hashes.sha256(push_identifier, true), handle_push_success);
 	end
+	
+	module:log("info", "Module unloaded");
 end
