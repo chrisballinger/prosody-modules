@@ -1,5 +1,5 @@
 -- mod_storage_xmlarchive
--- Copyright (C) 2015-2016 Kim Alvefur
+-- Copyright (C) 2015-2017 Kim Alvefur
 --
 -- This file is MIT/X11 licensed.
 --
@@ -120,7 +120,7 @@ function archive:find(username, query)
 			end
 		end
 	end
-	local items, xmlfile;
+	local items;
 	local first_item, last_item;
 	if rev then
 		start_day, step, last_day = last_day, -step, start_day;
@@ -151,10 +151,31 @@ function archive:find(username, query)
 		end
 	end
 
+	local date_open, xmlfile;
+	local function read_xml(date, offset, length)
+		if xmlfile and date ~= date_open then
+			xmlfile:close();
+			xmlfile = nil;
+		end
+		if not xmlfile then
+			date_open = date;
+			local filename = dm.getpath(username .. "@" .. date, module.host, self.store, "xml");
+			local ferr;
+			xmlfile, ferr = io.open(filename);
+			if not xmlfile then
+				module:log("error", "Error: %s", ferr);
+				return nil, ferr;
+			end
+		end
+		local pos, err = xmlfile:seek("set", offset);
+		if pos ~= offset then
+			return nil, err or "seek-failed";
+		end
+		return xmlfile:read(length);
+	end
+
 	return function ()
 		if limit and count >= limit then if xmlfile then xmlfile:close() end return; end
-		local filename;
-
 		for d = start_day, last_day, step do
 			if not items then
 				module:log("debug", "Loading items from %s", dates[d]);
@@ -182,26 +203,17 @@ function archive:find(username, query)
 					module:log("warn", "data[%q][%d].when is invalid", dates[d], i);
 					break;
 				end
-				if not xmlfile then
-					local ferr;
-					filename = dm.getpath(username .. "@" .. dates[d], module.host, self.store, "xml");
-					xmlfile, ferr = io.open(filename);
-					if not xmlfile then
-						module:log("error", "Error: %s", ferr);
-						return;
-					end
-				end
 				if  (not q_with or i_with == q_with)
 				and (not q_start or i_when >= q_start)
 				and (not q_end or i_when <= q_end) then
 					count = count + 1;
 					first_item = i + step;
 
-					xmlfile:seek("set", item.offset);
-					local data = xmlfile:read(item.length);
+					local data = read_xml(dates[d], item.offset, item.length);
+					if not data then return end
 					local ok, err = stream:feed(data);
 					if not ok then
-						module:log("warn", "Parse error in %s at %d+%d: %s", filename, item.offset, item.length, err);
+						module:log("warn", "Parse error in %s@%s/%s/%q[%d]: %s", username, module.host, self.store, i, err);
 						reset_stream();
 					end
 					if result then
