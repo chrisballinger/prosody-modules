@@ -177,10 +177,11 @@ function archive:find(username, query)
 	return function ()
 		if limit and count >= limit then if xmlfile then xmlfile:close() end return; end
 		for d = start_day, last_day, step do
+			local date = dates[d];
 			if not items then
-				module:log("debug", "Loading items from %s", dates[d]);
+				module:log("debug", "Loading items from %s", date);
 				start_day = d;
-				items = dm.list_load(username .. "@" .. dates[d], module.host, self.store) or empty;
+				items = dm.list_load(username .. "@" .. date, module.host, self.store) or empty;
 				if not rev then
 					first_item, last_item = 1, #items;
 				else
@@ -192,7 +193,7 @@ function archive:find(username, query)
 			for i = first_item, last_item, step do
 				local item = items[i];
 				if not item then
-					module:log("warn", "data[%q][%d] is nil", dates[d], i);
+					module:log("warn", "data[%q][%d] is nil", date, i);
 					break;
 				end
 				local i_when, i_with = item.when, item.with;
@@ -200,7 +201,7 @@ function archive:find(username, query)
 					i_when = dt.parse(i_when);
 				end
 				if type(i_when) ~= "number" then
-					module:log("warn", "data[%q][%d].when is invalid", dates[d], i);
+					module:log("warn", "data[%q][%d].when is invalid", date, i);
 					break;
 				end
 				if  (not q_with or i_with == q_with)
@@ -209,7 +210,7 @@ function archive:find(username, query)
 					count = count + 1;
 					first_item = i + step;
 
-					local data = read_xml(dates[d], item.offset, item.length);
+					local data = read_xml(date, item.offset, item.length);
 					if not data then return end
 					local ok, err = stream:feed(data);
 					if not ok then
