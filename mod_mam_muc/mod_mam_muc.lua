@@ -8,15 +8,17 @@ if module:get_host_type() ~= "component" then
 	return;
 end
 
-local xmlns_mam     = "urn:xmpp:mam:1";
+local xmlns_mam     = "urn:xmpp:mam:2";
 local xmlns_delay   = "urn:xmpp:delay";
 local xmlns_forward = "urn:xmpp:forward:0";
+local xmlns_st_id   = "urn:xmpp:sid:0";
 local muc_form_enable_logging = "muc#roomconfig_enablelogging"
 
 local st = require "util.stanza";
 local rsm = require "util.rsm";
 local jid_bare = require "util.jid".bare;
 local jid_split = require "util.jid".split;
+local jid_prep = require "util.jid".prep;
 local dataform = require "util.dataforms".new;
 local it = require"util.iterators";
 
@@ -351,7 +353,16 @@ end
 
 -- Handle messages
 function save_to_history(self, stanza)
-	local room_node = jid_split(self.jid);
+	local room_node, room_host = jid_split(self.jid);
+
+	-- Filter out <stanza-id> that claim to be from us
+	stanza:maptags(function (tag)
+		if tag.name == "stanza-id" and tag.attr.xmlns == xmlns_st_id
+		and jid_prep(tag.attr.by) == self.jid then
+			return nil;
+		end
+		return tag;
+	end);
 
 	-- Policy check
 	if not logging_enabled(self) then return end -- Don't log
@@ -361,7 +372,12 @@ function save_to_history(self, stanza)
 	if stanza.attr.type then
 		with = with .. "<" .. stanza.attr.type
 	end
-	archive:append(room_node, nil, stanza, time_now(), with);
+
+	local id = archive:append(room_node, nil, stanza, time_now(), with);
+
+	if id then
+		stanza:add_direct_child(st.stanza("stanza-id", { xmlns = xmlns_st_id, by = self.jid, id = id }));
+	end
 end
 
 module:hook("muc-broadcast-message", function (event)
