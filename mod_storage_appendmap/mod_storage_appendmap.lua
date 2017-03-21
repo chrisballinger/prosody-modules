@@ -16,8 +16,8 @@ function map:get(user, key)
 	if _VERSION == "Lua 5.1" then -- HACK
 		env._ENV = env; -- HACK
 	end -- SO MANY HACKS
-	local chunk, err = load(filename, env);
-	if not chunk then return chunk, err; end
+	local chunk, err, errno = load(filename, env);
+	if not chunk then if errno == 2 then return end return chunk, err; end
 	local ok, err = pcall(chunk);
 	if not ok then return ok, err; end
 	if _VERSION == "Lua 5.1" then -- HACK
