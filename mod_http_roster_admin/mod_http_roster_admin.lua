@@ -118,7 +118,9 @@ local function updated_friends_handler(username, cb)
 			removed = removed + 1;
 		end
 		module:log("debug", "User %s: added %d new contacts, removed %d contacts", username, added, removed);
-		cb(true);
+		if cb ~= nil then
+			cb(true);
+		end
 	end);
 end
 
