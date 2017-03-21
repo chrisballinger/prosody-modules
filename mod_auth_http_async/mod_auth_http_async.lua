@@ -8,8 +8,6 @@
 --
 
 local new_sasl = require "util.sasl".new;
-local http = require "socket.http";
-local https = require "ssl.https";
 local base64 = require "util.encodings".base64.encode;
 local have_async, async = pcall(require, "util.async");
 
@@ -30,6 +28,7 @@ if rawget(_G, "base_parsed") == nil then
 end
 
 local function async_http_auth(url, username, password)
+	local http = require "net.http";
 	local wait, done = async.waiter();
 	local content, code, request, response;
 	local ex = {
@@ -51,6 +50,8 @@ local function async_http_auth(url, username, password)
 end
 
 local function sync_http_auth(url)
+	local http = require "socket.http";
+	local https = require "ssl.https";
 	local request;
 	if string.sub(url, 1, string.len('https')) == 'https' then
 		request = https.request;
