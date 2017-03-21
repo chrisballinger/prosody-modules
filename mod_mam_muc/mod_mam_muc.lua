@@ -1,5 +1,5 @@
 -- XEP-0313: Message Archive Management for Prosody MUC
--- Copyright (C) 2011-2014 Kim Alvefur
+-- Copyright (C) 2011-2017 Kim Alvefur
 --
 -- This file is MIT/X11 licensed.
 
@@ -49,8 +49,9 @@ local archive = module:open_store(archive_store, "archive");
 
 if archive.name == "null" or not archive.find then
 	if not archive.find then
-		module:log("error", "Attempt to open archive storage returned a valid driver but it does not seem to implement the storage API");
-		module:log("error", "mod_%s does not support archiving", archive._provided_by or archive.name and "storage_"..archive.name.."(?)" or "<unknown>");
+		module:log("error", "Attempt to open archive storage returned a driver without archive API support");
+		module:log("error", "mod_%s does not support archiving",
+			archive._provided_by or archive.name and "storage_"..archive.name.."(?)" or "<unknown>");
 	else
 		module:log("error", "Attempt to open archive storage returned null driver");
 	end
