@@ -299,9 +299,10 @@ module:hook("muc-get-history", function (event)
 
 	local history, i = {}, 1;
 
-	for _, item, when in data do
+	for id, item, when in data do
 		item.attr.to = to;
 		item:tag("delay", { xmlns = "urn:xmpp:delay", from = room_jid, stamp = timestamp(when) }):up(); -- XEP-0203
+		item:tag("stanza-id", { xmlns = xmlns_st_id, by = room_jid, id = id }):up();
 		if maxchars then
 			local chars = #tostring(item);
 			if maxchars - chars < 0 then
