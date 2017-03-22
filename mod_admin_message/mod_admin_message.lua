@@ -85,7 +85,7 @@ local function on_message(event)
 	admin_telnet.console:process_line(session, body.."\n");
 
 	-- Strip trailing blank line
-	session.fulltext = tostring(session.fulltext):gsub("\n\|%s*$", "")
+	session.fulltext = tostring(session.fulltext):gsub("\n|%s*$", "")
 
 	-- Send the reply stanza
 	local reply_stanza = st.message({ from = host, to = userjid,
