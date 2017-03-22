@@ -6,8 +6,8 @@ labels: 'Stage-Alpha'
 Introduction
 ============
 
-This module implements [XEP-0363], which lets clients upload files
-over HTTP.
+This module implements [XEP-0363], versions 0.2 and 0.3, which let
+clients upload files over HTTP.
 
 Configuration
 =============
