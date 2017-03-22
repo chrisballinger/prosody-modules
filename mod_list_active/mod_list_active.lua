@@ -42,7 +42,7 @@ function module.command(arg)
 		local last_active = dm.load(user, host, "lastlog");
 		local last_action = last_active and last_active.event or "?"
 		last_active = last_active and last_active.timestamp or 0;
-		if last_active < max_age then
+		if last_active > max_age then
 			print(output:format(jid_join(user, host), last_action));
 		end
 	end
