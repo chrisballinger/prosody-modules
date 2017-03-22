@@ -36,15 +36,22 @@ end
 module:depends("http");
 module:depends("disco");
 
--- namespace
-local xmlns_http_upload = "urn:xmpp:http:upload";
+-- namespaces
+local namespace = "urn:xmpp:http:upload:0";
+local legacy_namespace = "urn:xmpp:http:upload";
 
 -- identity and feature advertising
 module:add_identity("store", "file", module:get_option_string("name", "HTTP File Upload"));
-module:add_feature(xmlns_http_upload);
+module:add_feature(namespace);
+module:add_feature(legacy_namespace);
 
 module:add_extension(dataform {
-	{ name = "FORM_TYPE", type = "hidden", value = xmlns_http_upload },
+	{ name = "FORM_TYPE", type = "hidden", value = namespace },
+	{ name = "max-file-size", type = "text-single" },
+}:form({ ["max-file-size"] = tostring(file_size_limit) }, "result"));
+
+module:add_extension(dataform {
+	{ name = "FORM_TYPE", type = "hidden", value = legacy_namespace },
 	{ name = "max-file-size", type = "text-single" },
 }:form({ ["max-file-size"] = tostring(file_size_limit) }, "result"));
 
@@ -54,10 +61,7 @@ local pending_slots = module:shared("upload_slots");
 local storage_path = module:get_option_string(module.name .. "_path", join_path(prosody.paths.data, module.name));
 lfs.mkdir(storage_path);
 
--- hooks
-module:hook("iq/host/"..xmlns_http_upload..":request", function (event)
-	local stanza, origin = event.stanza, event.origin;
-	local request = stanza.tags[1];
+local function handle_request(origin, stanza, xmlns, filename, filesize)
 	-- local clients only
 	if origin.type ~= "c2s" then
 		module:log("debug", "Request for upload slot from a %s", origin.type);
@@ -65,13 +69,11 @@ module:hook("iq/host/"..xmlns_http_upload..":request", function (event)
 		return true;
 	end
 	-- validate
-	local filename = request:get_child_text("filename");
 	if not filename or filename:find("/") then
 		module:log("debug", "Filename %q not allowed", filename or "");
 		origin.send(st.error_reply(stanza, "modify", "bad-request", "Invalid filename"));
 		return true;
 	end
-	local filesize = tonumber(request:get_child_text("size"));
 	if not filesize then
 		module:log("debug", "Missing file size");
 		origin.send(st.error_reply(stanza, "modify", "bad-request", "Missing or invalid file size"));
@@ -79,12 +81,12 @@ module:hook("iq/host/"..xmlns_http_upload..":request", function (event)
 	elseif filesize > file_size_limit then
 		module:log("debug", "File too large (%d > %d)", filesize, file_size_limit);
 		origin.send(st.error_reply(stanza, "modify", "not-acceptable", "File too large")
-			:tag("file-too-large", {xmlns=xmlns_http_upload})
+			:tag("file-too-large", {xmlns=xmlns})
 				:tag("max-file-size"):text(tostring(file_size_limit)));
 		return true;
 	end
 	local reply = st.reply(stanza);
-	reply:tag("slot", { xmlns = xmlns_http_upload });
+	reply:tag("slot", { xmlns = xmlns });
 
 	local random;
 	repeat random = uuid();
@@ -106,6 +108,23 @@ module:hook("iq/host/"..xmlns_http_upload..":request", function (event)
 	origin.send(reply);
 	origin.log("debug", "Given upload slot %q", slot);
 	return true;
+end
+
+-- hooks
+module:hook("iq/host/"..namespace..":request", function (event)
+	local stanza, origin = event.stanza, event.origin;
+	local request = stanza.tags[1];
+	local filename = request.attr.filename;
+	local filesize = tonumber(request.attr.size);
+	handle_request(origin, stanza, namespace, filename, filesize);
+end);
+
+module:hook("iq/host/"..legacy_namespace..":request", function (event)
+	local stanza, origin = event.stanza, event.origin;
+	local request = stanza.tags[1];
+	local filename = request:get_child_text("filename");
+	local filesize = tonumber(request:get_child_text("size"));
+	handle_request(origin, stanza, legacy_namespace, filename, filesize);
 end);
 
 -- http service
