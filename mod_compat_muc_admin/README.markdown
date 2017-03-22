@@ -24,4 +24,4 @@ And add it between the enabled muc component's modules
 Compatibility
 =============
 
--   0.7-0.9.x
+-   0.7-0.8.x
