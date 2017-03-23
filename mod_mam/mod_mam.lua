@@ -44,6 +44,7 @@ local archive_store = module:get_option_string("archive_store", "archive2");
 local archive = assert(module:open_store(archive_store, "archive"));
 
 if archive.name == "null" or not archive.find then
+	-- luacheck: ignore 631
 	if not archive.find then
 		module:log("debug", "Attempt to open archive storage returned a valid driver but it does not seem to implement the storage API");
 		module:log("debug", "mod_%s does not support archiving", archive._provided_by or archive.name and "storage_"..archive.name.."(?)" or "<unknown>");
