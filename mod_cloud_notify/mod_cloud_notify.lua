@@ -55,7 +55,10 @@ local push_store = (function()
 	return api;
 end)();
 
-local function handle_push_error(event)
+-- Forward declarations, as both functions need to reference each other
+local handle_push_success, handle_push_error;
+
+function handle_push_error(event)
 	local stanza = event.stanza;
 	local error_type, condition = stanza:get_error();
 	local node = jid.split(stanza.attr.to);
@@ -94,7 +97,7 @@ local function handle_push_error(event)
 	return true;
 end
 
-local function handle_push_success(event)
+function handle_push_success(event)
 	local stanza = event.stanza;
 	local node = jid.split(stanza.attr.to);
 	local from = stanza.attr.from;
