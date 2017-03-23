@@ -206,13 +206,10 @@ function handle_http_request(event)
 	local method = request.method;
 	local body = request.body;
 
-	--module:log("debug", "%s request to %s%s with body %s", method, request.url.path, request.url.query and "?" .. request.url.query or "", #body > 0 and body or "empty");
 	local query = request.url.query or {}; --FIXME
 	if query and type(query) == "string" then
 		query = formdecode(query);
-		--module:log("debug", "GET data: %s", dump(query));
 	end
-	--module:log("debug", "Headers: %s", dump(request.headers));
 
 	local feed = feed_list[query.node];
 	if not feed then
