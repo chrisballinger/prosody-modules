@@ -10,15 +10,23 @@
 -- imports
 local st = require"util.stanza";
 local lfs = require"lfs";
-local uuid = require"util.uuid".generate;
 local url = require "socket.url";
 local dataform = require "util.dataforms".new;
 local datamanager = require "util.datamanager";
 local t_concat = table.concat;
 local t_insert = table.insert;
 local s_upper = string.upper;
+local have_random, random = pcall(require, "util.random"); -- Only available in 0.10+
+local uuid = require"util.uuid".generate;
+if have_random then
+	local b64 = require "util.encodings".base64;
+	local b64url = { ['+'] = '-', ['/'] = '_', ['='] = '' };
+	function uuid()
+		return (b64(random(8)):gsub("[+/=]", b64url));
+	end
+end
 
-local function join_path(...)
+local function join_path(...) -- COMPAT util.path was added in 0.10
 	return table.concat({ ... }, package.config:sub(1,1));
 end
 
