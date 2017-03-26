@@ -22,7 +22,7 @@ if have_random then
 	local b64 = require "util.encodings".base64;
 	local b64url = { ['+'] = '-', ['/'] = '_', ['='] = '' };
 	function uuid()
-		return (b64(random(8)):gsub("[+/=]", b64url));
+		return (b64(random.bytes(8)):gsub("[+/=]", b64url));
 	end
 end
 
