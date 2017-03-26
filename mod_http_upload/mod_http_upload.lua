@@ -100,7 +100,7 @@ local function handle_request(origin, stanza, xmlns, filename, filesize)
 	local random_dir;
 	repeat random_dir = uuid();
 	until lfs.mkdir(join_path(storage_path, random_dir))
-		or not lfs.attributes(join_path(storage_path, random_dir, filenams))
+		or not lfs.attributes(join_path(storage_path, random_dir, filename))
 
 	datamanager.list_append(origin.username, origin.host, module.name, {
 		filename = join_path(storage_path, random_dir, filename), size = filesize, time = os.time() });
