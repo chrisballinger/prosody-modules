@@ -36,7 +36,8 @@ local file_size_limit = module:get_option_number(module.name .. "_file_size_limi
 --- sanity
 local parser_body_limit = module:context("*"):get_option_number("http_max_content_size", 10*1024*1024);
 if file_size_limit > parser_body_limit then
-	module:log("warn", "%s_file_size_limit exceeds HTTP parser limit on body size, capping file size to %d B", module.name, parser_body_limit);
+	module:log("warn", "%s_file_size_limit exceeds HTTP parser limit on body size, capping file size to %d B",
+		module.name, parser_body_limit);
 	file_size_limit = parser_body_limit;
 end
 
@@ -98,9 +99,11 @@ local function handle_request(origin, stanza, xmlns, filename, filesize)
 
 	local random;
 	repeat random = uuid();
-	until lfs.mkdir(join_path(storage_path, random)) or not lfs.attributes(join_path(storage_path, random, filename))
+	until lfs.mkdir(join_path(storage_path, random))
+		or not lfs.attributes(join_path(storage_path, random, filenams))
 
-	datamanager.list_append(origin.username, origin.host, module.name, { filename = join_path(storage_path, random, filename), size = filesize, time = os.time() });
+	datamanager.list_append(origin.username, origin.host, module.name, {
+		filename = join_path(storage_path, random, filename), size = filesize, time = os.time() });
 	local slot = random.."/"..filename;
 	pending_slots[slot] = origin.full_jid;
 	local base_url = module:http_url();
