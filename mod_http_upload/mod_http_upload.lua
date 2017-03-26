@@ -97,19 +97,19 @@ local function handle_request(origin, stanza, xmlns, filename, filesize)
 	local reply = st.reply(stanza);
 	reply:tag("slot", { xmlns = xmlns });
 
-	local random;
-	repeat random = uuid();
-	until lfs.mkdir(join_path(storage_path, random))
-		or not lfs.attributes(join_path(storage_path, random, filenams))
+	local random_dir;
+	repeat random_dir = uuid();
+	until lfs.mkdir(join_path(storage_path, random_dir))
+		or not lfs.attributes(join_path(storage_path, random_dir, filenams))
 
 	datamanager.list_append(origin.username, origin.host, module.name, {
-		filename = join_path(storage_path, random, filename), size = filesize, time = os.time() });
-	local slot = random.."/"..filename;
+		filename = join_path(storage_path, random_dir, filename), size = filesize, time = os.time() });
+	local slot = random_dir.."/"..filename;
 	pending_slots[slot] = origin.full_jid;
 	local base_url = module:http_url();
 	local slot_url = url.parse(base_url);
 	slot_url.path = url.parse_path(slot_url.path or "/");
-	t_insert(slot_url.path, random);
+	t_insert(slot_url.path, random_dir);
 	t_insert(slot_url.path, filename);
 	slot_url.path.is_directory = false;
 	slot_url.path = url.build_path(slot_url.path);
@@ -145,8 +145,8 @@ local function upload_data(event, path)
 		module:log("warn", "Attempt to upload to unknown slot %q", path);
 		return; -- 404
 	end
-	local random, filename = path:match("^([^/]+)/([^/]+)$");
-	if not random then
+	local random_dir, filename = path:match("^([^/]+)/([^/]+)$");
+	if not random_dir then
 		module:log("warn", "Invalid file path %q", path);
 		return 400;
 	end
@@ -155,7 +155,7 @@ local function upload_data(event, path)
 		return 400;
 	end
 	pending_slots[path] = nil;
-	local full_filename = join_path(storage_path, random, filename);
+	local full_filename = join_path(storage_path, random_dir, filename);
 	if lfs.attributes(full_filename) then
 		module:log("warn", "File %s exists already, not replacing it", full_filename);
 		return 409;
@@ -177,7 +177,7 @@ local function upload_data(event, path)
 		os.remove(full_filename);
 		return 500;
 	end
-	module:log("info", "File uploaded by %s to slot %s", uploader, random);
+	module:log("info", "File uploaded by %s to slot %s", uploader, random_dir);
 	return 201;
 end
 
