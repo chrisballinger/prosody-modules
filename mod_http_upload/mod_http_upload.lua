@@ -19,7 +19,7 @@ local s_upper = string.upper;
 local have_random, random = pcall(require, "util.random"); -- Only available in 0.10+
 local uuid = require"util.uuid".generate;
 if have_random then
-	local b64 = require "util.encodings".base64;
+	local b64 = require "util.encodings".base64.encode;
 	local b64url = { ['+'] = '-', ['/'] = '_', ['='] = '' };
 	function uuid()
 		return (b64(random.bytes(8)):gsub("[+/=]", b64url));
