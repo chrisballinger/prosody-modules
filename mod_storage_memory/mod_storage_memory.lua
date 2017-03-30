@@ -142,7 +142,7 @@ local stores = {
 
 local driver = {};
 
-function driver:open(store, typ)
+function driver:open(store, typ) -- luacheck: ignore 212/self
 	local store_mt = stores[typ or "keyval"];
 	if store_mt then
 		return setmetatable({ store = memory[store] }, store_mt);
