@@ -30,42 +30,6 @@ end
 
 keyval_store.purge = _purge_store;
 
-local map_store = {};
-map_store.__index = map_store;
-
-function map_store:get(username, key)
-	local userstore = self.store[username or NULL];
-	if type(userstore) == "table" then
-		return userstore[key];
-	end
-end
-
-function map_store:set(username, key, data)
-	local userstore = self.store[username or NULL];
-	if userstore == nil then
-		userstore = {};
-		self.store[username or NULL] = userstore;
-	end
-	userstore[key] = data;
-	return true;
-end
-
-map_store.remove = {};
-function map_store:set_keys(username, keydatas)
-	local userstore = self.store[username or NULL];
-	if userstore == nil then
-		userstore = {};
-		self.store[username or NULL] = userstore;
-	end
-	for k,v in pairs(keydatas) do
-		if v == self.remove then v = nil; end
-		userstore[k] = v;
-	end
-	return true;
-end
-
-map_store.purge = _purge_store;
-
 local archive_store = {};
 archive_store.__index = archive_store;
 
@@ -159,7 +123,6 @@ archive_store.purge = _purge_store;
 
 local stores = {
 	keyval = keyval_store;
-	map = map_store;
 	archive = archive_store;
 }
 
