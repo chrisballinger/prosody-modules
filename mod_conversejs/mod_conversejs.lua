@@ -9,8 +9,6 @@ local has_ws = pcall(function ()
 	module:depends("websocket");
 end);
 
-local serve = module:depends"http_files".serve;
-
 local template = [[
 <!DOCTYPE html>
 <meta charset="utf-8">
