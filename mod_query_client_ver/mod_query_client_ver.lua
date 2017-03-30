@@ -34,6 +34,7 @@ module:hook("iq-result/host/"..version_id, function(event)
 		end
 	end
 	origin.send(st.iq({ id = disco_id, type = "get", from = module.host, to = origin.full_jid }):query(xmlns_disco_info));
+	return true;
 end);
 
 module:hook("iq-result/host/"..disco_id, function(event)
@@ -43,9 +44,9 @@ module:hook("iq-result/host/"..disco_id, function(event)
 		local ident = query:get_child("identity");
 		if ident and ident.attr.name then
 			origin.log("info", "Running %s", ident.attr.name);
-			return true;
 		end
 	end
 	-- Unknown software
+	return true;
 end);
 
