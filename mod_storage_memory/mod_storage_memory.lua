@@ -99,6 +99,7 @@ function archive_store:find(username, query)
 		limit = query.limit;
 		qstart = query.start or qstart;
 		qend = query["end"] or qend;
+		qwith = query.with;
 	end
 	if not start then return nil, "invalid-key"; end
 	local iter = coroutine.wrap(archive_iter);
