@@ -1,3 +1,8 @@
+local serialize = require "util.serialization".serialize;
+local envload = require "util.envload".envload;
+local st = require "util.stanza";
+local is_stanza = st.is_stanza or function (s) return getmetatable(s) == st.stanza_mt end
+
 local auto_purge_enabled = module:get_option_boolean("storage_memory_temporary", false);
 local auto_purge_stores = module:get_option_set("storage_memory_temporary_stores", {});
 
@@ -9,7 +14,7 @@ local memory = setmetatable({}, {
 	end
 });
 
-local NULL = {};
+local function NULL() return nil end
 
 local function _purge_store(self, username)
 	self.store[username or NULL] = nil;
@@ -20,11 +25,11 @@ local keyval_store = {};
 keyval_store.__index = keyval_store;
 
 function keyval_store:get(username)
-	return self.store[username or NULL];
+	return (self.store[username or NULL] or NULL)();
 end
 
 function keyval_store:set(username, data)
-	self.store[username or NULL] = data;
+	self.store[username or NULL] = envload(serialize(data), "@data", {});
 	return true;
 end
 
@@ -36,6 +41,14 @@ archive_store.__index = archive_store;
 function archive_store:append(username, key, value, when, with)
 	if type(when) ~= "number" then
 		when, with, value = value, when, with;
+	end
+	if is_stanza(value) then
+		value = st.preserialize(value);
+		value = function ()
+			return st.deserialize(envload(serialize(data), "@stanza", {}));
+		end
+	else
+		value = envload(serialize(data), "@data", {});
 	end
 	local a = self.store[username or NULL];
 	if not a then
@@ -61,7 +74,7 @@ local function archive_iter (a, start, stop, step, limit, when_start, when_end, 
 		item = a[i];
 		when, with = item.when, item.with;
 		if when >= when_start and when_end >= when and (not match_with or match_with == with) then
-			coroutine.yield(item.key, item.value, when, with);
+			coroutine.yield(item.key, item.value(), when, with);
 			count = count + 1;
 			if limit and count >= limit then return end
 		end
