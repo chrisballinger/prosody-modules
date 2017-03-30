@@ -45,10 +45,10 @@ function archive_store:append(username, key, value, when, with)
 	if is_stanza(value) then
 		value = st.preserialize(value);
 		value = function ()
-			return st.deserialize(envload(serialize(data), "@stanza", {}));
+			return st.deserialize(envload(serialize(value), "@stanza", {}));
 		end
 	else
-		value = envload(serialize(data), "@data", {});
+		value = envload(serialize(value), "@data", {});
 	end
 	local a = self.store[username or NULL];
 	if not a then
