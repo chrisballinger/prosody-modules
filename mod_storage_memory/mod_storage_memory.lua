@@ -86,7 +86,7 @@ function archive_store:append(username, key, value, when, with)
 	end
 	a[i] = v;
 	a[key] = i;
-	return true;
+	return key;
 end
 
 local function archive_iter (a, start, stop, step, limit, when_start, when_end, match_with)
