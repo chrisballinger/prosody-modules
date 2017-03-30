@@ -30,9 +30,13 @@ module:hook("iq-result/host/"..version_id, function(event)
 				client = client .. " version " .. version;
 			end
 			origin.log("info", "Running %s", client);
-			return true;
 		end
 	end
+	return true;
+end);
+
+module:hook("iq-error/host/"..version_id, function(event)
+	local origin, stanza = event.origin, event.stanza;
 	origin.send(st.iq({ id = disco_id, type = "get", from = module.host, to = origin.full_jid }):query(xmlns_disco_info));
 	return true;
 end);
@@ -46,7 +50,9 @@ module:hook("iq-result/host/"..disco_id, function(event)
 			origin.log("info", "Running %s", ident.attr.name);
 		end
 	end
-	-- Unknown software
 	return true;
 end);
 
+module:hook("iq-error/host/"..disco_id, function()
+	return true; -- Doesn't reply to disco#info? Weird, but ignore for now.
+end);
