@@ -91,7 +91,7 @@ function archive:find(username, query)
 	local stream_session = { notopen = true };
 	local stream_callbacks = { handlestanza = cb, stream_ns = "jabber:client", default_ns = "jabber:client" };
 	local stream = new_stream(stream_session, stream_callbacks);
-	local dates = dm.list_load(username, module.host, self.store) or empty;
+	local dates = self:dates() or empty;
 	local function reset_stream()
 		stream:reset();
 		stream_session.notopen = true;
@@ -244,7 +244,7 @@ function archive:delete(username, query)
 	end
 	local before = query.before or query["end"] or "9999-12-31";
 	if type(before) == "number" then before = dt.date(before); else before = before:sub(1, 10); end
-	local dates, err = dm.list_load(username, module.host, self.store);
+	local dates, err = self:dates(username);
 	if not dates or next(dates) == nil then
 		if not err then return true end -- already empty
 		return dates, err;
