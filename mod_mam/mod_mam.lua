@@ -41,7 +41,7 @@ if global_default_policy ~= "roster" then
 end
 
 local archive_store = module:get_option_string("archive_store", "archive2");
-local archive = assert(module:open_store(archive_store, "archive"));
+local archive = module:open_store(archive_store, "archive");
 
 if archive.name == "null" or not archive.find then
 	-- luacheck: ignore 631
