@@ -123,7 +123,7 @@ module:hook("iq/host/"..namespace..":request", function (event)
 	local request = stanza.tags[1];
 	local filename = request.attr.filename;
 	local filesize = tonumber(request.attr.size);
-	handle_request(origin, stanza, namespace, filename, filesize);
+	return handle_request(origin, stanza, namespace, filename, filesize);
 end);
 
 module:hook("iq/host/"..legacy_namespace..":request", function (event)
@@ -131,7 +131,7 @@ module:hook("iq/host/"..legacy_namespace..":request", function (event)
 	local request = stanza.tags[1];
 	local filename = request:get_child_text("filename");
 	local filesize = tonumber(request:get_child_text("size"));
-	handle_request(origin, stanza, legacy_namespace, filename, filesize);
+	return handle_request(origin, stanza, legacy_namespace, filename, filesize);
 end);
 
 -- http service
