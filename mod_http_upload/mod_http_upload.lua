@@ -16,14 +16,10 @@ local datamanager = require "util.datamanager";
 local t_concat = table.concat;
 local t_insert = table.insert;
 local s_upper = string.upper;
-local have_random, random = pcall(require, "util.random"); -- Only available in 0.10+
+local have_id, id = pcall(require, "util.id"); -- Only available in 0.10+
 local uuid = require"util.uuid".generate;
-if have_random then
-	local b64 = require "util.encodings".base64.encode;
-	local b64url = { ['+'] = '-', ['/'] = '_', ['='] = '' };
-	function uuid()
-		return (b64(random.bytes(8)):gsub("[+/=]", b64url));
-	end
+if have_id then
+	uuid = id.medium();
 end
 
 local function join_path(...) -- COMPAT util.path was added in 0.10
