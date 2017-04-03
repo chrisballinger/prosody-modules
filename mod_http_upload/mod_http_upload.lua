@@ -19,7 +19,7 @@ local s_upper = string.upper;
 local have_id, id = pcall(require, "util.id"); -- Only available in 0.10+
 local uuid = require"util.uuid".generate;
 if have_id then
-	uuid = id.medium();
+	uuid = id.medium;
 end
 
 local function join_path(...) -- COMPAT util.path was added in 0.10
