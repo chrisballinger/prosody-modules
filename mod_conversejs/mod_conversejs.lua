@@ -14,7 +14,7 @@ local template = [[
 <meta charset="utf-8">
 <link rel="stylesheet" type="text/css" media="screen" href="https://cdn.conversejs.org/css/converse.min.css">
 <script src="https://cdn.conversejs.org/dist/converse.min.js"></script>
-<script>converse.initialize(%s);</script>
+<body><script>converse.initialize(%s);</script>
 ]]
 
 module:provides("http", {
