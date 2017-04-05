@@ -66,7 +66,8 @@ function handle_push_error(event)
 	local user_push_services = push_store:get(node);
 
 	for push_identifier, _ in pairs(user_push_services) do
-		if hashes.sha256(push_identifier, true) == stanza.attr.id then
+		local stanza_id = hashes.sha256(push_identifier, true);
+		if stanza_id == stanza.attr.id then
 			if user_push_services[push_identifier] and user_push_services[push_identifier].jid == from and error_type ~= "wait" then
 				push_errors[push_identifier] = push_errors[push_identifier] + 1;
 				module:log("info", "Got error of type '%s' (%s) for identifier '%s': "
@@ -84,9 +85,11 @@ function handle_push_error(event)
 					-- save changed global config
 					push_store:set_identifier(node, push_identifier, nil);
 					push_errors[push_identifier] = nil;
-					-- unhook iq handlers for this identifier
-					module:unhook("iq-error/bare/"..hashes.sha256(push_identifier, true), handle_push_error);
-					module:unhook("iq-result/bare/"..hashes.sha256(push_identifier, true), handle_push_success);
+					-- unhook iq handlers for this identifier (if possible)
+					if module.unhook then
+						module:unhook("iq-error/bare/"..stanza_id, handle_push_error);
+						module:unhook("iq-result/bare/"..stanza_id, handle_push_success);
+					end
 				end
 			elseif user_push_services[push_identifier] and user_push_services[push_identifier].jid == from and error_type == "wait" then
 				module:log("debug", "Got error of type '%s' (%s) for identifier '%s': "
@@ -178,8 +181,10 @@ local function push_disable(event)
 			end
 			user_push_services[key] = nil;
 			push_errors[key] = nil;
-			module:unhook("iq-error/bare/"..key, handle_push_error);
-			module:unhook("iq-result/bare/"..key, handle_push_success);
+			if module.unhook then
+				module:unhook("iq-error/bare/"..key, handle_push_error);
+				module:unhook("iq-result/bare/"..key, handle_push_success);
+			end
 		end
 	end
 	local ok = push_store:set(origin.username, user_push_services);
@@ -218,7 +223,8 @@ local function handle_notify_request(stanza, node, user_push_services)
 		push_info.count = push_info.count + 1;
 		push_store:set_identifier(node, push_identifier, push_info);
 		-- construct push stanza
-		local push_publish = st.iq({ to = push_info.jid, from = node .. "@" .. module.host, type = "set", id = hashes.sha256(push_identifier, true) })
+		local stanza_id = hashes.sha256(push_identifier, true);
+		local push_publish = st.iq({ to = push_info.jid, from = node .. "@" .. module.host, type = "set", id = stanza_id })
 			:tag("pubsub", { xmlns = "http://jabber.org/protocol/pubsub" })
 				:tag("publish", { node = push_info.node })
 					:tag("item")
@@ -244,8 +250,8 @@ local function handle_notify_request(stanza, node, user_push_services)
 		-- handle push errors for this node
 		if push_errors[push_identifier] == nil then
 			push_errors[push_identifier] = 0;
-			module:hook("iq-error/bare/"..hashes.sha256(push_identifier, true), handle_push_error);
-			module:hook("iq-result/bare/"..hashes.sha256(push_identifier, true), handle_push_success);
+			module:hook("iq-error/bare/"..stanza_id, handle_push_error);
+			module:hook("iq-result/bare/"..stanza_id, handle_push_success);
 		end
 		module:send(push_publish);
 	end
@@ -379,19 +385,22 @@ module:hook("cloud-notify-ping", send_ping);
 
 module:log("info", "Module loaded");
 function module.unload()
-	module:unhook("account-disco-info", account_dico_info);
-	module:unhook("iq-set/self/"..xmlns_push..":enable", push_enable);
-	module:unhook("iq-set/self/"..xmlns_push..":disable", push_disable);
+	if module.unhook then
+		module:unhook("account-disco-info", account_dico_info);
+		module:unhook("iq-set/self/"..xmlns_push..":enable", push_enable);
+		module:unhook("iq-set/self/"..xmlns_push..":disable", push_disable);
 
-	module:unhook("smacks-hibernation-start", hibernate_session);
-	module:unhook("smacks-hibernation-end", restore_session);
-	module:unhook("smacks-ack-delayed", ack_delayed);
-	module:unhook("archive-message-added", archive_message_added);
-	module:unhook("cloud-notify-ping", send_ping);
+		module:unhook("smacks-hibernation-start", hibernate_session);
+		module:unhook("smacks-hibernation-end", restore_session);
+		module:unhook("smacks-ack-delayed", ack_delayed);
+		module:unhook("archive-message-added", archive_message_added);
+		module:unhook("cloud-notify-ping", send_ping);
 
-	for push_identifier, _ in pairs(push_errors) do
-		module:hook("iq-error/bare/"..hashes.sha256(push_identifier, true), handle_push_error);
-		module:hook("iq-result/bare/"..hashes.sha256(push_identifier, true), handle_push_success);
+		for push_identifier, _ in pairs(push_errors) do
+			local stanza_id = hashes.sha256(push_identifier, true);
+			module:unhook("iq-error/bare/"..stanza_id, handle_push_error);
+			module:unhook("iq-result/bare/"..stanza_id, handle_push_success);
+		end
 	end
 
 	module:log("info", "Module unloaded");
