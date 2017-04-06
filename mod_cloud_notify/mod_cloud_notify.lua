@@ -108,7 +108,7 @@ function handle_push_success(event)
 
 	for push_identifier, _ in pairs(user_push_services) do
 		if hashes.sha256(push_identifier, true) == stanza.attr.id then
-			if user_push_services[push_identifier] and user_push_services[push_identifier].jid == from and push_errors[push_identifier] then
+			if user_push_services[push_identifier] and user_push_services[push_identifier].jid == from and push_errors[push_identifier] > 0 then
 				push_errors[push_identifier] = 0;
 				module:log("debug", "Push succeeded, error count for identifier '%s' is now at %s", push_identifier, tostring(push_errors[push_identifier]));
 			end

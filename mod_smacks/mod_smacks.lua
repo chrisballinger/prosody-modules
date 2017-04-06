@@ -49,8 +49,8 @@ local function init_session_cache(max_entries, evict_callback)
 	if not cache then
 		local store = {};
 		return {
-			get = function(user, key) return store[user.."@"..key]; end;
-			set = function(user, key, value) store[user.."@"..key] = value; end;
+			get = function(user, key) return store[key]; end;
+			set = function(user, key, value) store[key] = value; end;
 		};
 	end
 	
