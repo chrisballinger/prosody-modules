@@ -15,12 +15,12 @@ function check_session(watchdog)
 	local session = watchdog.session;
 	if not session.idle_pinged then
 		session.idle_pinged = true;
-               if session.smacks and not session.awaiting_ack then
-                       session.send(st.stanza("r", { xmlns = "urn:xmpp:sm:2" })) -- TODO: hardcoded sm:2
-               else
-                       session.send(st.iq({ type = "get", from = module.host, id = "idle-check" })
-                               :tag("ping", { xmlns = "urn:xmpp:ping" }));
-               end
+		if session.smacks and not session.awaiting_ack then
+				session.send(st.stanza("r", { xmlns = session.smacks }))
+		else
+				session.send(st.iq({ type = "get", from = module.host, id = "idle-check" })
+						:tag("ping", { xmlns = "urn:xmpp:ping" }));
+		end
 		return ping_timeout; -- Call us again after ping_timeout
 	else
 		module:log("info", "Client %q silent for too long, closing...", session.full_jid);
