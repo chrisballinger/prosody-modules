@@ -48,3 +48,7 @@ end
 
 module:hook("resource-bind", function (event) watch_session(event.session); end);
 module:hook("resource-unbind", function (event) unwatch_session(event.session); end);
+
+-- handle smacks sessions properly (not pinging in hibernated state)
+module:hook("smacks-hibernation-start", function (event) unwatch_session(event.origin); end);
+module:hook("smacks-hibernation-end", function (event) watch_session(event.origin); end);
