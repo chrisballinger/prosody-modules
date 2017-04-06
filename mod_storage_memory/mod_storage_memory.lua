@@ -29,7 +29,7 @@ function keyval_store:get(username)
 end
 
 function keyval_store:set(username, data)
-	self.store[username or NULL] = envload(serialize(data), "@data", {});
+	self.store[username or NULL] = envload("return "..serialize(data), "@data", {});
 	return true;
 end
 
@@ -45,10 +45,10 @@ function archive_store:append(username, key, value, when, with)
 	if is_stanza(value) then
 		value = st.preserialize(value);
 		value = function ()
-			return st.deserialize(envload(serialize(value), "@stanza", {}));
+			return st.deserialize(envload("return "..serialize(value), "@stanza", {}));
 		end
 	else
-		value = envload(serialize(value), "@data", {});
+		value = envload("return "..serialize(value), "@data", {});
 	end
 	local a = self.store[username or NULL];
 	if not a then
