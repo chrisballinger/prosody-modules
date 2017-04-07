@@ -15,11 +15,13 @@ function check_session(watchdog)
 	local session = watchdog.session;
 	if not session.idle_pinged then
 		session.idle_pinged = true;
-		if session.smacks and not session.awaiting_ack then
+		if session.smacks then
+			if not session.awaiting_ack then
 				session.send(st.stanza("r", { xmlns = session.smacks }))
+			end
 		else
-				session.send(st.iq({ type = "get", from = module.host, id = "idle-check" })
-						:tag("ping", { xmlns = "urn:xmpp:ping" }));
+			session.send(st.iq({ type = "get", from = module.host, id = "idle-check" })
+					:tag("ping", { xmlns = "urn:xmpp:ping" }));
 		end
 		return ping_timeout; -- Call us again after ping_timeout
 	else
@@ -51,4 +53,4 @@ module:hook("resource-unbind", function (event) unwatch_session(event.session); 
 
 -- handle smacks sessions properly (not pinging in hibernated state)
 module:hook("smacks-hibernation-start", function (event) unwatch_session(event.origin); end);
-module:hook("smacks-hibernation-end", function (event) watch_session(event.origin); end);
+module:hook("smacks-hibernation-end", function (event) watch_session(event.resumed); end);
