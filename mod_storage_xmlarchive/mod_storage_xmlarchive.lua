@@ -91,7 +91,7 @@ function archive:find(username, query)
 	local stream_session = { notopen = true };
 	local stream_callbacks = { handlestanza = cb, stream_ns = "jabber:client", default_ns = "jabber:client" };
 	local stream = new_stream(stream_session, stream_callbacks);
-	local dates = self:dates() or empty;
+	local dates = self:dates(username) or empty;
 	local function reset_stream()
 		stream:reset();
 		stream_session.notopen = true;
