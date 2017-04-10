@@ -279,14 +279,21 @@ function provider:open(store, typ)
 end
 
 function provider:purge(username)
-	for store in dm.stores(username, module.host) do
-		local dates = dm.list_load(username, module.host, store) or empty;
-		if dates[1] and type(dates[1]) == "string" and dates[1]:match("^%d%d%d%d%-%d%d%-%d%d$") then
-			module:log("info", "Store %s looks like an archive store, emptying it...", store);
-			provider:open(store, "archive"):delete(username);
+	local encoded_username = dm.path_encode((username or "@") .. "@");
+	local basepath = prosody.paths.data .. "/" .. dm.path_encode(module.host);
+	for store in lfs.dir(basepath) do
+		store = basepath .. "/" .. dm.path_encode(store);
+		if lfs.attributes(store, "mode") == "directory" then
+			for file in lfs.dir(store) do
+				if file:sub(1, #encoded_username) == encoded_username then
+					if file:sub(-4) == ".xml" or file:sub(-5) == ".list" then
+						os.remove(store .. "/" .. file);
+					end
+				end
+			end
+			return true;
 		end
 	end
-	return true;
 end
 
 module:provides("storage", provider);
