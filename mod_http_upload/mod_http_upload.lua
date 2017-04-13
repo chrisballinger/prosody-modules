@@ -31,6 +31,7 @@ end
 local file_size_limit = module:get_option_number(module.name .. "_file_size_limit", 1024 * 1024); -- 1 MB
 local quota = module:get_option_number(module.name .. "_quota");
 local max_age = module:get_option_number(module.name .. "_expire_after");
+local allowed_file_types = module:get_option_set(module.name .. "_allowed_file_types");
 
 --- sanity
 local parser_body_limit = module:context("*"):get_option_number("http_max_content_size", 10*1024*1024);
@@ -136,6 +137,13 @@ local function handle_request(origin, stanza, xmlns, filename, filesize, mimetyp
 		local file_ext = filename:match("%.([^.]+)$");
 		if (not file_ext and mimetype ~= "application/octet-stream") or (file_ext and mime_map[file_ext] ~= mimetype) then
 			origin.send(st.error_reply(stanza, "modify", "bad-request", "MIME type does not match file extension"));
+			return true;
+		end
+	end
+
+	if allowed_file_types then
+		if not (allowed_file_types:contains(mimetype) or allowed_file_types:contains(mimetype:gsub("/.*", "/*"))) then
+			origin.send(st.error_reply(stanza, "cancel", "not-allowed", "File type not allowed"));
 			return true;
 		end
 	end
