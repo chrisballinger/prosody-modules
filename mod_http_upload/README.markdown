@@ -27,6 +27,8 @@ Alternatively it can be added to `modules_enabled` like other modules.
 Limits
 ------
 
+### Max size
+
 A maximum file size can be set by:
 
 ``` {.lua}
@@ -37,11 +39,15 @@ Default is 1MB (1024\*1024).
 
 This can not be set over the value of `http_max_content_size` (default 10M).
 
+### Max age
+
 Files can be set to be deleted after some time:
 
 ``` lua
 http_upload_expire_after = 60 * 60 * 24 * 7 -- a week in seconds
 ```
+
+### User quota
 
 A total maximum size of all uploaded files per user can be set by:
 
