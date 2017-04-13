@@ -43,6 +43,12 @@ Files can be set to be deleted after some time:
 http_upload_expire_after = 60 * 60 * 24 * 7 -- a week in seconds
 ```
 
+A total maximum size of all uploaded files per user can be set by:
+
+``` lua
+http_upload_quota = 1234 -- bytes
+```
+
 Path
 ----
 

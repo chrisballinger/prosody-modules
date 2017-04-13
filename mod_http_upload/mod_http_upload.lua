@@ -29,6 +29,7 @@ end
 
 -- config
 local file_size_limit = module:get_option_number(module.name .. "_file_size_limit", 1024 * 1024); -- 1 MB
+local quota = module:get_option_number(module.name .. "_quota");
 local max_age = module:get_option_number(module.name .. "_expire_after");
 
 --- sanity
@@ -88,6 +89,17 @@ local function expire(username, host)
 	return datamanager.list_store(username, host, module.name, uploads);
 end
 
+local function check_quota(username, host, does_it_fit)
+	if not quota then return true; end
+	local uploads, err = datamanager.list_load(username, host, module.name);
+	if not uploads then return true; end
+	local sum = does_it_fit or 0;
+	for _, item in ipairs(uploads) do
+		sum = sum + item.size;
+	end
+	return sum < quota;
+end
+
 local function handle_request(origin, stanza, xmlns, filename, filesize)
 	-- local clients only
 	if origin.type ~= "c2s" then
@@ -111,6 +123,10 @@ local function handle_request(origin, stanza, xmlns, filename, filesize)
 		origin.send(st.error_reply(stanza, "modify", "not-acceptable", "File too large")
 			:tag("file-too-large", {xmlns=xmlns})
 				:tag("max-file-size"):text(tostring(file_size_limit)));
+		return true;
+	elseif not check_quota(origin.username, origin.host, filesize) then
+		module:log("debug", "Upload of %dB by %s would exceed quota", filesize, origin.full_jid);
+		origin.send(st.error_reply(stanza, "wait", "resource-constraint", "Quota reached"));
 		return true;
 	end
 	local reply = st.reply(stanza);
