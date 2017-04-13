@@ -81,11 +81,10 @@ local function expire(username, host)
 	uploads:filter(function (item)
 		if item.time < expiry then
 			local deleted, whynot = os.remove(item.filename);
-			if deleted then
-				return false;
-			else
+			if not deleted then
 				module:log("warn", "Could not delete expired upload %s: %s", item.filename, whynot or "delete failed");
 			end
+			return false;
 		end
 		return true;
 	end);
