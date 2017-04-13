@@ -1,6 +1,6 @@
 -- mod_http_upload
 --
--- Copyright (C) 2015 Kim Alvefur
+-- Copyright (C) 2015-2017 Kim Alvefur
 --
 -- This file is MIT/X11 licensed.
 --
@@ -13,6 +13,7 @@ local lfs = require"lfs";
 local url = require "socket.url";
 local dataform = require "util.dataforms".new;
 local datamanager = require "util.datamanager";
+local array = require "util.array";
 local t_concat = table.concat;
 local t_insert = table.insert;
 local s_upper = string.upper;
@@ -28,6 +29,7 @@ end
 
 -- config
 local file_size_limit = module:get_option_number(module.name .. "_file_size_limit", 1024 * 1024); -- 1 MB
+local max_age = module:get_option_number(module.name .. "_expire_after");
 
 --- sanity
 local parser_body_limit = module:context("*"):get_option_number("http_max_content_size", 10*1024*1024);
@@ -66,6 +68,26 @@ local pending_slots = module:shared("upload_slots");
 local storage_path = module:get_option_string(module.name .. "_path", join_path(prosody.paths.data, module.name));
 lfs.mkdir(storage_path);
 
+local function expire(username, host)
+	if not max_age then return true; end
+	local uploads, err = datamanager.list_load(username, host, module.name);
+	if not uploads then return true; end
+	uploads = array(uploads);
+	local expiry = os.time() - max_age;
+	uploads:filter(function (item)
+		if item.time < expiry then
+			local deleted, whynot = os.remove(item.filename);
+			if deleted then
+				return false;
+			else
+				module:log("warn", "Could not delete expired upload %s: %s", item.filename, whynot or "delete failed");
+			end
+		end
+		return true;
+	end);
+	return datamanager.list_store(username, host, module.name, uploads);
+end
+
 local function handle_request(origin, stanza, xmlns, filename, filesize)
 	-- local clients only
 	if origin.type ~= "c2s" then
@@ -79,6 +101,7 @@ local function handle_request(origin, stanza, xmlns, filename, filesize)
 		origin.send(st.error_reply(stanza, "modify", "bad-request", "Invalid filename"));
 		return true;
 	end
+	expire(origin.username, origin.host);
 	if not filesize then
 		module:log("debug", "Missing file size");
 		origin.send(st.error_reply(stanza, "modify", "bad-request", "Missing or invalid file size"));
