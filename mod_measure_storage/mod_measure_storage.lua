@@ -14,7 +14,7 @@ local function time_method(module, store_name, store_type, method_name, method_f
 	else
 		metric_name = store_name.."_"..store_type.."_"..method_name;
 	end
-	local measure_operation_started = module:measure(metric_name, metric_tags);
+	local measure_operation_started = module:measure(metric_name, "times", metric_tags);
 
 	return function (...)
 		module:log("debug", "Measuring storage operation %s (%s)", metric_name, metric_tags or "no tags");
