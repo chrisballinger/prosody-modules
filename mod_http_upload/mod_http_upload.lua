@@ -152,6 +152,11 @@ local function handle_request(origin, stanza, xmlns, filename, filesize, mimetyp
 		filename = join_path(storage_path, random_dir, filename), size = filesize, time = os.time() });
 	local slot = random_dir.."/"..filename;
 	pending_slots[slot] = origin.full_jid;
+
+	module:add_timer(900, function()
+		pending_slots[slot] = nil;
+	end);
+
 	local base_url = module:http_url();
 	local slot_url = url.parse(base_url);
 	slot_url.path = url.parse_path(slot_url.path or "/");
