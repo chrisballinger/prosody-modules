@@ -44,6 +44,9 @@ end
 module:depends("http");
 module:depends("disco");
 
+local http_files = module:depends("http_files");
+local mime_map = module:shared("/*/http_files/mime").types;
+
 -- namespaces
 local namespace = "urn:xmpp:http:upload:0";
 local legacy_namespace = "urn:xmpp:http:upload";
@@ -100,7 +103,7 @@ local function check_quota(username, host, does_it_fit)
 	return sum < quota;
 end
 
-local function handle_request(origin, stanza, xmlns, filename, filesize)
+local function handle_request(origin, stanza, xmlns, filename, filesize, mimetype)
 	-- local clients only
 	if origin.type ~= "c2s" then
 		module:log("debug", "Request for upload slot from a %s", origin.type);
@@ -129,6 +132,15 @@ local function handle_request(origin, stanza, xmlns, filename, filesize)
 		origin.send(st.error_reply(stanza, "wait", "resource-constraint", "Quota reached"));
 		return true;
 	end
+
+	if mime_map then
+		local file_ext = filename:match("%.([^.]+)$");
+		if (not file_ext and mimetype ~= "application/octet-stream") or (file_ext and mime_map[file_ext] ~= mimetype) then
+			origin.send(st.error_reply(stanza, "modify", "bad-request", "MIME type does not match file extension"));
+			return true;
+		end
+	end
+
 	local reply = st.reply(stanza);
 	reply:tag("slot", { xmlns = xmlns });
 
@@ -162,7 +174,8 @@ module:hook("iq/host/"..namespace..":request", function (event)
 	local request = stanza.tags[1];
 	local filename = request.attr.filename;
 	local filesize = tonumber(request.attr.size);
-	return handle_request(origin, stanza, namespace, filename, filesize);
+	local mimetype = request.attr["content-type"];
+	return handle_request(origin, stanza, namespace, filename, filesize, mimetype);
 end);
 
 module:hook("iq/host/"..legacy_namespace..":request", function (event)
@@ -170,7 +183,8 @@ module:hook("iq/host/"..legacy_namespace..":request", function (event)
 	local request = stanza.tags[1];
 	local filename = request:get_child_text("filename");
 	local filesize = tonumber(request:get_child_text("size"));
-	return handle_request(origin, stanza, legacy_namespace, filename, filesize);
+	local mimetype = request:get_child_text("content-type");
+	return handle_request(origin, stanza, legacy_namespace, filename, filesize, mimetype);
 end);
 
 -- http service
@@ -256,7 +270,7 @@ local function send_response_sans_body(response, body)
 	end
 end
 
-local serve_uploaded_files = module:depends("http_files").serve(storage_path);
+local serve_uploaded_files = http_files.serve(storage_path);
 
 local function serve_head(event, path)
 	event.response.send = send_response_sans_body;
