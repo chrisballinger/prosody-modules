@@ -55,6 +55,14 @@ A total maximum size of all uploaded files per user can be set by:
 http_upload_quota = 1234 -- bytes
 ```
 
+### File types
+
+Accepted file types can be limited by MIME type:
+
+``` lua
+http_upload_allowed_file_types = { "image/*", "text/plain" }
+```
+
 Path
 ----
 
