@@ -81,13 +81,17 @@ local function expire(username, host)
 	local expiry = os.time() - max_age;
 	local upload_window = os.time() - 900;
 	uploads:filter(function (item)
+		local filename = item.filename;
+		if item.dir then
+			filename = join_path(storage_path, item.dir, item.filename);
+		end
 		if item.time < expiry then
-			local deleted, whynot = os.remove(item.filename);
+			local deleted, whynot = os.remove(filename);
 			if not deleted then
-				module:log("warn", "Could not delete expired upload %s: %s", item.filename, whynot or "delete failed");
+				module:log("warn", "Could not delete expired upload %s: %s", filename, whynot or "delete failed");
 			end
 			return false;
-		elseif item.time < upload_window and not lfs.attributes(item.filename) then
+		elseif item.time < upload_window and not lfs.attributes(filename) then
 			return false; -- File was not uploaded or has been deleted since
 		end
 		return true;
@@ -161,7 +165,8 @@ local function handle_request(origin, stanza, xmlns, filename, filesize, mimetyp
 		or not lfs.attributes(join_path(storage_path, random_dir, filename))
 
 	local ok = datamanager.list_append(username, host, module.name, {
-		filename = join_path(storage_path, random_dir, filename), size = filesize, time = os.time() });
+		filename = filename, dir = random_dir, size = filesize, time = os.time() });
+
 	if not ok then
 		origin.send(st.error_reply(stanza, "wait", "internal-server-failure"));
 		return true;
