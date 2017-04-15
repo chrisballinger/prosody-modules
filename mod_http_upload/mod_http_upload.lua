@@ -12,6 +12,8 @@ local st = require"util.stanza";
 local lfs = require"lfs";
 local url = require "socket.url";
 local dataform = require "util.dataforms".new;
+local datamanager = require "util.datamanager";
+local array = require "util.array";
 local t_concat = table.concat;
 local t_insert = table.insert;
 local s_upper = string.upper;
@@ -67,44 +69,35 @@ module:add_extension(dataform {
 
 -- state
 local pending_slots = module:shared("upload_slots");
-local used_slots = module:open_store();
-local slot_map = module:open_store(nil, "map");
 
 local storage_path = module:get_option_string(module.name .. "_path", join_path(prosody.paths.data, module.name));
 lfs.mkdir(storage_path);
 
-local function k(u, h) return h ~= module.host and u .. "@" .. h or u; end
-
 local function expire(username, host)
 	if not max_age then return true; end
-	local uploads, err = used_slots:get(k(username, host));
+	local uploads, err = datamanager.list_load(username, host, module.name);
 	if not uploads then return true; end
+	uploads = array(uploads);
 	local expiry = os.time() - max_age;
-	local upload_window = os.time() - 900;
-	for slot, item in pairs(uploads) do
-		local full_filename = join_path(storage_path, item.dir, item.filename);
+	uploads:filter(function (item)
 		if item.time < expiry then
-			local deleted, whynot = os.remove(full_filename);
-			if deleted then
-				module:log("debug", "Deleted expired upload %s", item.filename);
-			else
+			local deleted, whynot = os.remove(item.filename);
+			if not deleted then
 				module:log("warn", "Could not delete expired upload %s: %s", item.filename, whynot or "delete failed");
 			end
-			uploads[slot] = nil;
-		elseif item.time < upload_window and not lfs.attributes(full_filename) then
-			pending_slots[slot] = nil;
-			uploads[slot] = nil;
+			return false;
 		end
-	end
-	return used_slots:set(k(username, host), uploads);
+		return true;
+	end);
+	return datamanager.list_store(username, host, module.name, uploads);
 end
 
 local function check_quota(username, host, does_it_fit)
 	if not quota then return true; end
-	local uploads, err = used_slots:get(k(username, host));
+	local uploads, err = datamanager.list_load(username, host, module.name);
 	if not uploads then return true; end
 	local sum = does_it_fit or 0;
-	for _, item in pairs(uploads) do
+	for _, item in ipairs(uploads) do
 		sum = sum + item.size;
 	end
 	return sum < quota;
@@ -163,22 +156,13 @@ local function handle_request(origin, stanza, xmlns, filename, filesize, mimetyp
 	until lfs.mkdir(join_path(storage_path, random_dir))
 		or not lfs.attributes(join_path(storage_path, random_dir, filename))
 
-	local key = k(origin.username, origin.host);
+	datamanager.list_append(origin.username, origin.host, module.name, {
+		filename = join_path(storage_path, random_dir, filename), size = filesize, time = os.time() });
 	local slot = random_dir.."/"..filename;
-	local ok = slot_map:set(key, slot, {
-		filename = filename, dir = random_dir, size = filesize, time = os.time()
-	});
-	if not ok then
-		origin.send(st.error_reply(stanza, "wait", "internal-server-failure"));
-		return true;
-	end
 	pending_slots[slot] = origin.full_jid;
 
 	module:add_timer(900, function()
 		pending_slots[slot] = nil;
-		if not lfs.attributes(join_path(storage_path, slot)) then
-			slot_map:set(key, slot, nil);
-		end
 	end);
 
 	local base_url = module:http_url();
@@ -260,7 +244,6 @@ end
 
 -- FIXME Duplicated from net.http.server
 
--- luacheck: ignore 431/k
 local codes = require "net.http.codes";
 local headerfix = setmetatable({}, {
 	__index = function(t, k)
