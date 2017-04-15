@@ -107,6 +107,7 @@ local function check_quota(username, host, does_it_fit)
 end
 
 local function handle_request(origin, stanza, xmlns, filename, filesize, mimetype)
+	local username, host = origin.username, origin.host;
 	-- local clients only
 	if origin.type ~= "c2s" then
 		module:log("debug", "Request for upload slot from a %s", origin.type);
@@ -119,7 +120,7 @@ local function handle_request(origin, stanza, xmlns, filename, filesize, mimetyp
 		origin.send(st.error_reply(stanza, "modify", "bad-request", "Invalid filename"));
 		return true;
 	end
-	expire(origin.username, origin.host);
+	expire(username, host);
 	if not filesize then
 		module:log("debug", "Missing file size");
 		origin.send(st.error_reply(stanza, "modify", "bad-request", "Missing or invalid file size"));
@@ -130,7 +131,7 @@ local function handle_request(origin, stanza, xmlns, filename, filesize, mimetyp
 			:tag("file-too-large", {xmlns=xmlns})
 				:tag("max-file-size"):text(tostring(file_size_limit)));
 		return true;
-	elseif not check_quota(origin.username, origin.host, filesize) then
+	elseif not check_quota(username, host, filesize) then
 		module:log("debug", "Upload of %dB by %s would exceed quota", filesize, origin.full_jid);
 		origin.send(st.error_reply(stanza, "wait", "resource-constraint", "Quota reached"));
 		return true;
@@ -159,7 +160,7 @@ local function handle_request(origin, stanza, xmlns, filename, filesize, mimetyp
 	until lfs.mkdir(join_path(storage_path, random_dir))
 		or not lfs.attributes(join_path(storage_path, random_dir, filename))
 
-	datamanager.list_append(origin.username, origin.host, module.name, {
+	datamanager.list_append(username, host, module.name, {
 		filename = join_path(storage_path, random_dir, filename), size = filesize, time = os.time() });
 	local slot = random_dir.."/"..filename;
 	pending_slots[slot] = origin.full_jid;
