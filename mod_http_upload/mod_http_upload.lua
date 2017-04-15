@@ -143,9 +143,16 @@ local function handle_request(origin, stanza, xmlns, filename, filesize, mimetyp
 
 	if mime_map then
 		local file_ext = filename:match("%.([^.]+)$");
-		if (not file_ext and mimetype ~= "application/octet-stream") or (file_ext and mime_map[file_ext] ~= mimetype) then
-			origin.send(st.error_reply(stanza, "modify", "bad-request", "MIME type does not match file extension"));
-			return true;
+		if not mimetype then
+			mimetype = "application/octet-stream";
+			if file_ext then
+				mimetype = mime_map[file_ext] or mimetype;
+			end
+		else
+			if (not file_ext and mimetype ~= "application/octet-stream") or (file_ext and mime_map[file_ext] ~= mimetype) then
+				origin.send(st.error_reply(stanza, "modify", "bad-request", "MIME type does not match file extension"));
+				return true;
+			end
 		end
 	end
 
