@@ -43,7 +43,7 @@ end
 
 local function hook_event(module)
 	module:hook("store-opened", function(event)
-		event.store = wrap_store(module, event.store_name, event.store_type, event.store);
+		event.store = wrap_store(module, event.store_name, event.store_type or "keyval", event.store);
 	end);
 end
 
