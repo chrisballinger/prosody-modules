@@ -79,6 +79,7 @@ local function expire(username, host)
 	if not uploads then return true; end
 	uploads = array(uploads);
 	local expiry = os.time() - max_age;
+	local upload_window = os.time() - 900;
 	uploads:filter(function (item)
 		if item.time < expiry then
 			local deleted, whynot = os.remove(item.filename);
@@ -86,6 +87,8 @@ local function expire(username, host)
 				module:log("warn", "Could not delete expired upload %s: %s", item.filename, whynot or "delete failed");
 			end
 			return false;
+		elseif item.time < upload_window and not lfs.attributes(item.filename) then
+			return false; -- File was not uploaded or has been deleted since
 		end
 		return true;
 	end);
