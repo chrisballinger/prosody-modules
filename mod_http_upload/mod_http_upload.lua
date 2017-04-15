@@ -160,8 +160,13 @@ local function handle_request(origin, stanza, xmlns, filename, filesize, mimetyp
 	until lfs.mkdir(join_path(storage_path, random_dir))
 		or not lfs.attributes(join_path(storage_path, random_dir, filename))
 
-	datamanager.list_append(username, host, module.name, {
+	local ok = datamanager.list_append(username, host, module.name, {
 		filename = join_path(storage_path, random_dir, filename), size = filesize, time = os.time() });
+	if not ok then
+		origin.send(st.error_reply(stanza, "wait", "internal-server-failure"));
+		return true;
+	end
+
 	local slot = random_dir.."/"..filename;
 	pending_slots[slot] = origin.full_jid;
 
