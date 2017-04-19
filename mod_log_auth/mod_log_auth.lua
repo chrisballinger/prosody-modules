@@ -6,7 +6,7 @@ if mode == "failure" or mode == "all" then
 	module:hook("authentication-failure", function (event)
 		local session = event.session;
 		local username = session.username or session.sasl_handler and session.sasl_handler.username or "?";
-		module:log("info", "Failed authentication attempt (%s) for user %s from IP: %s",
+		session.log("info", "Failed authentication attempt (%s) for user %s from IP: %s",
 			event.condition or "unknown-condition", username, session.ip or "?");
 	end);
 end
@@ -14,6 +14,6 @@ end
 if mode == "success" or mode == "all" then
 	module:hook("authentication-success", function (event)
 		local session = event.session;
-		module:log("info", "Successful authentication as %s from IP: %s", session.username, session.ip or "?");
+		session.log("info", "Successful authentication as %s from IP: %s", session.username, session.ip or "?");
 	end);
 end
