@@ -46,7 +46,7 @@ local function socks5_connect_sent(conn, data)
 		return;
 	end
 
-	request_status = byte(data, 2);
+	local request_status = byte(data, 2);
 
 	if not request_status == 0x00 then
 		module:log("debug", "Failed to connect to the SOCKS5 proxy. :(");
