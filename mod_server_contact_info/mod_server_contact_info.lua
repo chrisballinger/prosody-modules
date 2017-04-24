@@ -26,7 +26,7 @@ if not contact_config or not next(contact_config) then -- we'll use admins from 
 		module:log("error", "No contact_info or admins set in config");
 		return -- Nothing to attach, so we'll just skip it.
 	end
-	module:log("debug", "No contact_info in config, using admins as fallback");
+	module:log("info", "No contact_info in config, using admins as fallback");
 	contact_config = {
 		admin = array.collect( admins / function(admin) return "xmpp:" .. admin; end);
 	};

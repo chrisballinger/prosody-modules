@@ -2,9 +2,7 @@ local mt = require"util.multitable";
 local datetime = require"util.datetime";
 local jid_split = require"util.jid".split;
 local nodeprep = require"util.encodings".stringprep.nodeprep;
-local uuid = require"util.uuid".generate;
 local it = require"util.iterators";
-local gettime = require"socket".gettime;
 local url = require"socket.url";
 local os_time, os_date = os.time, os.date;
 local render = require"util.interpolation".new("%b{}", require"util.stanza".xml_escape);
@@ -140,7 +138,10 @@ local function years_page(event, path)
 					weeks[#weeks+1] = { days = days };
 					current_day = 1;
 				end
-				days[current_day], current_day = { wday = tmp.wday, day = i, href = days_t[i] and datetime.date(days_t[i]) }, current_day+1;
+				days[current_day] = {
+					wday = tmp.wday, day = i, href = days_t[i] and datetime.date(days_t[i])
+				};
+				current_day = current_day+1;
 			end
 		end
 		table.sort(year, sort_m);
@@ -277,56 +278,10 @@ local function list_rooms(event)
 	});
 end
 
-local cache = setmetatable({}, {__mode = 'v'});
-
-local function with_cache(f)
-	return function (event, path)
-		local request, response = event.request, event.response;
-		local ckey = path or "";
-		local cached = cache[ckey];
-
-		if cached then
-			local etag = cached.etag;
-			local if_none_match = request.headers.if_none_match;
-			if etag == if_none_match then
-				module:log("debug", "Client cache hit");
-				return 304;
-			end
-			module:log("debug", "Server cache hit");
-			response.headers.etag = etag;
-			response.headers.content_type = "text/html; charset=utf-8";
-			return cached[1];
-		end
-
-		local start = gettime();
-		local rendered = f(event, path);
-		module:log("debug", "Rendering took %dms", math.floor( (gettime() - start) * 1000 + 0.5));
-
-		if type(rendered) == "string" then
-			local etag = uuid();
-			cached = { rendered, etag = etag, date = datetime.date() };
-			response.headers.etag = etag;
-			cache[ckey] = cached;
-		end
-
-		response.headers.content_type = "text/html; charset=utf-8";
-		return rendered;
-	end
-end
-
--- How is cache invalidation a hard problem? ;)
-module:hook("muc-broadcast-message", function (event)
-	local room = event.room;
-	local room_name = jid_split(room.jid);
-	local today = datetime.date();
-	cache[get_link(room_name)] = nil;
-	cache[get_link(room_name, today)] = nil;
-end);
-
 module:provides("http", {
 	route = {
 		["GET /"] = list_rooms;
-		["GET /*"] = with_cache(logs_page);
+		["GET /*"] = logs_page;
 	};
 });
 

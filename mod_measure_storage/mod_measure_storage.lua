@@ -14,7 +14,7 @@ local function time_method(module, store_name, store_type, method_name, method_f
 	else
 		metric_name = store_name.."_"..store_type.."_"..method_name;
 	end
-	local measure_operation_started = module:measure(metric_name, metric_tags);
+	local measure_operation_started = module:measure(metric_name, "times", metric_tags);
 
 	return function (...)
 		module:log("debug", "Measuring storage operation %s (%s)", metric_name, metric_tags or "no tags");
@@ -43,7 +43,7 @@ end
 
 local function hook_event(module)
 	module:hook("store-opened", function(event)
-		event.store = wrap_store(module, event.store_name, event.store_type, event.store);
+		event.store = wrap_store(module, event.store_name, event.store_type or "keyval", event.store);
 	end);
 end
 
