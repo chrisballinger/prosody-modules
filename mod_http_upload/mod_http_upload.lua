@@ -1,6 +1,6 @@
 -- mod_http_upload
 --
--- Copyright (C) 2015 Kim Alvefur
+-- Copyright (C) 2015-2017 Kim Alvefur
 --
 -- This file is MIT/X11 licensed.
 --
@@ -13,6 +13,7 @@ local lfs = require"lfs";
 local url = require "socket.url";
 local dataform = require "util.dataforms".new;
 local datamanager = require "util.datamanager";
+local array = require "util.array";
 local t_concat = table.concat;
 local t_insert = table.insert;
 local s_upper = string.upper;
@@ -28,6 +29,9 @@ end
 
 -- config
 local file_size_limit = module:get_option_number(module.name .. "_file_size_limit", 1024 * 1024); -- 1 MB
+local quota = module:get_option_number(module.name .. "_quota");
+local max_age = module:get_option_number(module.name .. "_expire_after");
+local allowed_file_types = module:get_option_set(module.name .. "_allowed_file_types");
 
 --- sanity
 local parser_body_limit = module:context("*"):get_option_number("http_max_content_size", 10*1024*1024);
@@ -40,6 +44,9 @@ end
 -- depends
 module:depends("http");
 module:depends("disco");
+
+local http_files = module:depends("http_files");
+local mime_map = module:shared("/*/http_files/mime").types;
 
 -- namespaces
 local namespace = "urn:xmpp:http:upload:0";
@@ -66,7 +73,45 @@ local pending_slots = module:shared("upload_slots");
 local storage_path = module:get_option_string(module.name .. "_path", join_path(prosody.paths.data, module.name));
 lfs.mkdir(storage_path);
 
-local function handle_request(origin, stanza, xmlns, filename, filesize)
+local function expire(username, host)
+	if not max_age then return true; end
+	local uploads, err = datamanager.list_load(username, host, module.name);
+	if not uploads then return true; end
+	uploads = array(uploads);
+	local expiry = os.time() - max_age;
+	local upload_window = os.time() - 900;
+	uploads:filter(function (item)
+		local filename = item.filename;
+		if item.dir then
+			filename = join_path(storage_path, item.dir, item.filename);
+		end
+		if item.time < expiry then
+			local deleted, whynot = os.remove(filename);
+			if not deleted then
+				module:log("warn", "Could not delete expired upload %s: %s", filename, whynot or "delete failed");
+			end
+			return false;
+		elseif item.time < upload_window and not lfs.attributes(filename) then
+			return false; -- File was not uploaded or has been deleted since
+		end
+		return true;
+	end);
+	return datamanager.list_store(username, host, module.name, uploads);
+end
+
+local function check_quota(username, host, does_it_fit)
+	if not quota then return true; end
+	local uploads, err = datamanager.list_load(username, host, module.name);
+	if not uploads then return true; end
+	local sum = does_it_fit or 0;
+	for _, item in ipairs(uploads) do
+		sum = sum + item.size;
+	end
+	return sum < quota;
+end
+
+local function handle_request(origin, stanza, xmlns, filename, filesize, mimetype)
+	local username, host = origin.username, origin.host;
 	-- local clients only
 	if origin.type ~= "c2s" then
 		module:log("debug", "Request for upload slot from a %s", origin.type);
@@ -79,6 +124,7 @@ local function handle_request(origin, stanza, xmlns, filename, filesize)
 		origin.send(st.error_reply(stanza, "modify", "bad-request", "Invalid filename"));
 		return true;
 	end
+	expire(username, host);
 	if not filesize then
 		module:log("debug", "Missing file size");
 		origin.send(st.error_reply(stanza, "modify", "bad-request", "Missing or invalid file size"));
@@ -89,7 +135,34 @@ local function handle_request(origin, stanza, xmlns, filename, filesize)
 			:tag("file-too-large", {xmlns=xmlns})
 				:tag("max-file-size"):text(tostring(file_size_limit)));
 		return true;
+	elseif not check_quota(username, host, filesize) then
+		module:log("debug", "Upload of %dB by %s would exceed quota", filesize, origin.full_jid);
+		origin.send(st.error_reply(stanza, "wait", "resource-constraint", "Quota reached"));
+		return true;
 	end
+
+	if mime_map then
+		local file_ext = filename:match("%.([^.]+)$");
+		if not mimetype then
+			mimetype = "application/octet-stream";
+			if file_ext then
+				mimetype = mime_map[file_ext] or mimetype;
+			end
+		else
+			if (not file_ext and mimetype ~= "application/octet-stream") or (file_ext and mime_map[file_ext] ~= mimetype) then
+				origin.send(st.error_reply(stanza, "modify", "bad-request", "MIME type does not match file extension"));
+				return true;
+			end
+		end
+	end
+
+	if allowed_file_types then
+		if not (allowed_file_types:contains(mimetype) or allowed_file_types:contains(mimetype:gsub("/.*", "/*"))) then
+			origin.send(st.error_reply(stanza, "cancel", "not-allowed", "File type not allowed"));
+			return true;
+		end
+	end
+
 	local reply = st.reply(stanza);
 	reply:tag("slot", { xmlns = xmlns });
 
@@ -98,10 +171,21 @@ local function handle_request(origin, stanza, xmlns, filename, filesize)
 	until lfs.mkdir(join_path(storage_path, random_dir))
 		or not lfs.attributes(join_path(storage_path, random_dir, filename))
 
-	datamanager.list_append(origin.username, origin.host, module.name, {
-		filename = join_path(storage_path, random_dir, filename), size = filesize, time = os.time() });
+	local ok = datamanager.list_append(username, host, module.name, {
+		filename = filename, dir = random_dir, size = filesize, time = os.time() });
+
+	if not ok then
+		origin.send(st.error_reply(stanza, "wait", "internal-server-failure"));
+		return true;
+	end
+
 	local slot = random_dir.."/"..filename;
 	pending_slots[slot] = origin.full_jid;
+
+	module:add_timer(900, function()
+		pending_slots[slot] = nil;
+	end);
+
 	local base_url = module:http_url();
 	local slot_url = url.parse(base_url);
 	slot_url.path = url.parse_path(slot_url.path or "/");
@@ -123,7 +207,8 @@ module:hook("iq/host/"..namespace..":request", function (event)
 	local request = stanza.tags[1];
 	local filename = request.attr.filename;
 	local filesize = tonumber(request.attr.size);
-	return handle_request(origin, stanza, namespace, filename, filesize);
+	local mimetype = request.attr["content-type"];
+	return handle_request(origin, stanza, namespace, filename, filesize, mimetype);
 end);
 
 module:hook("iq/host/"..legacy_namespace..":request", function (event)
@@ -131,7 +216,8 @@ module:hook("iq/host/"..legacy_namespace..":request", function (event)
 	local request = stanza.tags[1];
 	local filename = request:get_child_text("filename");
 	local filesize = tonumber(request:get_child_text("size"));
-	return handle_request(origin, stanza, legacy_namespace, filename, filesize);
+	local mimetype = request:get_child_text("content-type");
+	return handle_request(origin, stanza, legacy_namespace, filename, filesize, mimetype);
 end);
 
 -- http service
@@ -217,7 +303,7 @@ local function send_response_sans_body(response, body)
 	end
 end
 
-local serve_uploaded_files = module:depends("http_files").serve(storage_path);
+local serve_uploaded_files = http_files.serve(storage_path);
 
 local function serve_head(event, path)
 	event.response.send = send_response_sans_body;
