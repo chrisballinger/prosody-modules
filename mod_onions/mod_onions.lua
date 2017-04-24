@@ -5,6 +5,7 @@ local wrapclient = require "net.server".wrapclient;
 local s2s_new_outgoing = require "core.s2smanager".new_outgoing;
 local initialize_filters = require "util.filters".initialize;
 local st = require "util.stanza";
+local socket = require "socket";
 
 local portmanager = require "core.portmanager";
 
