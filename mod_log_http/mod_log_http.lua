@@ -69,7 +69,6 @@ end);
 
 module:hook_object_event(http.events, "response", function (event)
 	module:log("warn", "Received response %d from %s!", event.code, event.url);
-	for k,v in pairs(event.response) do print("=====", k, v) end
 	append_response(event.request.id, event.response);
 end);
 
