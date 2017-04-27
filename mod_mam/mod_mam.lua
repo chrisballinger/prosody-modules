@@ -156,7 +156,7 @@ local function handle_mam_query(event)
 		limit = qmax + 1;
 		before = before; after = after;
 		reverse = reverse;
-		total = get_total;
+		total = use_total;
 	});
 
 	if not data then
