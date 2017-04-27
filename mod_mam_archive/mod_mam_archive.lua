@@ -5,7 +5,7 @@
 --
 local get_prefs = module:require"mod_mam/mamprefs".get;
 local set_prefs = module:require"mod_mam/mamprefs".set;
-local rsm = module:require "mod_mam/rsm";
+local rsm = require "util.rsm";
 local jid_bare = require "util.jid".bare;
 local jid_prep = require "util.jid".prep;
 local date_parse = require "util.datetime".parse;
