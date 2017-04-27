@@ -1,7 +1,6 @@
 module:set_global();
 
 local measure = require"core.statsmanager".measure;
-local have_pposix, pposix = pcall(require, "util.pposix");
 
 local measures = {};
 setmetatable(measures, {
@@ -13,15 +12,6 @@ setmetatable(measures, {
 module:hook("stats-update", function ()
 	measures.lua(collectgarbage("count")*1024);
 end);
-
-if have_pposix and pposix.meminfo then
-	module:hook("stats-update", function ()
-		local m = measures;
-		for k, v in pairs(pposix.meminfo()) do
-			m[k](v);
-		end
-	end);
-end
 
 if require"lfs".attributes("/proc/self/statm", "mode") == "file" then
 	local pagesize = module:get_option_number("memory_pagesize", 4096); -- getconf PAGESIZE
