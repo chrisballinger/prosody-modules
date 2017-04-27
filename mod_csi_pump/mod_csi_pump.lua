@@ -48,7 +48,10 @@ local function is_important(stanza, session)
 	local st_type = stanza.attr.type;
 	if st_name == "presence" then
 		-- TODO check for MUC status codes?
-		return false;
+		if st_type == nil or st_type == "unavailable" then
+			return false;
+		end
+		return true;
 	elseif st_name == "message" then
 		if st_type == "headline" then
 			return false;
