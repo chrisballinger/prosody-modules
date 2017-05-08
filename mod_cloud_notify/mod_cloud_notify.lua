@@ -280,7 +280,7 @@ end, 1);
 -- publish on unacked smacks message
 local function process_smacks_stanza(stanza, session)
 	if session.push_identifier then
-		session.log("debug", "Invoking cloud handle_notify_request for smacks queued stanza");
+		session.log("debug", "Invoking cloud handle_notify_request() for smacks queued stanza");
 		local user_push_services = {[session.push_identifier] = session.push_settings};
 		local node = get_push_settings(stanza, session);
 		handle_notify_request(stanza, node, user_push_services);
@@ -288,14 +288,26 @@ local function process_smacks_stanza(stanza, session)
 	return stanza;
 end
 
+local function process_smacks_queue(queue, session)
+	if not session.push_identifier then return; end
+	local user_push_services = {[session.push_identifier] = session.push_settings};
+	for i=1, #queue do
+		local stanza = queue[i];
+		local node = get_push_settings(stanza, session);
+		session.log("debug", "Invoking cloud handle_notify_request() for smacks queued stanza: %d", i);
+		if handle_notify_request(stanza, node, user_push_services) ~= 0 then
+			session.log("debug", "Cloud handle_notify_request() > 0, not notifying for other queued stanzas");
+			return;		-- only notify for one stanza in the queue, not for all in a row
+		end
+	end
+end
+
 -- smacks hibernation is started
 local function hibernate_session(event)
 	local session = event.origin;
 	local queue = event.queue;
 	-- process unacked stanzas
-	for i=1,#queue do
-		process_smacks_stanza(queue[i], session);
-	end
+	process_smacks_queue(queue, session);
 	-- process future unacked (hibernated) stanzas
 	filters.add_filter(session, "stanzas/out", process_smacks_stanza);
 end
@@ -318,9 +330,7 @@ local function ack_delayed(event)
 	local session = event.origin;
 	local queue = event.queue;
 	-- process unacked stanzas (handle_notify_request() will only send push requests for new stanzas)
-	for i=1,#queue do
-		process_smacks_stanza(queue[i], session);
-	end
+	process_smacks_queue(queue, session);
 end
 
 -- archive message added
@@ -350,7 +360,7 @@ local function archive_message_added(event)
 				end
 			end
 			if identifier_found then
-				identifier_found.log("debug", "Not notifying '%s' of new MAM stanza (session still alive)", identifier);
+				identifier_found.log("debug", "Not cloud notifying '%s' of new MAM stanza (session still alive)", identifier);
 			else
 				notify_push_sevices[identifier] = push_info;
 			end
