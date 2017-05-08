@@ -207,54 +207,60 @@ local push_form = dataform {
 
 -- http://xmpp.org/extensions/xep-0357.html#publishing
 local function handle_notify_request(stanza, node, user_push_services)
-	if not user_push_services or not #user_push_services then return end
+	local pushes = 0;
+	if not user_push_services or not #user_push_services then return pushes end
 	
 	for push_identifier, push_info in pairs(user_push_services) do
+		local send_push = true;		-- only send push to this node when not already done for this stanza or if no stanza is given at all
 		if stanza then
 			if not stanza._push_notify then stanza._push_notify = {}; end
 			if stanza._push_notify[push_identifier] then
 				module:log("debug", "Already sent push notification for %s@%s to %s (%s)", node, module.host, push_info.jid, tostring(push_info.node));
-				return;
+				send_push = false;
 			end
 			stanza._push_notify[push_identifier] = true;
 		end
-
-		-- increment count and save it
-		push_info.count = push_info.count + 1;
-		push_store:set_identifier(node, push_identifier, push_info);
-		-- construct push stanza
-		local stanza_id = hashes.sha256(push_identifier, true);
-		local push_publish = st.iq({ to = push_info.jid, from = node .. "@" .. module.host, type = "set", id = stanza_id })
-			:tag("pubsub", { xmlns = "http://jabber.org/protocol/pubsub" })
-				:tag("publish", { node = push_info.node })
-					:tag("item")
-						:tag("notification", { xmlns = xmlns_push });
-		local form_data = {
-			["message-count"] = tostring(push_info.count);
-		};
-		if stanza and include_sender then
-			form_data["last-message-sender"] = stanza.attr.from;
+		
+		if send_push then
+			-- increment count and save it
+			push_info.count = push_info.count + 1;
+			push_store:set_identifier(node, push_identifier, push_info);
+			-- construct push stanza
+			local stanza_id = hashes.sha256(push_identifier, true);
+			local push_publish = st.iq({ to = push_info.jid, from = node .. "@" .. module.host, type = "set", id = stanza_id })
+				:tag("pubsub", { xmlns = "http://jabber.org/protocol/pubsub" })
+					:tag("publish", { node = push_info.node })
+						:tag("item")
+							:tag("notification", { xmlns = xmlns_push });
+			local form_data = {
+				["message-count"] = tostring(push_info.count);
+			};
+			if stanza and include_sender then
+				form_data["last-message-sender"] = stanza.attr.from;
+			end
+			if stanza and include_body then
+				form_data["last-message-body"] = stanza:get_child_text("body");
+			end
+			push_publish:add_child(push_form:form(form_data));
+			push_publish:up(); -- / notification
+			push_publish:up(); -- / publish
+			push_publish:up(); -- / pubsub
+			if push_info.options then
+				push_publish:tag("publish-options"):add_child(st.deserialize(push_info.options));
+			end
+			-- send out push
+			module:log("debug", "Sending push notification for %s@%s to %s (%s)", node, module.host, push_info.jid, tostring(push_info.node));
+			-- handle push errors for this node
+			if push_errors[push_identifier] == nil then
+				push_errors[push_identifier] = 0;
+				module:hook("iq-error/bare/"..stanza_id, handle_push_error);
+				module:hook("iq-result/bare/"..stanza_id, handle_push_success);
+			end
+			module:send(push_publish);
+			pushes = pushes + 1;
 		end
-		if stanza and include_body then
-			form_data["last-message-body"] = stanza:get_child_text("body");
-		end
-		push_publish:add_child(push_form:form(form_data));
-		push_publish:up(); -- / notification
-		push_publish:up(); -- / publish
-		push_publish:up(); -- / pubsub
-		if push_info.options then
-			push_publish:tag("publish-options"):add_child(st.deserialize(push_info.options));
-		end
-		-- send out push
-		module:log("debug", "Sending push notification for %s@%s to %s (%s)", node, module.host, push_info.jid, tostring(push_info.node));
-		-- handle push errors for this node
-		if push_errors[push_identifier] == nil then
-			push_errors[push_identifier] = 0;
-			module:hook("iq-error/bare/"..stanza_id, handle_push_error);
-			module:hook("iq-result/bare/"..stanza_id, handle_push_success);
-		end
-		module:send(push_publish);
 	end
+	return pushes;
 end
 
 -- small helper function to extract relevant push settings
@@ -268,7 +274,7 @@ end
 -- publish on offline message
 module:hook("message/offline/handle", function(event)
 	local node, user_push_services = get_push_settings(event.stanza, event.origin);
-	return handle_notify_request(event.stanza, node, user_push_services);
+	handle_notify_request(event.stanza, node, user_push_services);
 end, 1);
 
 -- publish on unacked smacks message
@@ -350,7 +356,7 @@ local function archive_message_added(event)
 			end
 		end
 
-		return handle_notify_request(event.stanza, to, notify_push_sevices);
+		handle_notify_request(event.stanza, to, notify_push_sevices);
 	end
 end
 
@@ -363,7 +369,7 @@ local function send_ping(event)
 	local user = event.user;
 	local user_push_services = push_store:get(user);
 	local push_services = event.push_services or user_push_services;
-	return handle_notify_request(nil, user, push_services);
+	handle_notify_request(nil, user, push_services);
 end
 -- can be used by other modules to ping one or more (or all) push endpoints
 module:hook("cloud-notify-ping", send_ping);
