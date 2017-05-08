@@ -170,15 +170,17 @@ local function request_ack_if_needed(session, force)
 				end
 			end);
 		end
-		-- Trigger "smacks-ack-delayed"-event if we added new (ackable) stanzas to the outgoing queue
-		-- and there isn't already a timer for this event running.
-		-- If we wouldn't do this, stanzas added to the queue after the first "smacks-ack-delayed"-event
-		-- would not trigger this event (again).
-		if #queue > max_unacked_stanzas and session.awaiting_ack and session.delayed_ack_timer == nil then
-			session.log("debug", "Calling delayed_ack_function directly (still waiting for ack)");
-			delayed_ack_function(session);
-		end
 	end
+	
+	-- Trigger "smacks-ack-delayed"-event if we added new (ackable) stanzas to the outgoing queue
+	-- and there isn't already a timer for this event running.
+	-- If we wouldn't do this, stanzas added to the queue after the first "smacks-ack-delayed"-event
+	-- would not trigger this event (again).
+	if #queue > max_unacked_stanzas and session.awaiting_ack and session.delayed_ack_timer == nil then
+		session.log("debug", "Calling delayed_ack_function directly (still waiting for ack)");
+		delayed_ack_function(session);
+	end
+	
 	session.last_queue_count = #queue;
 end
 
