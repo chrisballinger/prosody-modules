@@ -12,7 +12,7 @@ local xmlns_mam     = "urn:xmpp:mam:2";
 local xmlns_delay   = "urn:xmpp:delay";
 local xmlns_forward = "urn:xmpp:forward:0";
 local xmlns_st_id   = "urn:xmpp:sid:0";
-local muc_form_enable_logging = "muc#roomconfig_enablelogging"
+local muc_form_enable = "muc#roomconfig_enablearchiving"
 
 local st = require "util.stanza";
 local rsm = require "util.rsm";
@@ -61,11 +61,11 @@ if archive.name == "null" or not archive.find then
 	return false;
 end
 
-local function logging_enabled(room)
+local function archiving_enabled(room)
 	if log_all_rooms then
 		return true;
 	end
-	local enabled = room._data.logging;
+	local enabled = room._data.archiving;
 	if enabled == nil then
 		return log_by_default;
 	end
@@ -78,7 +78,7 @@ local send_history, save_to_history;
 if not new_muc then -- 0.10 or older
 	module:hook("muc-room-created", function (event)
 		local room = event.room;
-		if logging_enabled(room) then
+		if archiving_enabled(room) then
 			room.send_history = send_history;
 			room.save_to_history = save_to_history;
 		end
@@ -86,7 +86,7 @@ if not new_muc then -- 0.10 or older
 
 	function module.load()
 		for room in each_room() do
-			if logging_enabled(room) then
+			if archiving_enabled(room) then
 				room.send_history = send_history;
 				room.save_to_history = save_to_history;
 			end
@@ -107,21 +107,21 @@ if not log_all_rooms then
 		local room, form = event.room, event.form;
 		table.insert(form,
 		{
-			name = muc_form_enable_logging,
+			name = muc_form_enable,
 			type = "boolean",
-			label = "Enable Logging?",
-			value = logging_enabled(room),
+			label = "Enable archiving?",
+			value = archiving_enabled(room),
 		}
 		);
 	end);
 
 	module:hook("muc-config-submitted", function(event)
 		local room, fields, changed = event.room, event.fields, event.changed;
-		local new = fields[muc_form_enable_logging];
-		if new ~= room._data.logging then
-			room._data.logging = new;
+		local new = fields[muc_form_enable];
+		if new ~= room._data.archiving then
+			room._data.archiving = new;
 			if type(changed) == "table" then
-				changed[muc_form_enable_logging] = true;
+				changed[muc_form_enable] = true;
 			else
 				event.changed = true;
 			end
@@ -276,7 +276,7 @@ end);
 
 module:hook("muc-get-history", function (event)
 	local room = event.room;
-	if not logging_enabled(room) then return end
+	if not archiving_enabled(room) then return end
 	local room_jid = room.jid;
 	local maxstanzas = event.maxstanzas;
 	local maxchars = event.maxchars;
@@ -366,7 +366,7 @@ function save_to_history(self, stanza)
 	end);
 
 	-- Policy check
-	if not logging_enabled(self) then return end -- Don't log
+	if not archiving_enabled(self) then return end -- Don't log
 
 	-- And stash it
 	local with = stanza.name
