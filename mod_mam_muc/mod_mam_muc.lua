@@ -395,7 +395,7 @@ function save_to_history(self, stanza)
 
 	local stored_stanza = stanza;
 
-	if self:get_whois() == "anyone" then
+	if stanza.name == "message" and self:get_whois() == "anyone" then
 		stored_stanza = st.clone(stanza);
 		local actor = jid_bare(self._occupants[stanza.attr.from].jid);
 		local affiliation = self:get_affiliation(actor) or "none";
