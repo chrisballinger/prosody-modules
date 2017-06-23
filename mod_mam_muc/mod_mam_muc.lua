@@ -12,6 +12,7 @@ local xmlns_mam     = "urn:xmpp:mam:2";
 local xmlns_delay   = "urn:xmpp:delay";
 local xmlns_forward = "urn:xmpp:forward:0";
 local xmlns_st_id   = "urn:xmpp:sid:0";
+local xmlns_muc_user = "http://jabber.org/protocol/muc#user";
 local muc_form_enable = "muc#roomconfig_enablearchiving"
 
 local st = require "util.stanza";
@@ -249,6 +250,14 @@ module:hook("iq-set/bare/"..xmlns_mam..":query", function(event)
 				:tag("forwarded", { xmlns = xmlns_forward })
 					:tag("delay", { xmlns = xmlns_delay, stamp = timestamp(when) }):up();
 
+		if room:get_whois() ~= "anyone" then
+			item:maptags(function (tag)
+				if tag.name == "x" and tag.attr.xmlns == xmlns_muc_user then
+					return nil;
+				end
+				return tag;
+			end);
+		end
 		if not is_stanza(item) then
 			item = st.deserialize(item);
 		end
@@ -311,6 +320,14 @@ module:hook("muc-get-history", function (event)
 		item.attr.to = to;
 		item:tag("delay", { xmlns = "urn:xmpp:delay", from = room_jid, stamp = timestamp(when) }):up(); -- XEP-0203
 		item:tag("stanza-id", { xmlns = xmlns_st_id, by = room_jid, id = id }):up();
+		if room:get_whois() ~= "anyone" then
+			item:maptags(function (tag)
+				if tag.name == "x" and tag.attr.xmlns == xmlns_muc_user then
+					return nil;
+				end
+				return tag;
+			end);
+		end
 		if maxchars then
 			local chars = #tostring(item);
 			if maxchars - chars < 0 then
@@ -370,8 +387,22 @@ function save_to_history(self, stanza)
 		and jid_prep(tag.attr.by) == self.jid then
 			return nil;
 		end
+		if tag.name == "x" and tag.attr.xmlns == xmlns_muc_user then
+			return nil;
+		end
 		return tag;
 	end);
+
+	local stored_stanza = stanza;
+
+	if self:get_whois() == "anyone" then
+		stored_stanza = st.clone(stanza);
+		local actor = jid_bare(self._occupants[stanza.attr.from].jid);
+		local affiliation = self:get_affiliation(actor) or "none";
+		local role = self:get_role(actor) or self:get_default_role(affiliation);
+		stored_stanza:add_direct_child(st.stanza("x", { xmlns = xmlns_muc_user })
+			:tag("item", { affiliation = affiliation; role = role; jid = actor }));
+	end
 
 	-- Policy check
 	if not archiving_enabled(self) then return end -- Don't log
@@ -382,7 +413,7 @@ function save_to_history(self, stanza)
 		with = with .. "<" .. stanza.attr.type
 	end
 
-	local id = archive:append(room_node, nil, stanza, time_now(), with);
+	local id = archive:append(room_node, nil, stored_stanza, time_now(), with);
 
 	if id then
 		stanza:add_direct_child(st.stanza("stanza-id", { xmlns = xmlns_st_id, by = self.jid, id = id }));
