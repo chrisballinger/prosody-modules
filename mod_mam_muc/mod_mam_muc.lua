@@ -40,8 +40,13 @@ local tostring = tostring;
 local time_now = os.time;
 local m_min = math.min;
 local timestamp, timestamp_parse = require "util.datetime".datetime, require "util.datetime".parse;
-local max_history_length = module:get_option_number("max_history_messages", 1000);
-local default_max_items, max_max_items = 20, module:get_option_number("max_archive_query_results", max_history_length);
+
+local default_history_length = 20;
+local max_history_length = module:get_option_number("max_history_messages", math.huge);
+
+local function get_historylength(room)
+	return math.min(room._data.history_length or default_history_length, max_history_length);
+end
 
 local log_all_rooms = module:get_option_boolean("muc_log_all_rooms", false);
 local log_by_default = module:get_option_boolean("muc_log_by_default", true);
@@ -200,7 +205,7 @@ module:hook("iq-set/bare/"..xmlns_mam..":query", function(event)
 
 	-- RSM stuff
 	local qset = rsm.get(query);
-	local qmax = m_min(qset and qset.max or default_max_items, max_max_items);
+	local qmax = m_min(qset and qset.max or 20, 20);
 	local reverse = qset and qset.before or false;
 
 	local before, after = qset and qset.before, qset and qset.after;
@@ -285,7 +290,7 @@ module:hook("muc-get-history", function (event)
 
 	-- Load all the data!
 	local query = {
-		limit = m_min(maxstanzas or 20, max_history_length);
+		limit = math.min(maxstanzas, get_historylength(room));
 		start = since;
 		reverse = true;
 		with = "message<groupchat";
