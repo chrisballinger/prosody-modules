@@ -203,6 +203,11 @@ module:hook("iq-set/bare/"..xmlns_mam..":query", function(event)
 		qstart, qend = vstart, vend;
 	end
 
+	module:log("debug", "Archive query id %s from %s until %s)",
+		tostring(qid),
+		qstart and timestamp(qstart) or "the dawn of time",
+		qend and timestamp(qend) or "now");
+
 	-- RSM stuff
 	local qset = rsm.get(query);
 	local qmax = m_min(qset and qset.max or 20, 20);
