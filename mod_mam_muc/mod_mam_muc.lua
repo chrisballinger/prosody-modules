@@ -295,7 +295,7 @@ module:hook("muc-get-history", function (event)
 	local room = event.room;
 	if not archiving_enabled(room) then return end
 	local room_jid = room.jid;
-	local maxstanzas = event.maxstanzas;
+	local maxstanzas = event.maxstanzas or math.huge;
 	local maxchars = event.maxchars;
 	local since = event.since;
 	local to = event.to;
