@@ -152,12 +152,12 @@ module:hook("s2s-stream-features",
 
 local function request_ack_if_needed(session, force)
 	local queue = session.outgoing_stanza_queue;
-	if session.awaiting_ack == nil then
+	if session.awaiting_ack == nil and not session.hibernating then
 		if (#queue > max_unacked_stanzas and session.last_queue_count ~= #queue) or force then
 			session.log("debug", "Queuing <r> (in a moment)");
 			session.awaiting_ack = false;
 			session.awaiting_ack_timer = stoppable_timer(1e-06, function ()
-				if not session.awaiting_ack then
+				if not session.awaiting_ack and not session.hibernating then
 					session.log("debug", "Sending <r> (inside timer, before send)");
 					(session.sends2s or session.send)(st.stanza("r", { xmlns = session.smacks }))
 					session.log("debug", "Sending <r> (inside timer, after send)");
