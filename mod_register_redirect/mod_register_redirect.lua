@@ -8,7 +8,7 @@
 local st = require "util.stanza"
 local cman = configmanager
 
-local ip_wl = module:get_option_set("registration_whitelist", { "127.0.0.1" })
+local ip_wl = module:get_option_set("registration_whitelist", { "127.0.0.1", "::1" })
 local url = module:get_option_string("registration_url", nil)
 local inst_text = module:get_option_string("registration_text", nil)
 local oob = module:get_option_boolean("registration_oob", true)
