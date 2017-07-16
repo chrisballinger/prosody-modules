@@ -1,4 +1,4 @@
-local secure_interfaces = module:get_option_set("secure_interfaces", { "127.0.0.1" });
+local secure_interfaces = module:get_option_set("secure_interfaces", { "127.0.0.1", "::1" });
 
 module:hook("stream-features", function (event)
 	local session = event.origin;
