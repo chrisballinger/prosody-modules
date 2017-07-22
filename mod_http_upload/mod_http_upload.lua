@@ -31,7 +31,6 @@ end
 local file_size_limit = module:get_option_number(module.name .. "_file_size_limit", 1024 * 1024); -- 1 MB
 local quota = module:get_option_number(module.name .. "_quota");
 local max_age = module:get_option_number(module.name .. "_expire_after");
-local allowed_file_types = module:get_option_set(module.name .. "_allowed_file_types");
 
 --- sanity
 local parser_body_limit = module:context("*"):get_option_number("http_max_content_size", 10*1024*1024);
@@ -46,7 +45,6 @@ module:depends("http");
 module:depends("disco");
 
 local http_files = module:depends("http_files");
-local mime_map = module:shared("/*/http_files/mime").types;
 
 -- namespaces
 local namespace = "urn:xmpp:http:upload:0";
@@ -110,7 +108,7 @@ local function check_quota(username, host, does_it_fit)
 	return sum < quota;
 end
 
-local function handle_request(origin, stanza, xmlns, filename, filesize, mimetype)
+local function handle_request(origin, stanza, xmlns, filename, filesize)
 	local username, host = origin.username, origin.host;
 	-- local clients only
 	if origin.type ~= "c2s" then
@@ -139,28 +137,6 @@ local function handle_request(origin, stanza, xmlns, filename, filesize, mimetyp
 		module:log("debug", "Upload of %dB by %s would exceed quota", filesize, origin.full_jid);
 		origin.send(st.error_reply(stanza, "wait", "resource-constraint", "Quota reached"));
 		return true;
-	end
-
-	if mime_map then
-		local file_ext = filename:match("%.([^.]+)$");
-		if not mimetype then
-			mimetype = "application/octet-stream";
-			if file_ext then
-				mimetype = mime_map[file_ext] or mimetype;
-			end
-		else
-			if (not file_ext and mimetype ~= "application/octet-stream") or (file_ext and mime_map[file_ext] ~= mimetype) then
-				origin.send(st.error_reply(stanza, "modify", "bad-request", "MIME type does not match file extension"));
-				return true;
-			end
-		end
-	end
-
-	if allowed_file_types then
-		if not (allowed_file_types:contains(mimetype) or allowed_file_types:contains(mimetype:gsub("/.*", "/*"))) then
-			origin.send(st.error_reply(stanza, "cancel", "not-allowed", "File type not allowed"));
-			return true;
-		end
 	end
 
 	local reply = st.reply(stanza);
@@ -207,8 +183,7 @@ module:hook("iq/host/"..namespace..":request", function (event)
 	local request = stanza.tags[1];
 	local filename = request.attr.filename;
 	local filesize = tonumber(request.attr.size);
-	local mimetype = request.attr["content-type"];
-	return handle_request(origin, stanza, namespace, filename, filesize, mimetype);
+	return handle_request(origin, stanza, namespace, filename, filesize);
 end);
 
 module:hook("iq/host/"..legacy_namespace..":request", function (event)
@@ -216,8 +191,7 @@ module:hook("iq/host/"..legacy_namespace..":request", function (event)
 	local request = stanza.tags[1];
 	local filename = request:get_child_text("filename");
 	local filesize = tonumber(request:get_child_text("size"));
-	local mimetype = request:get_child_text("content-type");
-	return handle_request(origin, stanza, legacy_namespace, filename, filesize, mimetype);
+	return handle_request(origin, stanza, legacy_namespace, filename, filesize);
 end);
 
 -- http service
