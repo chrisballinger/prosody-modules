@@ -88,6 +88,7 @@ local function expire(username, host)
 			if not deleted then
 				module:log("warn", "Could not delete expired upload %s: %s", filename, whynot or "delete failed");
 			end
+			os.remove(filename:match("^(.*)[/\\]"));
 			return false;
 		elseif item.time < upload_window and not lfs.attributes(filename) then
 			return false; -- File was not uploaded or has been deleted since
