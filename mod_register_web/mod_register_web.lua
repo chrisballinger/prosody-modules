@@ -128,6 +128,9 @@ function register_user(form, origin)
 	if not registering.allowed then
 		return nil, "Registration not allowed";
 	end
+	if form.confirm_password ~= form.password then
+		return nil, "Passwords don't match";
+	end
 	local ok, err = usermanager.create_user(prepped_username, form.password, module.host);
 	if ok then
 		local extra_data = {};
