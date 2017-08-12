@@ -20,7 +20,7 @@ local id = s_sub(require "util.hashes".sha256(datetime.datetime(), true), 1, 4);
 local function find(self, path)
 	local pos = 1;
 	local len = #path + 1;
-	
+
 	repeat
 		local xmlns, name, text;
 		local char = s_sub(path, pos, pos);
@@ -110,11 +110,24 @@ local function is_important(stanza, session)
 		if carbon then stanza = carbon; end
 		-- carbon copied outgoing messages aren't important (but incoming carbon copies are!)
 		if carbon and stanza_direction == "out" then return false; end
-		
+
 		local st_type = stanza.attr.type;
 		if st_type == "headline" then
 			return false;
 		end
+
+		-- We can't check for nick in encrypted groupchat messages, so let's treat them as important
+		-- Some clients don't set a body or an empty body for encrypted messages
+
+		-- check omemo https://xmpp.org/extensions/inbox/omemo.html
+		if stanza:get_child("encrypted", "eu.siacs.conversations.axolotl") or stanza:get_child("encrypted", "urn:xmpp:omemo:0") then return true; end
+
+		-- check xep27 pgp https://xmpp.org/extensions/xep-0027.html
+		if stanza:get_child("x", "jabber:x:encrypted") then return true; end
+
+		-- check xep373 pgp (OX) https://xmpp.org/extensions/xep-0373.html
+		if stanza:get_child("openpgp", "urn:xmpp:openpgp:0") then return true; end
+
 		local body = stanza:get_child_text("body");
 		if st_type == "groupchat" then
 			if stanza:get_child_text("subject") then return true; end
@@ -144,7 +157,7 @@ module:hook("csi-client-inactive", function (event)
 		function session.send(stanza)
 			session.log("debug", "mod_csi_battery_saver(%s): Got stanza: <%s>", id, tostring(stanza.name));
 			local important = is_important(stanza, session);
-			-- add delay stamp to unimported (buffered) stanzas that can/need be stamped
+			-- add delay stamp to unimportant (buffered) stanzas that can/need be stamped
 			if not important and is_stamp_needed(stanza, session) then stanza = add_stamp(stanza, session); end
 			pump:push(stanza);
 			if important then
