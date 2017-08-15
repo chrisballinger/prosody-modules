@@ -9,6 +9,7 @@ local s_sub = string.sub;
 local jid = require "util.jid";
 local new_queue = require "util.queue".new;
 local datetime = require "util.datetime";
+local clone = require "util.stanza".clone;
 
 local xmlns_delay = "urn:xmpp:delay";
 
@@ -56,7 +57,7 @@ local function new_pump(output, ...)
 	end
 	local push = q.push;
 	function q:push(item)
-		local ok = push(self, item);
+		local ok = push(self, clone(item));
 		if not ok then
 			q:flush();
 			output(item, self);
