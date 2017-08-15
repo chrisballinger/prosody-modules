@@ -256,8 +256,12 @@ local function send_response_sans_body(response, body)
 
 	local status_line = "HTTP/"..response.request.httpversion.." "..(response.status or codes[response.status_code]);
 	local headers = response.headers;
-	body = body or response.body or "";
-	headers.content_length = #body;
+	if type(body) == "string" then
+		headers.content_length = #body;
+	elseif io.type(body) == "file" then
+		headers.content_length = body:seek("end");
+		body:close();
+	end
 
 	local output = { status_line };
 	for k,v in pairs(headers) do
@@ -282,6 +286,7 @@ local serve_uploaded_files = http_files.serve(storage_path);
 
 local function serve_head(event, path)
 	event.response.send = send_response_sans_body;
+	event.response.send_file = send_response_sans_body;
 	return serve_uploaded_files(event, path);
 end
 
