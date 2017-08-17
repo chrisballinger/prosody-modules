@@ -509,7 +509,6 @@ function handle_resume(session, stanza, xmlns_sm)
 		-- Ok, we need to re-send any stanzas that the client didn't see
 		-- ...they are what is now left in the outgoing stanza queue
 		local queue = original_session.outgoing_stanza_queue;
-		module:fire_event("smacks-hibernation-end", {origin = session, resumed = original_session, queue = queue});
 		original_session.log("debug", "#queue = %d", #queue);
 		for i=1,#queue do
 			original_session.send(queue[i]);
@@ -519,6 +518,7 @@ function handle_resume(session, stanza, xmlns_sm)
 			session.log("warn", "Tried to send stanza on old session migrated by smacks resume (maybe there is a bug?): %s", tostring(stanza));
 			return false;
 		end
+		module:fire_event("smacks-hibernation-end", {origin = session, resumed = original_session, queue = queue});
 		request_ack_if_needed(original_session, true);
 	else
 		module:log("warn", "Client %s@%s[%s] tried to resume stream for %s@%s[%s]",
