@@ -40,12 +40,12 @@ if next(captcha_options) ~= nil then
 
 	function generate_captcha(display_options)
 		return recaptcha_tpl.apply(setmetatable({
-	  		recaptcha_display_error = display_options and display_options.recaptcha_error
-	  			and ("&error="..display_options.recaptcha_error) or "";
-	  	}, {
-	  		__index = function (t, k)
-	  			if captcha_options[k] then return captcha_options[k]; end
-	  			module:log("error", "Missing parameter from captcha_options: %s", k);
+			recaptcha_display_error = display_options and display_options.recaptcha_error
+			and ("&error="..display_options.recaptcha_error) or "";
+		}, {
+			__index = function (t, k)
+				if captcha_options[k] then return captcha_options[k]; end
+				module:log("error", "Missing parameter from captcha_options: %s", k);
 			end
 		}));
 	end
