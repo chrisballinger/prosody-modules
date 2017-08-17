@@ -159,8 +159,11 @@ module:hook("csi-client-inactive", function (event)
 		function session.send(stanza)
 			session.log("debug", "mod_csi_battery_saver(%s): Got stanza: <%s>", id, tostring(stanza.name or stanza));
 			local important = is_important(stanza, session);
+			-- clone stanzas before adding delay stamp and putting them into the queue
+			if st.is_stanza(stanza) then stanza = st.clone(stanza); end
 			-- add delay stamp to unimportant (buffered) stanzas that can/need be stamped
 			if not important and is_stamp_needed(stanza, session) then stanza = add_stamp(stanza, session); end
+			-- add stanza to outgoing queue and flush the buffer if needed
 			pump:push(stanza);
 			if important then
 				session.log("debug", "mod_csi_battery_saver(%s): Encountered important stanza, flushing buffer: <%s>", id, tostring(stanza.name or stanza));
