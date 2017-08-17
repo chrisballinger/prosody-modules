@@ -9,7 +9,7 @@ local s_sub = string.sub;
 local jid = require "util.jid";
 local new_queue = require "util.queue".new;
 local datetime = require "util.datetime";
-local clone = require "util.stanza".clone;
+local st = require "util.stanza";
 
 local xmlns_delay = "urn:xmpp:delay";
 
@@ -57,7 +57,7 @@ local function new_pump(output, ...)
 	end
 	local push = q.push;
 	function q:push(item)
-		local ok = push(self, clone(item));
+		local ok = push(self, item);
 		if not ok then
 			q:flush();
 			output(item, self);
@@ -95,7 +95,7 @@ end
 
 local function is_important(stanza, session)
 	local st_name = stanza and stanza.name or nil;
-	if not st_name then return false; end
+	if not st_name then return true; end	-- nonzas are always important
 	if st_name == "presence" then
 		-- TODO check for MUC status codes?
 		return false;
@@ -148,6 +148,7 @@ end
 module:hook("csi-client-inactive", function (event)
 	local session = event.origin;
 	if session.pump then
+		session.log("debug", "mod_csi_battery_saver(%s): Client is inactive, buffering unimportant stanzas", id);
 		session.pump:pause();
 	else
 		session.log("debug", "mod_csi_battery_saver(%s): Client is inactive the first time, initializing module for this session", id);
@@ -156,19 +157,21 @@ module:hook("csi-client-inactive", function (event)
 		session.pump = pump;
 		session._pump_orig_send = session.send;
 		function session.send(stanza)
-			session.log("debug", "mod_csi_battery_saver(%s): Got stanza: <%s>", id, tostring(stanza.name));
+			session.log("debug", "mod_csi_battery_saver(%s): Got stanza: <%s>", id, tostring(stanza.name or stanza));
 			local important = is_important(stanza, session);
+			-- clone stanzas before adding delay stamp and putting them into the queue
+			if st.is_stanza(stanza) then stanza = st.clone(stanza); end
 			-- add delay stamp to unimportant (buffered) stanzas that can/need be stamped
 			if not important and is_stamp_needed(stanza, session) then stanza = add_stamp(stanza, session); end
+			-- add stanza to outgoing queue and flush the buffer if needed
 			pump:push(stanza);
 			if important then
-				session.log("debug", "mod_csi_battery_saver(%s): Encountered important stanza, flushing buffer: <%s>", id, tostring(stanza.name));
+				session.log("debug", "mod_csi_battery_saver(%s): Encountered important stanza, flushing buffer: <%s>", id, tostring(stanza.name or stanza));
 				pump:flush();
 			end
 			return true;
 		end
 	end
-	session.log("debug", "mod_csi_battery_saver(%s): Client is inactive, buffering unimportant stanzas", id);
 end);
 
 module:hook("csi-client-active", function (event)
@@ -179,17 +182,28 @@ module:hook("csi-client-active", function (event)
 	end
 end);
 
+-- clean up this session
+local function remove_pump(session)
+	if session.pump then
+		session.log("debug", "mod_csi_battery_saver(%s): Flushing buffer and restoring to original session.send()", id);
+		session.pump:flush();
+		session.send = session._pump_orig_send;
+		session.pump = nil;
+		session._pump_orig_send = nil;
+	end
+end
+
+-- clean up this session on hibernation start
+module:hook("smacks-hibernation-start", function (event)
+	remove_pump(event.origin);
+end);
+
 function module.unload()
 	module:log("info", "%s: Unloading module, flushing all buffers", id);
 	local host_sessions = prosody.hosts[module.host].sessions;
 	for _, user in pairs(host_sessions) do
 		for _, session in pairs(user.sessions) do
-			if session.pump then
-				session.pump:flush();
-				session.send = session._pump_orig_send;
-				session.pump = nil;
-				session._pump_orig_send = nil;
-			end
+			remove_pump(session);
 		end
 	end
 end
