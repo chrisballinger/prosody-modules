@@ -1,6 +1,7 @@
 local captcha_options = module:get_option("captcha_options", {});
 local nodeprep = require "util.encodings".stringprep.nodeprep;
 local usermanager = require "core.usermanager";
+local datamanager = require "util.datamanager";
 local http = require "net.http";
 local path_sep = package.config:sub(1,1);
 local json = require "util.json".decode;
