@@ -66,10 +66,11 @@ local function new_pump(output, ...)
 		end
 		return true;
 	end
-	function q:flush()
+	function q:flush(alternative_output)
+		local out = alternative_output or output;
 		local item = self:pop();
 		while item do
-			output(item, self);
+			out(item, self);
 			item = self:pop();
 		end
 		return true;
@@ -148,7 +149,7 @@ end
 module:hook("csi-client-inactive", function (event)
 	local session = event.origin;
 	if session.pump then
-		session.log("debug", "mod_csi_battery_saver(%s): Client is inactive, buffering unimportant stanzas", id);
+		session.log("debug", "mod_csi_battery_saver(%s): Client is inactive, buffering unimportant outgoing stanzas", id);
 		session.pump:pause();
 	else
 		session.log("debug", "mod_csi_battery_saver(%s): Client is inactive the first time, initializing module for this session", id);
@@ -157,7 +158,7 @@ module:hook("csi-client-inactive", function (event)
 		session.pump = pump;
 		session._pump_orig_send = session.send;
 		function session.send(stanza)
-			session.log("debug", "mod_csi_battery_saver(%s): Got stanza: <%s>", id, tostring(stanza.name or stanza));
+			session.log("debug", "mod_csi_battery_saver(%s): Got outgoing stanza: <%s>", id, tostring(stanza.name or stanza));
 			local important = is_important(stanza, session);
 			-- clone stanzas before adding delay stamp and putting them into the queue
 			if st.is_stanza(stanza) then stanza = st.clone(stanza); end
@@ -182,20 +183,30 @@ module:hook("csi-client-active", function (event)
 	end
 end);
 
--- clean up this session
-local function remove_pump(session)
+-- clean up this session on hibernation start
+module:hook("smacks-hibernation-start", function (event)
+	local session = event.origin;
 	if session.pump then
-		session.log("debug", "mod_csi_battery_saver(%s): Flushing buffer and restoring to original session.send()", id);
+		session.log("debug", "mod_csi_battery_saver(%s): Hibernation started, flushing buffer and afterwards disabling for this session", id);
 		session.pump:flush();
 		session.send = session._pump_orig_send;
 		session.pump = nil;
 		session._pump_orig_send = nil;
 	end
-end
+end);
 
--- clean up this session on hibernation start
-module:hook("smacks-hibernation-start", function (event)
-	remove_pump(event.origin);
+-- clean up this session on hibernation end as well
+-- but don't change resumed.send(), it is already overwritten with session.send() by the smacks module
+module:hook("smacks-hibernation-end", function (event)
+	local session = event.resumed;
+	if session.pump then
+		session.log("debug", "mod_csi_battery_saver(%s): Hibernation ended without being started, flushing buffer and afterwards disabling for this session", id);
+		session.pump:flush(session.send);		-- use the fresh session.send() introduced by the smacks resume
+		-- don't reset session.send() because this is not the send previously overwritten by this module, but a fresh one
+		-- session.send = session._pump_orig_send;
+		session.pump = nil;
+		session._pump_orig_send = nil;
+	end
 end);
 
 function module.unload()
@@ -203,7 +214,13 @@ function module.unload()
 	local host_sessions = prosody.hosts[module.host].sessions;
 	for _, user in pairs(host_sessions) do
 		for _, session in pairs(user.sessions) do
-			remove_pump(session);
+			if session.pump then
+				session.log("debug", "mod_csi_battery_saver(%s): Flushing buffer and restoring to original session.send()", id);
+				session.pump:flush();
+				session.send = session._pump_orig_send;
+				session.pump = nil;
+				session._pump_orig_send = nil;
+			end
 		end
 	end
 end

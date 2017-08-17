@@ -8,6 +8,9 @@ Please use this module instead of [mod_csi_pump] if you want timestamping,
 properly handled carbon copies, support for handling encrypted messages and
 correctly handled smacks events.
 
+If smacks is used on the same server this needs at least version [f70c02c14161]
+of the smacks module! There could be message reordering on resume otherwise.
+
 Stanzas are queued in a buffer until either an "important" stanza is
 encountered or the buffer becomes full. Then all queued stanzas are sent
 at the same time. This way, nothing is lost or reordered while still
@@ -26,3 +29,5 @@ Use with other CSI plugins such as [mod_throttle_presence],
 [mod_filter_chatstates] or [mod_csi_pump] is *not* supported.
 
 The internal stanza buffer of this module is hardcoded to 100 stanzas.
+
+[f70c02c14161]: //hg.prosody.im/prosody-modules/raw-file/f70c02c14161/mod_smacks/mod_smacks.lua
