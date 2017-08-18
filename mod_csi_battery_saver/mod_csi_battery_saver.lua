@@ -16,6 +16,9 @@ local xmlns_delay = "urn:xmpp:delay";
 -- a log id for this module instance
 local id = s_sub(require "util.hashes".sha256(datetime.datetime(), true), 1, 4);
 
+local filter_muc = module:get_option_boolean("csi_battery_saver_filter_muc", false);
+
+
 -- Patched version of util.stanza:find() that supports giving stanza names
 -- without their namespace, allowing for every namespace.
 local function find(self, path)
@@ -133,13 +136,18 @@ local function is_important(stanza, session)
 		local body = stanza:get_child_text("body");
 		if st_type == "groupchat" then
 			if stanza:get_child_text("subject") then return true; end
-			if not body then return false; end
-			if body:find(session.username, 1, true) then return true; end
-			local rooms = session.rooms_joined;
-			if not rooms then return false; end
-			local room_nick = rooms[jid.bare(stanza_direction == "in" and stanza.attr.from or stanza.attr.to)];
-			if room_nick and body:find(room_nick, 1, true) then return true; end
-			return false;
+			if body == nil or body == "" then return false; end
+			-- body contains text, let's see if we want to process it further
+			if filter_muc then
+				if body:find(session.username, 1, true) then return true; end
+				local rooms = session.rooms_joined;
+				if not rooms then return false; end
+				local room_nick = rooms[jid.bare(stanza_direction == "in" and stanza.attr.from or stanza.attr.to)];
+				if room_nick and body:find(room_nick, 1, true) then return true; end
+				return false;
+			else
+				return true;
+			end
 		end
 		return body ~= nil and body ~= "";
 	end
