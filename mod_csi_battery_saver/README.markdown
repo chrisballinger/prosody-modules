@@ -30,4 +30,12 @@ Use with other CSI plugins such as [mod_throttle_presence],
 
 The internal stanza buffer of this module is hardcoded to 100 stanzas.
 
+Configuration
+=============
+
+  Option                              Default           Description
+  ----------------------------------  ---------- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  `csi_battery_saver_filter_muc`      false      Controls whether all muc messages having a body should be considered as important (false) or only such containing the user's room nic (true). Warning: you should only set this to true if your users can live with muc messages being delayed several minutes. 
+
+
 [f70c02c14161]: //hg.prosody.im/prosody-modules/raw-file/f70c02c14161/mod_smacks/mod_smacks.lua
