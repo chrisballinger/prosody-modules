@@ -2,8 +2,10 @@
 -- Copyright (C) 2017 Thilo Molitor
 --
 
+local filter_muc = module:get_option_boolean("csi_battery_saver_filter_muc", false);
+
 module:depends"csi"
-module:depends"track_muc_joins"
+if filter_muc then module:depends"track_muc_joins"; end		-- only depend on this module if we actually use it
 local s_match = string.match;
 local s_sub = string.sub;
 local jid = require "util.jid";
@@ -15,8 +17,6 @@ local xmlns_delay = "urn:xmpp:delay";
 
 -- a log id for this module instance
 local id = s_sub(require "util.hashes".sha256(datetime.datetime(), true), 1, 4);
-
-local filter_muc = module:get_option_boolean("csi_battery_saver_filter_muc", false);
 
 
 -- Patched version of util.stanza:find() that supports giving stanza names
