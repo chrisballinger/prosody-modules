@@ -77,10 +77,12 @@ function handle_push_error(event)
 				if push_errors[push_identifier] >= max_push_errors then
 					module:log("warn", "Disabling push notifications for identifier '%s'", push_identifier);
 					-- remove push settings from sessions
-					for _, session in pairs(host_sessions[node].sessions) do
-						if session.push_identifier == push_identifier then
-							session.push_identifier = nil;
-							session.push_settings = nil;
+					if host_sessions[node] then
+						for _, session in pairs(host_sessions[node].sessions) do
+							if session.push_identifier == push_identifier then
+								session.push_identifier = nil;
+								session.push_settings = nil;
+							end
 						end
 					end
 					-- save changed global config
