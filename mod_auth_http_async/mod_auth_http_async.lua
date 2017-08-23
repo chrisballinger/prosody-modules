@@ -28,6 +28,7 @@ if rawget(_G, "base_parsed") == nil then
 end
 
 local function async_http_auth(url, username, password)
+module:log("debug", "async_http_auth()");
 	local http = require "net.http";
 	local wait, done = async.waiter();
 	local content, code, request, response;
@@ -49,7 +50,8 @@ local function async_http_auth(url, username, password)
 	return nil, "Auth failed. Invalid username or password.";
 end
 
-local function sync_http_auth(url)
+local function sync_http_auth(url,username, password)
+module:log("debug", "sync_http_auth()");
 	local http = require "socket.http";
 	local https = require "ssl.https";
 	local request;
@@ -60,7 +62,7 @@ local function sync_http_auth(url)
 	end
 	local _, code, headers, status = request{
 		url = url,
-		headers = { ACCEPT = "application/json, text/plain, */*"; }
+		headers = { Authorization = "Basic "..base64(username..":"..password);  }
 	};
 	if type(code) == "number" and code >= 200 and code <= 299 then
 		module:log("debug", "HTTP auth provider confirmed valid password");
@@ -77,7 +79,7 @@ function provider.test_password(username, password)
 	if (have_async) then
 		return async_http_auth(url, username, password);
 	else
-		return sync_http_auth(url);
+		return sync_http_auth(url, username, password);
 	end
 end
 
