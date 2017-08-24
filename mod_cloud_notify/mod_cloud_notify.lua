@@ -250,7 +250,7 @@ local function handle_notify_request(stanza, node, user_push_services)
 			push_store:set_identifier(node, push_identifier, push_info);
 			-- construct push stanza
 			local stanza_id = hashes.sha256(push_identifier, true);
-			local push_publish = st.iq({ to = push_info.jid, from = node .. "@" .. module.host, type = "set", id = stanza_id })
+			local push_publish = st.iq({ to = push_info.jid, from = module.host, type = "set", id = stanza_id })
 				:tag("pubsub", { xmlns = "http://jabber.org/protocol/pubsub" })
 					:tag("publish", { node = push_info.node })
 						:tag("item")
