@@ -15,6 +15,7 @@ local st = require "util.stanza";
 local dep = require "util.dependencies";
 local cache = dep.softreq("util.cache");	-- only available in prosody 0.10+
 local uuid_generate = require "util.uuid".generate;
+local jid = require "util.jid";
 
 local t_insert, t_remove = table.insert, table.remove;
 local math_min = math.min;
@@ -192,7 +193,11 @@ local function outgoing_stanza_filter(stanza, session)
 		cached_stanza._cached = true;
 
 		if cached_stanza and cached_stanza.name ~= "iq" and cached_stanza:get_child("delay", xmlns_delay) == nil then
-			cached_stanza = cached_stanza:tag("delay", { xmlns = xmlns_delay, from = session.host, stamp = datetime.datetime()});
+			cached_stanza = cached_stanza:tag("delay", {
+				xmlns = xmlns_delay,
+				from = jid.bare(session.full_jid or session.host),
+				stamp = datetime.datetime()
+			});
 		end
 
 		queue[#queue+1] = cached_stanza;
