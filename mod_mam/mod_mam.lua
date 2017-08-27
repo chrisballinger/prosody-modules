@@ -56,6 +56,8 @@ if archive.name == "null" or not archive.find then
 	archive = module:require "fallback_archive";
 end
 
+local use_total = true;
+
 local cleanup;
 
 -- Handle prefs.
@@ -154,7 +156,7 @@ local function handle_mam_query(event)
 		limit = qmax + 1;
 		before = before; after = after;
 		reverse = reverse;
-		total = true;
+		total = use_total;
 	});
 
 	if not data then
@@ -383,14 +385,18 @@ if cleanup_after ~= "never" then
 		end
 		return math.random(cleanup_interval, cleanup_interval * 2);
 	end);
+else
+	-- Don't ask the backend to count the potentially unbounded number of items,
+	-- it'll get slow.
+	use_total = false;
 end
 
 -- Stanzas sent by local clients
-module:hook("pre-message/bare", c2s_message_handler, 2);
-module:hook("pre-message/full", c2s_message_handler, 2);
+module:hook("pre-message/bare", c2s_message_handler, 0);
+module:hook("pre-message/full", c2s_message_handler, 0);
 -- Stanszas to local clients
-module:hook("message/bare", message_handler, 2);
-module:hook("message/full", message_handler, 2);
+module:hook("message/bare", message_handler, 0);
+module:hook("message/full", message_handler, 0);
 
 module:add_feature(xmlns_mam0); -- COMPAT with XEP-0313 v 0.1
 

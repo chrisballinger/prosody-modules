@@ -12,7 +12,8 @@ local xmlns_mam     = "urn:xmpp:mam:2";
 local xmlns_delay   = "urn:xmpp:delay";
 local xmlns_forward = "urn:xmpp:forward:0";
 local xmlns_st_id   = "urn:xmpp:sid:0";
-local muc_form_enable_logging = "muc#roomconfig_enablelogging"
+local xmlns_muc_user = "http://jabber.org/protocol/muc#user";
+local muc_form_enable = "muc#roomconfig_enablearchiving"
 
 local st = require "util.stanza";
 local rsm = require "util.rsm";
@@ -40,8 +41,13 @@ local tostring = tostring;
 local time_now = os.time;
 local m_min = math.min;
 local timestamp, timestamp_parse = require "util.datetime".datetime, require "util.datetime".parse;
-local max_history_length = module:get_option_number("max_history_messages", 1000);
-local default_max_items, max_max_items = 20, module:get_option_number("max_archive_query_results", max_history_length);
+
+local default_history_length = 20;
+local max_history_length = module:get_option_number("max_history_messages", math.huge);
+
+local function get_historylength(room)
+	return math.min(room._data.history_length or default_history_length, max_history_length);
+end
 
 local log_all_rooms = module:get_option_boolean("muc_log_all_rooms", false);
 local log_by_default = module:get_option_boolean("muc_log_by_default", true);
@@ -61,11 +67,11 @@ if archive.name == "null" or not archive.find then
 	return false;
 end
 
-local function logging_enabled(room)
+local function archiving_enabled(room)
 	if log_all_rooms then
 		return true;
 	end
-	local enabled = room._data.logging;
+	local enabled = room._data.archiving;
 	if enabled == nil then
 		return log_by_default;
 	end
@@ -78,7 +84,7 @@ local send_history, save_to_history;
 if not new_muc then -- 0.10 or older
 	module:hook("muc-room-created", function (event)
 		local room = event.room;
-		if logging_enabled(room) then
+		if archiving_enabled(room) then
 			room.send_history = send_history;
 			room.save_to_history = save_to_history;
 		end
@@ -86,7 +92,7 @@ if not new_muc then -- 0.10 or older
 
 	function module.load()
 		for room in each_room() do
-			if logging_enabled(room) then
+			if archiving_enabled(room) then
 				room.send_history = send_history;
 				room.save_to_history = save_to_history;
 			end
@@ -107,21 +113,21 @@ if not log_all_rooms then
 		local room, form = event.room, event.form;
 		table.insert(form,
 		{
-			name = muc_form_enable_logging,
+			name = muc_form_enable,
 			type = "boolean",
-			label = "Enable Logging?",
-			value = logging_enabled(room),
+			label = "Enable archiving?",
+			value = archiving_enabled(room),
 		}
 		);
 	end);
 
 	module:hook("muc-config-submitted", function(event)
 		local room, fields, changed = event.room, event.fields, event.changed;
-		local new = fields[muc_form_enable_logging];
-		if new ~= room._data.logging then
-			room._data.logging = new;
+		local new = fields[muc_form_enable];
+		if new ~= room._data.archiving then
+			room._data.archiving = new;
 			if type(changed) == "table" then
-				changed[muc_form_enable_logging] = true;
+				changed[muc_form_enable] = true;
 			else
 				event.changed = true;
 			end
@@ -198,9 +204,14 @@ module:hook("iq-set/bare/"..xmlns_mam..":query", function(event)
 		qstart, qend = vstart, vend;
 	end
 
+	module:log("debug", "Archive query id %s from %s until %s)",
+		tostring(qid),
+		qstart and timestamp(qstart) or "the dawn of time",
+		qend and timestamp(qend) or "now");
+
 	-- RSM stuff
 	local qset = rsm.get(query);
-	local qmax = m_min(qset and qset.max or default_max_items, max_max_items);
+	local qmax = m_min(qset and qset.max or 20, 20);
 	local reverse = qset and qset.before or false;
 
 	local before, after = qset and qset.before, qset and qset.after;
@@ -212,7 +223,6 @@ module:hook("iq-set/bare/"..xmlns_mam..":query", function(event)
 		limit = qmax + 1;
 		before = before; after = after;
 		reverse = reverse;
-		total = true;
 		with = "message<groupchat";
 	});
 
@@ -220,7 +230,6 @@ module:hook("iq-set/bare/"..xmlns_mam..":query", function(event)
 		origin.send(st.error_reply(stanza, "cancel", "internal-server-error"));
 		return true;
 	end
-	local total = tonumber(err);
 
 	local msg_reply_attr = { to = stanza.attr.from, from = stanza.attr.to };
 
@@ -241,6 +250,14 @@ module:hook("iq-set/bare/"..xmlns_mam..":query", function(event)
 				:tag("forwarded", { xmlns = xmlns_forward })
 					:tag("delay", { xmlns = xmlns_delay, stamp = timestamp(when) }):up();
 
+		if room:get_whois() ~= "anyone" then
+			item:maptags(function (tag)
+				if tag.name == "x" and tag.attr.xmlns == xmlns_muc_user then
+					return nil;
+				end
+				return tag;
+			end);
+		end
 		if not is_stanza(item) then
 			item = st.deserialize(item);
 		end
@@ -270,22 +287,22 @@ module:hook("iq-set/bare/"..xmlns_mam..":query", function(event)
 	origin.send(st.reply(stanza)
 		:tag("fin", { xmlns = xmlns_mam, queryid = qid, complete = complete })
 			:add_child(rsm.generate {
-				first = first, last = last, count = total }));
+				first = first, last = last }));
 	return true;
 end);
 
 module:hook("muc-get-history", function (event)
 	local room = event.room;
-	if not logging_enabled(room) then return end
+	if not archiving_enabled(room) then return end
 	local room_jid = room.jid;
-	local maxstanzas = event.maxstanzas;
+	local maxstanzas = event.maxstanzas or math.huge;
 	local maxchars = event.maxchars;
 	local since = event.since;
 	local to = event.to;
 
 	-- Load all the data!
 	local query = {
-		limit = m_min(maxstanzas or 20, max_history_length);
+		limit = math.min(maxstanzas, get_historylength(room));
 		start = since;
 		reverse = true;
 		with = "message<groupchat";
@@ -303,6 +320,14 @@ module:hook("muc-get-history", function (event)
 		item.attr.to = to;
 		item:tag("delay", { xmlns = "urn:xmpp:delay", from = room_jid, stamp = timestamp(when) }):up(); -- XEP-0203
 		item:tag("stanza-id", { xmlns = xmlns_st_id, by = room_jid, id = id }):up();
+		if room:get_whois() ~= "anyone" then
+			item:maptags(function (tag)
+				if tag.name == "x" and tag.attr.xmlns == xmlns_muc_user then
+					return nil;
+				end
+				return tag;
+			end);
+		end
 		if maxchars then
 			local chars = #tostring(item);
 			if maxchars - chars < 0 then
@@ -362,11 +387,25 @@ function save_to_history(self, stanza)
 		and jid_prep(tag.attr.by) == self.jid then
 			return nil;
 		end
+		if tag.name == "x" and tag.attr.xmlns == xmlns_muc_user then
+			return nil;
+		end
 		return tag;
 	end);
 
+	local stored_stanza = stanza;
+
+	if stanza.name == "message" and self:get_whois() == "anyone" then
+		stored_stanza = st.clone(stanza);
+		local actor = jid_bare(self._occupants[stanza.attr.from].jid);
+		local affiliation = self:get_affiliation(actor) or "none";
+		local role = self:get_role(actor) or self:get_default_role(affiliation);
+		stored_stanza:add_direct_child(st.stanza("x", { xmlns = xmlns_muc_user })
+			:tag("item", { affiliation = affiliation; role = role; jid = actor }));
+	end
+
 	-- Policy check
-	if not logging_enabled(self) then return end -- Don't log
+	if not archiving_enabled(self) then return end -- Don't log
 
 	-- And stash it
 	local with = stanza.name
@@ -374,7 +413,7 @@ function save_to_history(self, stanza)
 		with = with .. "<" .. stanza.attr.type
 	end
 
-	local id = archive:append(room_node, nil, stanza, time_now(), with);
+	local id = archive:append(room_node, nil, stored_stanza, time_now(), with);
 
 	if id then
 		stanza:add_direct_child(st.stanza("stanza-id", { xmlns = xmlns_st_id, by = self.jid, id = id }));

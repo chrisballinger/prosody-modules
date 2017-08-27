@@ -1,6 +1,7 @@
 local captcha_options = module:get_option("captcha_options", {});
 local nodeprep = require "util.encodings".stringprep.nodeprep;
 local usermanager = require "core.usermanager";
+local datamanager = require "util.datamanager";
 local http = require "net.http";
 local path_sep = package.config:sub(1,1);
 local json = require "util.json".decode;
@@ -39,12 +40,12 @@ if next(captcha_options) ~= nil then
 
 	function generate_captcha(display_options)
 		return recaptcha_tpl.apply(setmetatable({
-	  		recaptcha_display_error = display_options and display_options.recaptcha_error
-	  			and ("&error="..display_options.recaptcha_error) or "";
-	  	}, {
-	  		__index = function (t, k)
-	  			if captcha_options[k] then return captcha_options[k]; end
-	  			module:log("error", "Missing parameter from captcha_options: %s", k);
+			recaptcha_display_error = display_options and display_options.recaptcha_error
+			and ("&error="..display_options.recaptcha_error) or "";
+		}, {
+			__index = function (t, k)
+				if captcha_options[k] then return captcha_options[k]; end
+				module:log("error", "Missing parameter from captcha_options: %s", k);
 			end
 		}));
 	end
@@ -127,6 +128,9 @@ function register_user(form, origin)
 	module:fire_event("user-registering", registering);
 	if not registering.allowed then
 		return nil, "Registration not allowed";
+	end
+	if form.confirm_password ~= form.password then
+		return nil, "Passwords don't match";
 	end
 	local ok, err = usermanager.create_user(prepped_username, form.password, module.host);
 	if ok then

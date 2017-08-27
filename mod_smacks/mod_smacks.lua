@@ -152,12 +152,12 @@ module:hook("s2s-stream-features",
 
 local function request_ack_if_needed(session, force)
 	local queue = session.outgoing_stanza_queue;
-	if session.awaiting_ack == nil then
+	if session.awaiting_ack == nil and not session.hibernating then
 		if (#queue > max_unacked_stanzas and session.last_queue_count ~= #queue) or force then
 			session.log("debug", "Queuing <r> (in a moment)");
 			session.awaiting_ack = false;
 			session.awaiting_ack_timer = stoppable_timer(1e-06, function ()
-				if not session.awaiting_ack then
+				if not session.awaiting_ack and not session.hibernating then
 					session.log("debug", "Sending <r> (inside timer, before send)");
 					(session.sends2s or session.send)(st.stanza("r", { xmlns = session.smacks }))
 					session.log("debug", "Sending <r> (inside timer, after send)");
@@ -170,15 +170,17 @@ local function request_ack_if_needed(session, force)
 				end
 			end);
 		end
-		-- Trigger "smacks-ack-delayed"-event if we added new (ackable) stanzas to the outgoing queue
-		-- and there isn't already a timer for this event running.
-		-- If we wouldn't do this, stanzas added to the queue after the first "smacks-ack-delayed"-event
-		-- would not trigger this event (again).
-		if #queue > max_unacked_stanzas and session.awaiting_ack and session.delayed_ack_timer == nil then
-			session.log("debug", "Calling delayed_ack_function directly (still waiting for ack)");
-			delayed_ack_function(session);
-		end
 	end
+	
+	-- Trigger "smacks-ack-delayed"-event if we added new (ackable) stanzas to the outgoing queue
+	-- and there isn't already a timer for this event running.
+	-- If we wouldn't do this, stanzas added to the queue after the first "smacks-ack-delayed"-event
+	-- would not trigger this event (again).
+	if #queue > max_unacked_stanzas and session.awaiting_ack and session.delayed_ack_timer == nil then
+		session.log("debug", "Calling delayed_ack_function directly (still waiting for ack)");
+		delayed_ack_function(session);
+	end
+	
 	session.last_queue_count = #queue;
 end
 
@@ -507,7 +509,6 @@ function handle_resume(session, stanza, xmlns_sm)
 		-- Ok, we need to re-send any stanzas that the client didn't see
 		-- ...they are what is now left in the outgoing stanza queue
 		local queue = original_session.outgoing_stanza_queue;
-		module:fire_event("smacks-hibernation-end", {origin = session, resumed = original_session, queue = queue});
 		original_session.log("debug", "#queue = %d", #queue);
 		for i=1,#queue do
 			original_session.send(queue[i]);
@@ -517,6 +518,7 @@ function handle_resume(session, stanza, xmlns_sm)
 			session.log("warn", "Tried to send stanza on old session migrated by smacks resume (maybe there is a bug?): %s", tostring(stanza));
 			return false;
 		end
+		module:fire_event("smacks-hibernation-end", {origin = session, resumed = original_session, queue = queue});
 		request_ack_if_needed(original_session, true);
 	else
 		module:log("warn", "Client %s@%s[%s] tried to resume stream for %s@%s[%s]",

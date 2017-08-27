@@ -50,6 +50,8 @@ Compatibility
 =============
 
   ----- -------
+  trunk   Works
+  0.10   Works
   0.9   Works
   0.8   Works
   0.7   Works
@@ -59,7 +61,6 @@ Compatibility
 Todo
 ====
 
--   JSON?
 -   Display PEP information (maybe a new plugin?)
 -   More (free) iconsets
 -   Internal/external image generator (GD, ImageMagick)

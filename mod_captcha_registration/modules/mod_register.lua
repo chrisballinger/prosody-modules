@@ -205,7 +205,7 @@ end
 local recent_ips = {};
 local min_seconds_between_registrations = module:get_option("min_seconds_between_registrations");
 local whitelist_only = module:get_option("whitelist_registration_only");
-local whitelisted_ips = module:get_option("registration_whitelist") or { "127.0.0.1" };
+local whitelisted_ips = module:get_option("registration_whitelist") or { "127.0.0.1", "::1" };
 local blacklisted_ips = module:get_option("registration_blacklist") or {};
 
 for _, ip in ipairs(whitelisted_ips) do whitelisted_ips[ip] = true; end
