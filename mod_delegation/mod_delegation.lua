@@ -15,6 +15,11 @@ local set = require("util.set")
 
 local delegation_session = module:shared("/*/delegation/session")
 
+-- FIXME: temporarily needed for disco_items_hook, to be removed when clean implementation is done
+local is_contact_subscribed = require "core.rostermanager".is_contact_subscribed;
+local jid_split = require "util.jid".split;
+local jid_bare = require "util.jid".bare;
+
 if delegation_session.connected_cb == nil then
 	-- set used to have connected event listeners
 	-- which allow a host to react on events from
@@ -25,18 +30,21 @@ local connected_cb = delegation_session.connected_cb
 
 local _DELEGATION_NS = 'urn:xmpp:delegation:1'
 local _FORWARDED_NS = 'urn:xmpp:forward:0'
-local _DISCO_NS = 'http://jabber.org/protocol/disco#info'
+local _DISCO_INFO_NS = 'http://jabber.org/protocol/disco#info'
+local _DISCO_ITEMS_NS = 'http://jabber.org/protocol/disco#items'
 local _DATA_NS = 'jabber:x:data'
 
 local _MAIN_SEP = '::'
 local _BARE_SEP = ':bare:'
+local _REMAINING = ':*'
 local _MAIN_PREFIX = _DELEGATION_NS.._MAIN_SEP
 local _BARE_PREFIX = _DELEGATION_NS.._BARE_SEP
+local _DISCO_REMAINING = _DISCO_ITEMS_NS.._REMAINING
 local _PREFIXES = {_MAIN_PREFIX, _BARE_PREFIX}
 
 local disco_nest
 
-module:log("debug", "Loading namespace delegation module ");
+module:log("debug", "Loading namespace delegation module ")
 
 --> Configuration management <--
 
@@ -95,7 +103,11 @@ local function set_connected(entity_jid)
 		for namespace, ns_data in pairs(jid2ns[jid_]) do
 			if ns_data.connected == nil then
 				ns_data.connected = entity_jid
-				disco_nest(namespace, entity_jid)
+				-- disco remaining is a special namespace
+				-- there is no disco nesting for it
+				if namespace ~= _DISCO_REMAINING then
+					disco_nest(namespace, entity_jid)
+				end
 			end
 		end
 	end
@@ -144,7 +156,7 @@ local function on_component_auth(event)
 end
 
 if module:get_host_type() ~= "component" then
-    connected_cb:add(on_component_connected)
+	connected_cb:add(on_component_connected)
 end
 module:hook('component-authenticated', on_component_auth)
 module:hook('presence/initial', on_presence)
@@ -186,7 +198,7 @@ local function managing_ent_result(event)
 
 	local iq = forwarded.tags[1]
 	if #forwarded ~= 1 or iq.name ~= "iq" or
-        iq.attr.xmlns ~= 'jabber:client' or
+		iq.attr.xmlns ~= 'jabber:client' or
 		(iq.attr.type =='result' and #iq > 1) or
 		(iq.attr.type == 'error' and #iq > 2) then
 		module:log("warn", "ignoring invalid iq result from managing entity %s", stanza.attr.from)
@@ -194,13 +206,19 @@ local function managing_ent_result(event)
 		return true
 	end
 
-    iq.attr.xmlns = nil
+	iq.attr.xmlns = nil
 
 	local original = stanza_cache[stanza.attr.from][stanza.attr.id]
 	stanza_cache[stanza.attr.from][stanza.attr.id] = nil
 	-- we get namespace from original and not iq
 	-- because the namespace can be lacking in case of error
 	local namespace = original.tags[1].attr.xmlns
+
+	-- small hack for disco remaining feat
+	if namespace == _DISCO_ITEMS_NS then
+		namespace = _DISCO_REMAINING
+	end
+
 	local ns_data = ns_delegations[namespace]
 
 	if stanza.attr.from ~= ns_data.connected or (iq.attr.type ~= "result" and iq.attr.type ~= "error") or
@@ -213,7 +231,7 @@ local function managing_ent_result(event)
 	-- at this point eveything is checked,
 	-- and we (hopefully) can send the the result safely
 	module:send(iq)
-    return true
+	return true
 end
 
 function managing_ent_error(event)
@@ -228,7 +246,7 @@ function managing_ent_error(event)
 	stanza_cache[stanza.attr.from][stanza.attr.id] = nil
 	module:log("warn", "Got an error after forwarding stanza to "..stanza.attr.from)
 	module:send(st.error_reply(original, 'cancel', 'service-unavailable'))
-    return true
+	return true
 end
 
 local function forward_iq(stanza, ns_data)
@@ -270,7 +288,7 @@ local function iq_hook(event)
 					-- we must continue the normal bahaviour
 					if not first_child.attr[attribute] then
 						-- Filtered attribute is not present, we do normal workflow
-						return;
+						return
 					end
 				end
 			end
@@ -350,7 +368,7 @@ end
 local function extension_added(event)
 	local source, stanza = event.source, event.item
 	local form_type = find_form_type(stanza)
-	if not form_type then return; end
+	if not form_type then return end
 
 	for namespace, _ in pairs(ns_delegations) do
 		if source ~= module and string.sub(form_type, 1, #namespace) == namespace then
@@ -361,7 +379,7 @@ local function extension_added(event)
 end
 
 -- for disco nesting (see § 7.2) we need to remove internal features
--- we use handle_items as it allow to remove already added features
+-- we use handle_items as it allows to remove already added features
 -- and catch the ones which can come later
 module:handle_items("feature", feature_added, function(_) end)
 module:handle_items("identity", identity_added, function(_) end, false)
@@ -385,7 +403,7 @@ local function disco_result(event)
 	end
 	module:unhook("iq-result/host/"..stanza.attr.id, disco_result)
 	module:unhook("iq-error/host/"..stanza.attr.id, disco_error)
-	local query = stanza:get_child("query", _DISCO_NS)
+	local query = stanza:get_child("query", _DISCO_INFO_NS)
 	if not query or not query.attr.node then
 		session.send(st.error_reply(stanza, 'modify', 'not-acceptable'))
 		return true
@@ -458,7 +476,7 @@ function disco_nest(namespace, entity_jid)
 		local node = prefix..namespace
 
 		local iq = st.iq({from=module.host, to=entity_jid, type='get'})
-			:tag('query', {xmlns=_DISCO_NS, node=node})
+			:tag('query', {xmlns=_DISCO_INFO_NS, node=node})
 
 		local iq_id = iq.attr.id
 
@@ -468,12 +486,14 @@ function disco_nest(namespace, entity_jid)
 	end
 end
 
--- disco to bare jids special case
+-- disco to bare jids special cases
 
-module:hook("account-disco-info", function(event)
+-- disco#info
+
+local function disco_hook(event)
 	-- this event is called when a disco info request is done on a bare jid
 	-- we get the final reply and filter delegated features/identities/extensions
-	local reply = event.reply;
+	local reply = event.reply
 	reply.tags[1]:maptags(function(child)
 		if child.name == 'feature' then
 			local feature_ns = child.attr.var
@@ -518,4 +538,59 @@ module:hook("account-disco-info", function(event)
 		reply:add_child(stanza)
 	end
 
-end, -2^32);
+end
+
+-- disco#items
+
+local function disco_items_node_hook(event)
+	-- check if node is not handled by server
+	-- and forward the disco request to suitable entity
+	if not event.exists then
+		-- this node is not handled by the server
+		local ns_data = ns_delegations[_DISCO_REMAINING]
+		if ns_data ~= nil then
+			-- remaining delegation is requested, we forward
+			forward_iq(event.stanza, ns_data)
+			-- and stop normal event handling
+			return true
+		end
+	end
+end
+module:hook("account-disco-items-node", disco_items_node_hook, -2^32)
+
+local function disco_items_hook(event)
+	-- FIXME: we forward all bare-jid disco-items requests (without node) which will replace any Prosody reply
+	--		for now it's OK because Prosody is not returning anything on request on bare jid
+	--		but to be properly done, any Prosody reply should be kept and managing entities items should be added (merged) to it.
+	--		account-disco-items can't be cancelled (return value of hooks are not checked in mod_disco), so corountine needs
+	--		to be used with util.async (to get the IQ result, merge items then return from the event)
+	local origin, stanza = event.origin, event.stanza;
+	if stanza.attr.type ~= "get" then return; end
+	local node = stanza.tags[1].attr.node;
+	local username = jid_split(stanza.attr.to) or origin.username;
+	if not stanza.attr.to or is_contact_subscribed(username, module.host, jid_bare(stanza.attr.from)) then
+		if node == nil or node == "" then
+			local ns_data = ns_delegations[_DISCO_REMAINING]
+			if ns_data ~= nil then
+				forward_iq(event.stanza, ns_data)
+				return true
+			end
+		end
+	end
+end
+module:hook("iq/bare/http://jabber.org/protocol/disco#items:query", disco_items_hook, 100)
+
+local function disco_items_raw_hook(event)
+	-- this method is called when account-disco-items-* event are not called
+	-- notably when a disco-item is done by an unsubscibed entity
+	-- (i.e. an entity doing a disco#item on an entity without having
+	-- presence subscription)
+	-- we forward the request to managing entity
+	-- it's the responsability of the managing entity to filter the items
+	local ns_data = ns_delegations[_DISCO_REMAINING]
+	if ns_data ~= nil then
+		forward_iq(event.stanza, ns_data)
+		return true
+	end
+end
+module:hook("iq-get/bare/http://jabber.org/protocol/disco#items:query", disco_items_raw_hook, -2^32)
