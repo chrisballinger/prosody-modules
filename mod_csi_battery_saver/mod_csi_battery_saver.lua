@@ -93,7 +93,8 @@ local function is_stamp_needed(stanza, session)
 end
 
 local function add_stamp(stanza, session)
-	stanza = stanza:tag("delay", { xmlns = xmlns_delay, from = session.host, stamp = datetime.datetime()});
+	local bare_jid = jid.bare(session.full_jid or session.host);
+	stanza = stanza:tag("delay", { xmlns = xmlns_delay, from = bare_jid, stamp = datetime.datetime()});
 	return stanza;
 end
 
