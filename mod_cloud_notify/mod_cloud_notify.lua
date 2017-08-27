@@ -4,6 +4,7 @@
 --
 -- This file is MIT/X11 licensed.
 
+local t_insert = table.insert;
 local st = require"util.stanza";
 local jid = require"util.jid";
 local dataform = require"util.dataforms".new;
@@ -76,10 +77,12 @@ function handle_push_error(event)
 				if push_errors[push_identifier] >= max_push_errors then
 					module:log("warn", "Disabling push notifications for identifier '%s'", push_identifier);
 					-- remove push settings from sessions
-					for _, session in pairs(host_sessions[node].sessions) do
-						if session.push_identifier == push_identifier then
-							session.push_identifier = nil;
-							session.push_settings = nil;
+					if host_sessions[node] then
+						for _, session in pairs(host_sessions[node].sessions) do
+							if session.push_identifier == push_identifier then
+								session.push_identifier = nil;
+								session.push_settings = nil;
+							end
 						end
 					end
 					-- save changed global config
@@ -110,7 +113,7 @@ function handle_push_success(event)
 		if hashes.sha256(push_identifier, true) == stanza.attr.id then
 			if user_push_services[push_identifier] and user_push_services[push_identifier].jid == from and push_errors[push_identifier] > 0 then
 				push_errors[push_identifier] = 0;
-				module:log("debug", "Push succeeded, error count for identifier '%s' is now at %s", push_identifier, tostring(push_errors[push_identifier]));
+				module:log("debug", "Push succeeded, error count for identifier '%s' is now at %s again", push_identifier, tostring(push_errors[push_identifier]));
 			end
 		end
 	end
@@ -132,6 +135,8 @@ local function push_enable(event)
 	local push_jid = enable.attr.jid;
 	-- SHOULD contain a 'node' attribute
 	local push_node = enable.attr.node;
+	-- CAN contain a 'include_payload' attribute
+	local include_payload = enable.attr.include_payload;
 	if not push_jid then
 		origin.log("debug", "Push notification enable request missing the 'jid' field");
 		origin.send(st.error_reply(stanza, "modify", "bad-request", "Missing jid"));
@@ -146,6 +151,7 @@ local function push_enable(event)
 	local push_service = {
 		jid = push_jid;
 		node = push_node;
+		include_payload = include_payload;
 		count = 0;
 		options = publish_options and st.preserialize(publish_options);
 	};
@@ -197,6 +203,23 @@ local function push_disable(event)
 end
 module:hook("iq-set/self/"..xmlns_push..":disable", push_disable);
 
+-- clone a stanza and strip it
+local function strip_stanza(stanza)
+	local tags = {};
+	local new = { name = stanza.name, attr = { xmlns = stanza.attr.xmlns, type = stanza.attr.type }, tags = tags };
+	for i=1,#stanza do
+		local child = stanza[i];
+		if type(child) == "table" then		-- don't add raw text nodes
+			if child.name then
+				child = strip_stanza(child);
+				t_insert(tags, child);
+			end
+			t_insert(new, child);
+		end
+	end
+	return setmetatable(new, st.stanza_mt);
+end
+
 local push_form = dataform {
 	{ name = "FORM_TYPE"; type = "hidden"; value = "urn:xmpp:push:summary"; };
 	{ name = "message-count"; type = "text-single"; };
@@ -207,54 +230,71 @@ local push_form = dataform {
 
 -- http://xmpp.org/extensions/xep-0357.html#publishing
 local function handle_notify_request(stanza, node, user_push_services)
-	if not user_push_services or not #user_push_services then return end
+	local pushes = 0;
+	if not user_push_services or not #user_push_services then return pushes end
 	
 	for push_identifier, push_info in pairs(user_push_services) do
+		local send_push = true;		-- only send push to this node when not already done for this stanza or if no stanza is given at all
 		if stanza then
 			if not stanza._push_notify then stanza._push_notify = {}; end
 			if stanza._push_notify[push_identifier] then
 				module:log("debug", "Already sent push notification for %s@%s to %s (%s)", node, module.host, push_info.jid, tostring(push_info.node));
-				return;
+				send_push = false;
 			end
 			stanza._push_notify[push_identifier] = true;
 		end
-
-		-- increment count and save it
-		push_info.count = push_info.count + 1;
-		push_store:set_identifier(node, push_identifier, push_info);
-		-- construct push stanza
-		local stanza_id = hashes.sha256(push_identifier, true);
-		local push_publish = st.iq({ to = push_info.jid, from = node .. "@" .. module.host, type = "set", id = stanza_id })
-			:tag("pubsub", { xmlns = "http://jabber.org/protocol/pubsub" })
-				:tag("publish", { node = push_info.node })
-					:tag("item")
-						:tag("notification", { xmlns = xmlns_push });
-		local form_data = {
-			["message-count"] = tostring(push_info.count);
-		};
-		if stanza and include_sender then
-			form_data["last-message-sender"] = stanza.attr.from;
+		
+		if send_push then
+			-- increment count and save it
+			push_info.count = push_info.count + 1;
+			push_store:set_identifier(node, push_identifier, push_info);
+			-- construct push stanza
+			local stanza_id = hashes.sha256(push_identifier, true);
+			local push_publish = st.iq({ to = push_info.jid, from = module.host, type = "set", id = stanza_id })
+				:tag("pubsub", { xmlns = "http://jabber.org/protocol/pubsub" })
+					:tag("publish", { node = push_info.node })
+						:tag("item")
+							:tag("notification", { xmlns = xmlns_push });
+			local form_data = {
+				["message-count"] = tostring(push_info.count);
+			};
+			if stanza and include_sender then
+				form_data["last-message-sender"] = stanza.attr.from;
+			end
+			if stanza and include_body then
+				form_data["last-message-body"] = stanza:get_child_text("body");
+			end
+			push_publish:add_child(push_form:form(form_data));
+			if stanza and push_info.include_payload == "stripped" then
+				push_publish:tag("payload", { type = "stripped" })
+					:add_child(strip_stanza(stanza));
+				push_publish:up(); -- / payload
+			end
+			if stanza and push_info.include_payload == "full" then
+				push_publish:tag("payload", { type = "full" })
+					:add_child(st.clone(stanza));
+				push_publish:up(); -- / payload
+			end
+			push_publish:up(); -- / notification
+			push_publish:up(); -- / publish
+			push_publish:up(); -- / pubsub
+			if push_info.options then
+				push_publish:tag("publish-options"):add_child(st.deserialize(push_info.options));
+			end
+			-- send out push
+			module:log("debug", "Sending push notification for %s@%s to %s (%s)", node, module.host, push_info.jid, tostring(push_info.node));
+			-- module:log("debug", "PUSH STANZA: %s", tostring(push_publish));
+			-- handle push errors for this node
+			if push_errors[push_identifier] == nil then
+				push_errors[push_identifier] = 0;
+				module:hook("iq-error/bare/"..stanza_id, handle_push_error);
+				module:hook("iq-result/bare/"..stanza_id, handle_push_success);
+			end
+			module:send(push_publish);
+			pushes = pushes + 1;
 		end
-		if stanza and include_body then
-			form_data["last-message-body"] = stanza:get_child_text("body");
-		end
-		push_publish:add_child(push_form:form(form_data));
-		push_publish:up(); -- / notification
-		push_publish:up(); -- / publish
-		push_publish:up(); -- / pubsub
-		if push_info.options then
-			push_publish:tag("publish-options"):add_child(st.deserialize(push_info.options));
-		end
-		-- send out push
-		module:log("debug", "Sending push notification for %s@%s to %s (%s)", node, module.host, push_info.jid, tostring(push_info.node));
-		-- handle push errors for this node
-		if push_errors[push_identifier] == nil then
-			push_errors[push_identifier] = 0;
-			module:hook("iq-error/bare/"..stanza_id, handle_push_error);
-			module:hook("iq-result/bare/"..stanza_id, handle_push_success);
-		end
-		module:send(push_publish);
 	end
+	return pushes;
 end
 
 -- small helper function to extract relevant push settings
@@ -268,13 +308,14 @@ end
 -- publish on offline message
 module:hook("message/offline/handle", function(event)
 	local node, user_push_services = get_push_settings(event.stanza, event.origin);
-	return handle_notify_request(event.stanza, node, user_push_services);
+	module:log("debug", "Invoking cloud handle_notify_request() for offline stanza");
+	handle_notify_request(event.stanza, node, user_push_services);
 end, 1);
 
 -- publish on unacked smacks message
 local function process_smacks_stanza(stanza, session)
 	if session.push_identifier then
-		session.log("debug", "Invoking cloud handle_notify_request for smacks queued stanza");
+		session.log("debug", "Invoking cloud handle_notify_request() for smacks queued stanza");
 		local user_push_services = {[session.push_identifier] = session.push_settings};
 		local node = get_push_settings(stanza, session);
 		handle_notify_request(stanza, node, user_push_services);
@@ -282,16 +323,28 @@ local function process_smacks_stanza(stanza, session)
 	return stanza;
 end
 
+local function process_smacks_queue(queue, session)
+	if not session.push_identifier then return; end
+	local user_push_services = {[session.push_identifier] = session.push_settings};
+	for i=1, #queue do
+		local stanza = queue[i];
+		local node = get_push_settings(stanza, session);
+		session.log("debug", "Invoking cloud handle_notify_request() for smacks queued stanza: %d", i);
+		if handle_notify_request(stanza, node, user_push_services) ~= 0 then
+			session.log("debug", "Cloud handle_notify_request() > 0, not notifying for other queued stanzas");
+			return;		-- only notify for one stanza in the queue, not for all in a row
+		end
+	end
+end
+
 -- smacks hibernation is started
 local function hibernate_session(event)
 	local session = event.origin;
 	local queue = event.queue;
 	-- process unacked stanzas
-	for i=1,#queue do
-		process_smacks_stanza(queue[i], session);
-	end
+	process_smacks_queue(queue, session);
 	-- process future unacked (hibernated) stanzas
-	filters.add_filter(session, "stanzas/out", process_smacks_stanza);
+	filters.add_filter(session, "stanzas/out", process_smacks_stanza, -990);
 end
 
 -- smacks hibernation is ended
@@ -312,9 +365,7 @@ local function ack_delayed(event)
 	local session = event.origin;
 	local queue = event.queue;
 	-- process unacked stanzas (handle_notify_request() will only send push requests for new stanzas)
-	for i=1,#queue do
-		process_smacks_stanza(queue[i], session);
-	end
+	process_smacks_queue(queue, session);
 end
 
 -- archive message added
@@ -344,13 +395,13 @@ local function archive_message_added(event)
 				end
 			end
 			if identifier_found then
-				identifier_found.log("debug", "Not notifying '%s' of new MAM stanza (session still alive)", identifier);
+				identifier_found.log("debug", "Not cloud notifying '%s' of new MAM stanza (session still alive)", identifier);
 			else
 				notify_push_sevices[identifier] = push_info;
 			end
 		end
 
-		return handle_notify_request(event.stanza, to, notify_push_sevices);
+		handle_notify_request(event.stanza, to, notify_push_sevices);
 	end
 end
 
@@ -363,25 +414,10 @@ local function send_ping(event)
 	local user = event.user;
 	local user_push_services = push_store:get(user);
 	local push_services = event.push_services or user_push_services;
-	return handle_notify_request(nil, user, push_services);
+	handle_notify_request(nil, user, push_services);
 end
 -- can be used by other modules to ping one or more (or all) push endpoints
 module:hook("cloud-notify-ping", send_ping);
-
--- TODO: this has to be done on first connect not on offline broadcast, else the counter will be incorrect
--- TODO: it seems this is already done, so this could be safely removed, couldn't it?
--- module:hook("message/offline/broadcast", function(event)
--- 	local origin = event.origin;
--- 	local user_push_services = push_store:get(origin.username);
--- 	if not #user_push_services then return end
--- 
--- 	for _, push_info in pairs(user_push_services) do
--- 		if push_info then
--- 			push_info.count = 0;
--- 		end
--- 	end
--- 	push_store:set(origin.username, user_push_services);
--- end, 1);
 
 module:log("info", "Module loaded");
 function module.unload()

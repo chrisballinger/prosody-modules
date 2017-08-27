@@ -39,7 +39,6 @@ Compatibility
   0.7   Works
   0.8   Works
   0.9   Works
-  0.6   Works
   ----- -------
 
 **Note** that per-room configuration only works in 0.9+.

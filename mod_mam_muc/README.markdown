@@ -41,11 +41,8 @@ muc_log_by_default = true; -- Enable logging by default (can be disabled in room
 
 muc_log_all_rooms = false; -- set to true to force logging of all rooms
 
--- This is the largest number of messages that are allowed to be retrieved in one MAM request.
-max_archive_query_results = 20;
-
 -- This is the largest number of messages that are allowed to be retrieved when joining a room.
-max_history_messages = 1000;
+max_history_messages = 20;
 ```
 
 Compatibility
