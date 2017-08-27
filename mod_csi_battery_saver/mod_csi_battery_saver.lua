@@ -107,32 +107,36 @@ local function is_important(stanza, session)
 		-- unpack carbon copies
 		local stanza_direction = "in";
 		local carbon;
+		local st_type;
 		-- support carbon copied message stanzas having an arbitrary message-namespace or no message-namespace at all
 		if not carbon then carbon = find(stanza, "{urn:xmpp:carbons:2}/forwarded/message"); end
 		if not carbon then carbon = find(stanza, "{urn:xmpp:carbons:1}/forwarded/message"); end
 		stanza_direction = carbon and stanza:child_with_name("sent") and "out" or "in";
 		--session.log("debug", "mod_csi_battery_saver(%s): stanza_direction = %s, carbon = %s, stanza = %s", id, stanza_direction, carbon and "true" or "false", tostring(stanza));
 		if carbon then stanza = carbon; end
-		-- carbon copied outgoing messages aren't important (but incoming carbon copies are!)
-		if carbon and stanza_direction == "out" then return false; end
-
-		local st_type = stanza.attr.type;
-		if st_type == "headline" then
-			return false;
-		end
-
-		-- We can't check for nick in encrypted groupchat messages, so let's treat them as important
-		-- Some clients don't set a body or an empty body for encrypted messages
-
+		st_type = stanza.attr.type;
+		
+		-- headline message are always not important
+		if st_type == "headline" then return false; end
+		
+		-- chat markers (XEP-0333) are important, too, because some clients use them to update their notifications
+		if find(stanza, "{urn:xmpp:chat-markers:0}") then return true; end;
+		
+		-- carbon copied outgoing messages are important (some clients update their notifications upon receiving those) --> don't return false here
+		--if carbon and stanza_direction == "out" then return false; end
+		
+		-- We can't check for body contents in encrypted messages, so let's treat them as important
+		-- Some clients don't even set a body or an empty body for encrypted messages
+		
 		-- check omemo https://xmpp.org/extensions/inbox/omemo.html
 		if stanza:get_child("encrypted", "eu.siacs.conversations.axolotl") or stanza:get_child("encrypted", "urn:xmpp:omemo:0") then return true; end
-
+		
 		-- check xep27 pgp https://xmpp.org/extensions/xep-0027.html
 		if stanza:get_child("x", "jabber:x:encrypted") then return true; end
-
+		
 		-- check xep373 pgp (OX) https://xmpp.org/extensions/xep-0373.html
 		if stanza:get_child("openpgp", "urn:xmpp:openpgp:0") then return true; end
-
+		
 		local body = stanza:get_child_text("body");
 		if st_type == "groupchat" then
 			if stanza:get_child_text("subject") then return true; end

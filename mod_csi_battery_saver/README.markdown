@@ -17,12 +17,13 @@ at the same time. This way, nothing is lost or reordered while still
 allowing for power usage savings by not requiring mobile clients to
 bring up their radio for unimportant stanzas.
 
-`IQ` stanzas, and `message` stanzas containing a body or being encypted
-and all nonzas are considered important.
+`IQ` stanzas, and `message` stanzas containing a body or being encrypted,
+chat markers (see [XEP-0333]) and all nonzas are considered important.
 If the config option `csi_battery_saver_filter_muc` is set to true,
 groupchat messages must set a subject or have the user's username or nickname
-in their messages to count as "important", if the config is false (default), all
-groupchat messages havin a body or being encrypted are considered "important".
+in their messages (or be encrypted) to count as "important", if this option
+is set to false (default), all groupchat messages having a body
+or being encrypted are considered "important".
 `Presence` stanzas are always considered not "important".
 
 All buffered stanzas that allow timestamping are properly stamped to
