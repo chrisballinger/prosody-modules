@@ -86,8 +86,8 @@ local function advertise_delegations(session, to_jid)
 				for _, attribute in pairs(ns_data.filtering) do
 					message:tag("attribute", {name=attribute}):up()
 				end
-				message:up()
 			end
+			message:up()
 		end
 	end
 
