@@ -1,6 +1,6 @@
 ---
 labels:
-- 'Stage-Alpha'
+- 'Stage-Beta'
 summary: 'XEP-0355 (Namespace Delegation) implementation'
 ...
 
@@ -29,7 +29,7 @@ also need to activate the module in your component section:
 
     modules_enabled = {
             [...]
-        
+
             "delegation";
     }
 
@@ -58,7 +58,7 @@ request) will be delegated to pubsub.yourdomain.tld. Similarly, all
 pubsub request to the host (i.e. the PEP requests) will be delegated to
 pubsub.yourdomain.tld.
 
-**/! Be extra careful when you give a delegation to an entity/component,
+**/!\ Be extra careful when you give a delegation to an entity/component,
 it's a powerful access, only do it if you absoly trust the
 component/entity, and you know where the software is coming from**
 
@@ -75,6 +75,10 @@ If your are not a developper, the delegated namespace(s)/attribute(s)
 are most probably specified with the external component/entity you want
 to use.
 
+The pseudo-namespace `http://jabber.org/protocol/disco#items:*` is used
+to delegate remaining disco#items (i.e. items nodes not already handled
+by Prosody itself).
+
 Compatibility
 =============
 
@@ -90,7 +94,7 @@ following patch in a, for example, /tmp/component.patch file:
                     module:log("info", "External component successfully authenticated");
                     session.send(st.stanza("handshake"));
     +               module:fire_event("component-authenticated", { session = session });
-     
+
                     return true;
             end
 
