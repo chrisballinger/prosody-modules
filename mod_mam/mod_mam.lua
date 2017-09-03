@@ -317,7 +317,7 @@ local function message_handler(event, c2s)
 			clone_for_other_handlers:tag("stanza-id", { xmlns = xmlns_st_id, by = store_user.."@"..host, id = id }):up();
 			event.stanza = clone_for_other_handlers;
 			if cleanup then cleanup[store_user] = true; end
-			module:fire_event("archive-message-added", { origin = origin, stanza = clone_for_storage, for_user = store_user, id = id });
+			module:fire_event("archive-message-added", { origin = origin, stanza = stanza, for_user = store_user, id = id });
 		end
 	else
 		log("debug", "Not archiving stanza: %s (prefs)", stanza:top_tag());
