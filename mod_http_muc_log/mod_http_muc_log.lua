@@ -54,8 +54,7 @@ local function public_room(room) -- : boolean
 	end
 	return (room
 		and not (room.get_hidden or room.is_hidden)(room)
-		and not (room.get_members_only or room.is_members_only)(room)
-		and room._data.logging == true);
+		and not (room.get_members_only or room.is_members_only)(room))
 end
 
 local function sort_Y(a,b) return a.year > b.year end
