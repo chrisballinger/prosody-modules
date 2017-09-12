@@ -60,6 +60,13 @@ local use_total = true;
 
 local cleanup;
 
+local function schedule_cleanup(username)
+	if cleanup and not cleanup[username] then
+		table.insert(cleanup, username);
+		cleanup[username] = true;
+	end
+end
+
 -- Handle prefs.
 local function handle_prefs(event)
 	local origin, stanza = event.origin, event.stanza;
@@ -113,7 +120,7 @@ local function handle_mam_query(event)
 	local query = stanza.tags[1];
 	local qid = query.attr.queryid;
 
-	if cleanup then cleanup[origin.username] = true; end
+	schedule_cleanup(origin.username);
 
 	-- Search query parameters
 	local qwith, qstart, qend;
@@ -316,7 +323,7 @@ local function message_handler(event, c2s)
 			local id = ok;
 			clone_for_other_handlers:tag("stanza-id", { xmlns = xmlns_st_id, by = store_user.."@"..host, id = id }):up();
 			event.stanza = clone_for_other_handlers;
-			if cleanup then cleanup[store_user] = true; end
+			schedule_cleanup(store_user);
 			module:fire_event("archive-message-added", { origin = origin, stanza = stanza, for_user = store_user, id = id });
 		end
 	else
@@ -370,13 +377,13 @@ if cleanup_after ~= "never" then
 	pcall(function ()
 		-- If this works, then we schedule cleanup for all known users on startup
 		for user in um.users(module.host) do
-			cleanup[user] = true;
+			schedule_cleanup(user);
 		end
 	end);
 
 	-- At odd intervals, delete old messages for one user
 	module:add_timer(math.random(10, 60), function()
-		local user = next(cleanup);
+		local user = table.remove(cleanup, 1);
 		if user then
 			module:log("debug", "Removing old messages for user %q", user);
 			local ok, err = archive:delete(user, { ["end"] = os.time() - cleanup_after; })
