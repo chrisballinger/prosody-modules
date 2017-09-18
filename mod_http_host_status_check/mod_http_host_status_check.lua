@@ -35,6 +35,7 @@ function status_page()
 	local current_time = time();
 
 	local all_ok = true;
+	local failed_hosts = {};
 
 	for host in pairs(hosts) do
 		local last_heartbeat_time = heartbeats[host];
@@ -81,6 +82,7 @@ function status_page()
 
 		if not ok then
 			all_ok = false;
+			table.insert(failed_hosts, host);
 		end
 		
 		if not ok or is_component or last_heartbeat_time then
@@ -95,7 +97,7 @@ function status_page()
 		end
 	end
 	local page = template(status_page_template, {
-		status = all_ok and "OK" or "FAIL";
+		status = all_ok and "OK" or ("FAIL: "..table.concat(failed_hosts, ", "));
 		host_statuses = host_statuses;
 	});
 	return page;
