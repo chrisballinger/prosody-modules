@@ -114,34 +114,26 @@ local function handle_request(origin, stanza, xmlns, filename, filesize)
 	-- local clients only
 	if origin.type ~= "c2s" then
 		module:log("debug", "Request for upload slot from a %s", origin.type);
-		origin.send(st.error_reply(stanza, "cancel", "not-authorized"));
-		return true;
+		return nil, st.error_reply(stanza, "cancel", "not-authorized");
 	end
 	-- validate
 	if not filename or filename:find("/") then
 		module:log("debug", "Filename %q not allowed", filename or "");
-		origin.send(st.error_reply(stanza, "modify", "bad-request", "Invalid filename"));
-		return true;
+		return nil, st.error_reply(stanza, "modify", "bad-request", "Invalid filename");
 	end
 	expire(username, host);
 	if not filesize then
 		module:log("debug", "Missing file size");
-		origin.send(st.error_reply(stanza, "modify", "bad-request", "Missing or invalid file size"));
-		return true;
+		return nil, st.error_reply(stanza, "modify", "bad-request", "Missing or invalid file size");
 	elseif filesize > file_size_limit then
 		module:log("debug", "File too large (%d > %d)", filesize, file_size_limit);
-		origin.send(st.error_reply(stanza, "modify", "not-acceptable", "File too large")
+		return nil, st.error_reply(stanza, "modify", "not-acceptable", "File too large")
 			:tag("file-too-large", {xmlns=xmlns})
-				:tag("max-file-size"):text(tostring(file_size_limit)));
-		return true;
+				:tag("max-file-size"):text(tostring(file_size_limit));
 	elseif not check_quota(username, host, filesize) then
 		module:log("debug", "Upload of %dB by %s would exceed quota", filesize, origin.full_jid);
-		origin.send(st.error_reply(stanza, "wait", "resource-constraint", "Quota reached"));
-		return true;
+		return nil, st.error_reply(stanza, "wait", "resource-constraint", "Quota reached");
 	end
-
-	local reply = st.reply(stanza);
-	reply:tag("slot", { xmlns = xmlns });
 
 	local random_dir;
 	repeat random_dir = uuid();
@@ -152,8 +144,7 @@ local function handle_request(origin, stanza, xmlns, filename, filesize)
 		filename = filename, dir = random_dir, size = filesize, time = os.time() });
 
 	if not ok then
-		origin.send(st.error_reply(stanza, "wait", "internal-server-failure"));
-		return true;
+		return nil, st.error_reply(stanza, "wait", "internal-server-failure");
 	end
 
 	local slot = random_dir.."/"..filename;
@@ -163,6 +154,8 @@ local function handle_request(origin, stanza, xmlns, filename, filesize)
 		pending_slots[slot] = nil;
 	end);
 
+	origin.log("debug", "Given upload slot %q", slot);
+
 	local base_url = module:http_url();
 	local slot_url = url.parse(base_url);
 	slot_url.path = url.parse_path(slot_url.path or "/");
@@ -171,11 +164,7 @@ local function handle_request(origin, stanza, xmlns, filename, filesize)
 	slot_url.path.is_directory = false;
 	slot_url.path = url.build_path(slot_url.path);
 	slot_url = url.build(slot_url);
-	reply:tag("get"):text(slot_url):up();
-	reply:tag("put"):text(slot_url):up();
-	origin.send(reply);
-	origin.log("debug", "Given upload slot %q", slot);
-	return true;
+	return slot_url;
 end
 
 -- hooks
@@ -184,7 +173,20 @@ module:hook("iq/host/"..namespace..":request", function (event)
 	local request = stanza.tags[1];
 	local filename = request.attr.filename;
 	local filesize = tonumber(request.attr.size);
-	return handle_request(origin, stanza, namespace, filename, filesize);
+
+	local slot_url, err = handle_request(origin, stanza, namespace, filename, filesize);
+	if not slot_url then
+		origin.send(err);
+		return true;
+	end
+
+	local reply = st.reply(stanza)
+		:tag("slot", { xmlns = namespace })
+			:tag("get", { url = slot_url }):up()
+			:tag("put", { url = slot_url }):up()
+		:up();
+	origin.send(reply);
+	return true;
 end);
 
 module:hook("iq/host/"..legacy_namespace..":request", function (event)
@@ -192,7 +194,20 @@ module:hook("iq/host/"..legacy_namespace..":request", function (event)
 	local request = stanza.tags[1];
 	local filename = request:get_child_text("filename");
 	local filesize = tonumber(request:get_child_text("size"));
-	return handle_request(origin, stanza, legacy_namespace, filename, filesize);
+
+	local slot_url, err = handle_request(origin, stanza, legacy_namespace, filename, filesize);
+	if not slot_url then
+		origin.send(err);
+		return true;
+	end
+
+	local reply = st.reply(stanza)
+		:tag("slot", { xmlns = legacy_namespace })
+			:tag("get"):text(slot_url):up()
+			:tag("put"):text(slot_url):up()
+		:up();
+	origin.send(reply);
+	return true;
 end);
 
 -- http service
