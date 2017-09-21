@@ -409,8 +409,12 @@ end
 module:hook("pre-message/bare", c2s_message_handler, 0);
 module:hook("pre-message/full", c2s_message_handler, 0);
 -- Stanszas to local clients
-module:hook("message/bare", message_handler, 0);
-module:hook("message/full", message_handler, 0);
+local priority = 0.075
+assert(priority > 0, "priority must be before mod_message");
+assert(priority < 0.1, "priority must be after mod_firewall");
+assert(priority > 0.05, "priority must be before mod_carbons");
+module:hook("message/bare", message_handler, priority);
+module:hook("message/full", message_handler, priority);
 
 module:add_feature(xmlns_mam0); -- COMPAT with XEP-0313 v 0.1
 
