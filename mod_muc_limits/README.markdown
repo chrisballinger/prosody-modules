@@ -67,7 +67,9 @@ Compatibility
 =============
 
   ------- ------------------
-  Trunk   Works
+  Trunk   Unknown
+  0.10    Works
+  0.9     Works
   0.8     Doesn't work[^1]
   ------- ------------------
 
