@@ -35,11 +35,11 @@ Add the module to the MUC host (not the global modules\_enabled):
 
 You can define (globally or per-MUC component) the following options:
 
-  Name                 Default value   Description
-  -------------------- --------------- ------------------------------------------
-  muc\_event\_rate     0.5             The maximum number of events per second.
-  muc\_burst\_factor   6               Allow temporary bursts of this multiple.
-  muc\_max\_nick\_length  23              The maximum allowed length of user nicknames
+  Name                     Default value   Description
+  ------------------------ --------------- ----------------------------------------------
+  muc\_event\_rate         0.5             The maximum number of events per second.
+  muc\_burst\_factor       6               Allow temporary bursts of this multiple.
+  muc\_max\_nick\_length   23              The maximum allowed length of user nicknames
 
 For more understanding of how these values are used, see the algorithm
 section below.
