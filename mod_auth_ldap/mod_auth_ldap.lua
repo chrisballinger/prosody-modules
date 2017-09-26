@@ -31,6 +31,7 @@ function ldap_do_once(method, ...)
 		if not ld then return nil, err, "reconnect"; end
 	end
 
+	-- luacheck: ignore 411/success
 	local success, iterator, invariant, initial = pcall(ld[method], ld, ...);
 	if not success then ld = nil; return nil, iterator, "search"; end
 
@@ -42,7 +43,7 @@ end
 
 function ldap_do(method, retry_count, ...)
 	local dn, attr, where;
-	for i=1,1+retry_count do
+	for _=1,1+retry_count do
 		dn, attr, where = ldap_do_once(method, ...);
 		if dn or not(attr) then break; end -- nothing or something found
 		module:log("warn", "LDAP: %s %s (in %s)", tostring(dn), tostring(attr), where);
@@ -69,7 +70,7 @@ end
 
 local provider = {};
 
-function provider.create_user(username, password)
+function provider.create_user(username, password) -- luacheck: ignore 212
 	return nil, "Account creation not available with LDAP.";
 end
 
@@ -98,7 +99,7 @@ if ldap_mode == "getpasswd" then
 
 	function provider.get_sasl_handler()
 		return new_sasl(module.host, {
-			plain = function(sasl, username)
+			plain = function(sasl, username) -- luacheck: ignore 212/sasl
 				local password = provider.get_password(username);
 				if not password then return "", nil; end
 				return password, true;
@@ -118,7 +119,7 @@ elseif ldap_mode == "bind" then
 
 	function provider.get_sasl_handler()
 		return new_sasl(module.host, {
-			plain_test = function(sasl, username, password)
+			plain_test = function(sasl, username, password) -- luacheck: ignore 212/sasl
 				return provider.test_password(username, password), true;
 			end
 		});
