@@ -1,3 +1,6 @@
+**NOTE:** XMPP compression has unresolved [security concerns](https://mail.jabber.org/pipermail/standards/2014-October/029215.html),
+and this module has been removed from Prosody and renamed.
+
 While the bandwidth usage of XMPP isn't that much, compressing the data
 sent to/from your server can give significant benefits to those on slow
 connections, such as dial-up or mobile networks. Prosody supports
