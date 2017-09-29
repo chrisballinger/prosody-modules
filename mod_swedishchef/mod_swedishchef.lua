@@ -73,3 +73,4 @@ if module:get_option_boolean("swedish_chef_enabled", true) then
 	module:hook("message/bare", check_message);
 end
 
+module:hook("swedish_chef/message_filter", check_message);
