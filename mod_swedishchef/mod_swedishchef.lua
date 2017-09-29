@@ -69,5 +69,7 @@ function check_message(data)
 	end
 end
 
-module:hook("message/bare", check_message);
+if module:get_option_boolean("swedish_chef_enabled", true) then
+	module:hook("message/bare", check_message);
+end
 
