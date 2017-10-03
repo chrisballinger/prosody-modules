@@ -64,7 +64,7 @@ function check_message(data)
 	body = body:get_text();
 
 	if body and (body:find(trigger_string, 1, true) == 1) then
-		module:log("debug", body:find(trigger_string, 1, true));
+		module:log("debug", "Found trigger: %s", body:match(trigger_string, 1, true));
 		stanza[bodyindex][1] = swedish(body:gsub("^" .. trigger_string, "", 1));
 	end
 end
