@@ -9,7 +9,7 @@ local function reload_components()
         for host in pairs(defined_hosts) do
                 if (not hosts[host] and host ~= "*") then
                         module:log ("debug", "loading new component %s", host);
-                        modulemanager.load(host, configmanager.get(host, "core", "component_module"));
+                        modulemanager.load(host, config.get(host, "core", "component_module"));
                 end
         end;
 
