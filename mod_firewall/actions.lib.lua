@@ -176,7 +176,7 @@ function action_handlers.LOG(string)
 	local level = string:match("^%[(%a+)%]") or "info";
 	string = string:gsub("^%[%a+%] ?", "");
 	local meta_deps = {};
-	local code = meta(("(session.log or log)(%q, %q);"):format(level, string), meta_deps);
+	local code = meta(("(session.log or log)(%q, '%%s', %q);"):format(level, string), meta_deps);
 	return code, meta_deps;
 end
 
