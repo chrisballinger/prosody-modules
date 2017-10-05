@@ -37,21 +37,24 @@ The keys for reCaptcha are available in your reCaptcha account, visit
 
 If no reCaptcha options are set, a simple built in captcha is used.
 
+Customization
+-------------
+
+Copy the files in mod_register_web/templates/ to a new directory. Edit them,
+and set `register_web_template = "/path/to/your/custom-templates"` in your
+config file.
+
 Compatibility
 -------------
 
   ----- --------------
+  0.10  Works
   0.9   Works
   0.8   Doesn't work
   ----- --------------
 
 Todo
 ----
-
-Lots. The module is very basic at the moment. In particular I would like
-to see:
-
-Customisation (CSS and/or HTML)
 
 Different CAPTCHA implementation support
 
