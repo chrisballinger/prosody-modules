@@ -6,7 +6,7 @@
 -- Redirects IP addresses not in the whitelist to a web page or another method to complete the registration.
 
 local st = require "util.stanza"
-local cman = configmanager
+local cman = require "core.configmanager"
 
 local ip_wl = module:get_option_set("registration_whitelist", { "127.0.0.1", "::1" })
 local url = module:get_option_string("registration_url", nil)
