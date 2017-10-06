@@ -41,12 +41,12 @@ externally).
 Compatibility
 -------------
 
-0.9 works
+  ------ --------------
+  0.10   Works
+  0.9    Works
+  0.8    Works
+  0.7    Might not work
+  0.6    Doesn't work
+  0.5    Doesn't work
+  ------ --------------
 
-0.8 works
-
-0.7 might not work
-
-0.6 won't work
-
-0.5 won't work

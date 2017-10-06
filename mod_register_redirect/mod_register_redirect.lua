@@ -54,7 +54,7 @@ function reg_redirect(event)
 					inst_text = "Please contact "..module:get_host().."'s server administrator via xmpp to register an account on this server at: "..ajid
 				else
 					module:log("error", "Please be sure to, _at the very least_, configure one server administrator either global or hostwise...")
-					module:log("error", "if you want to use this module, or read it's configuration wiki at: http://code.google.com/p/prosody-modules/wiki/mod_register_redirect")
+					module:log("error", "if you want to use this module, or read it's configuration wiki at: https://modules.prosody.im/mod_register_redirect.html")
 					return origin.send(st.error_reply(stanza, "wait", "internal-server-error")) -- bouncing request.
 				end
 			end
