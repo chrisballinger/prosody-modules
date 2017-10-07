@@ -13,7 +13,10 @@ rm -f adhoc.js
 wget -O adhoc.js "http://git.babelmonkeys.de/?p=adhocweb.git;a=blob_plain;f=js/adhoc.js;hb=$ADHOC_COMMITISH" || exit 1
 
 rm -f strophe.min.js
-wget https://raw.github.com/strophe/strophe.im/gh-pages/strophejs/downloads/strophejs-$STROPHE_VERSION.tar.gz && tar xzf strophejs-$STROPHE_VERSION.tar.gz strophejs-$STROPHE_VERSION/strophe.min.js --strip-components=1 && rm strophejs-$STROPHE_VERSION.tar.gz || exit 1
+wget https://raw.github.com/strophe/strophe.im/gh-pages/strophejs/downloads/strophejs-$STROPHE_VERSION.tar.gz &&
+	tar xzf strophejs-$STROPHE_VERSION.tar.gz strophejs-$STROPHE_VERSION/strophe.min.js &&
+	mv strophejs-$STROPHE_VERSION/strophe.min.js . &&
+	rm -r strophejs-$STROPHE_VERSION strophejs-$STROPHE_VERSION.tar.gz || exit 1
 
 cd ../css
 rm -f bootstrap-$BOOTSTRAP_VERSION.min.css
