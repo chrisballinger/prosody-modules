@@ -44,7 +44,7 @@ local function identify(data)
 end
 
 local function update_pep(username, data, pep)
-	pep = pep or pep_plus.get_pep_service(username.."@"..module.host);
+	pep = pep or pep_plus.get_pep_service(username);
 	local photo, p = get_item(data, "PHOTO");
 	if vcard.to_vcard4 then
 		if p then t_remove(data, p); end
