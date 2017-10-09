@@ -8,7 +8,7 @@ local function rate(measures, dir)
 	return function (stanza, session)
 		measures[dir]();
 		measures[dir .. "_" .. session.type]();
-		if not stanza.attr.xmlns and stanza_kinds[stanza.name] then
+		if stanza.attr and not stanza.attr.xmlns and stanza_kinds[stanza.name] then
 			measures[dir .. "_" .. session.type .. "_" .. stanza.name]();
 		end
 		return stanza;
