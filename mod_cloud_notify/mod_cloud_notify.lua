@@ -20,6 +20,7 @@ local max_push_errors = module:get_option_number("push_max_errors", 50);
 
 local host_sessions = prosody.hosts[module.host].sessions;
 local push_errors = {};
+local id2node = {};
 
 -- For keeping state across reloads while caching reads
 local push_store = (function()
@@ -62,10 +63,11 @@ local handle_push_success, handle_push_error;
 function handle_push_error(event)
 	local stanza = event.stanza;
 	local error_type, condition = stanza:get_error();
-	local node = jid.split(stanza.attr.to);
+	local node = id2node[stanza.attr.id];
+	if node == nil then return false; end		-- unknown stanza? Ignore for now!
 	local from = stanza.attr.from;
 	local user_push_services = push_store:get(node);
-
+	
 	for push_identifier, _ in pairs(user_push_services) do
 		local stanza_id = hashes.sha256(push_identifier, true);
 		if stanza_id == stanza.attr.id then
@@ -90,8 +92,9 @@ function handle_push_error(event)
 					push_errors[push_identifier] = nil;
 					-- unhook iq handlers for this identifier (if possible)
 					if module.unhook then
-						module:unhook("iq-error/bare/"..stanza_id, handle_push_error);
-						module:unhook("iq-result/bare/"..stanza_id, handle_push_success);
+						module:unhook("iq-error/host/"..stanza_id, handle_push_error);
+						module:unhook("iq-result/host/"..stanza_id, handle_push_success);
+						id2node[stanza_id] = nil;
 					end
 				end
 			elseif user_push_services[push_identifier] and user_push_services[push_identifier].jid == from and error_type == "wait" then
@@ -105,10 +108,11 @@ end
 
 function handle_push_success(event)
 	local stanza = event.stanza;
-	local node = jid.split(stanza.attr.to);
+	local node = id2node[stanza.attr.id];
+	if node == nil then return false; end		-- unknown stanza? Ignore for now!
 	local from = stanza.attr.from;
 	local user_push_services = push_store:get(node);
-
+	
 	for push_identifier, _ in pairs(user_push_services) do
 		if hashes.sha256(push_identifier, true) == stanza.attr.id then
 			if user_push_services[push_identifier] and user_push_services[push_identifier].jid == from and push_errors[push_identifier] > 0 then
@@ -188,8 +192,9 @@ local function push_disable(event)
 			user_push_services[key] = nil;
 			push_errors[key] = nil;
 			if module.unhook then
-				module:unhook("iq-error/bare/"..key, handle_push_error);
-				module:unhook("iq-result/bare/"..key, handle_push_success);
+				module:unhook("iq-error/host/"..key, handle_push_error);
+				module:unhook("iq-result/host/"..key, handle_push_success);
+				id2node[key] = nil;
 			end
 		end
 	end
@@ -226,6 +231,7 @@ local push_form = dataform {
 	{ name = "pending-subscription-count"; type = "text-single"; };
 	{ name = "last-message-sender"; type = "jid-single"; };
 	{ name = "last-message-body"; type = "text-single"; };
+	{ name = "last-message-priority"; type = "text-single"; };
 };
 
 -- http://xmpp.org/extensions/xep-0357.html#publishing
@@ -264,6 +270,13 @@ local function handle_notify_request(stanza, node, user_push_services)
 			if stanza and include_body then
 				form_data["last-message-body"] = stanza:get_child_text("body");
 			end
+			if stanza then
+				if stanza:get_child("body") or stanza:get_child("encrypted", "eu.siacs.conversations.axolotl") then
+					form_data["last-message-priority"] = "high";
+				else
+					form_data["last-message-priority"] = "low";
+				end
+			end
 			push_publish:add_child(push_form:form(form_data));
 			if stanza and push_info.include_payload == "stripped" then
 				push_publish:tag("payload", { type = "stripped" })
@@ -287,8 +300,9 @@ local function handle_notify_request(stanza, node, user_push_services)
 			-- handle push errors for this node
 			if push_errors[push_identifier] == nil then
 				push_errors[push_identifier] = 0;
-				module:hook("iq-error/bare/"..stanza_id, handle_push_error);
-				module:hook("iq-result/bare/"..stanza_id, handle_push_success);
+				module:hook("iq-error/host/"..stanza_id, handle_push_error);
+				module:hook("iq-result/host/"..stanza_id, handle_push_success);
+				id2node[stanza_id] = node;
 			end
 			module:send(push_publish);
 			pushes = pushes + 1;
@@ -434,8 +448,9 @@ function module.unload()
 
 		for push_identifier, _ in pairs(push_errors) do
 			local stanza_id = hashes.sha256(push_identifier, true);
-			module:unhook("iq-error/bare/"..stanza_id, handle_push_error);
-			module:unhook("iq-result/bare/"..stanza_id, handle_push_success);
+			module:unhook("iq-error/host/"..stanza_id, handle_push_error);
+			module:unhook("iq-result/host/"..stanza_id, handle_push_success);
+			id2node[stanza_id] = nil;
 		end
 	end
 
