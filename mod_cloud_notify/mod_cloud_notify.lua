@@ -270,13 +270,6 @@ local function handle_notify_request(stanza, node, user_push_services)
 			if stanza and include_body then
 				form_data["last-message-body"] = stanza:get_child_text("body");
 			end
-			if stanza then
-				if stanza:get_child("body") or stanza:get_child("encrypted", "eu.siacs.conversations.axolotl") then
-					form_data["last-message-priority"] = "high";
-				else
-					form_data["last-message-priority"] = "low";
-				end
-			end
 			push_publish:add_child(push_form:form(form_data));
 			if stanza and push_info.include_payload == "stripped" then
 				push_publish:tag("payload", { type = "stripped" })
