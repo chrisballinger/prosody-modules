@@ -35,7 +35,7 @@ Source
 ``` lua
 modules_enabled = {
     -- Other modules
-    "compression"; -- Enable mod_compression
+    "compression_unsafe"; -- Enable mod_compression_unsafe
 }
 ```
 
@@ -50,7 +50,7 @@ more resources but less bandwidth.
 ``` lua
 modules_enabled = {
     -- Other modules
-    "compression"; -- Enable mod_compression
+    "compression_unsafe"; -- Enable mod_compression_unsafe
 }
  
 compression_level = 5
