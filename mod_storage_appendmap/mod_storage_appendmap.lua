@@ -2,11 +2,62 @@ local dump = require "util.serialization".serialize;
 local load = require "util.envload".envloadfile;
 local dm = require "core.storagemanager".olddm;
 
+local REMOVE = {}; -- Special value for removing keys
+
 local driver = {};
 
-local map = {};
+
+local keywords = {
+	["do"] = true; ["and"] = true; ["else"] = true; ["break"] = true;
+	["if"] = true; ["end"] = true; ["goto"] = true; ["false"] = true;
+	["in"] = true; ["for"] = true; ["then"] = true; ["local"] = true;
+	["or"] = true; ["nil"] = true; ["true"] = true; ["until"] = true;
+	["elseif"] = true; ["function"] = true; ["not"] = true;
+	["repeat"] = true; ["return"] = true; ["while"] = true;
+
+	-- _ENV is not technically a keyword but we need to treat it as such
+	["_ENV"] = true;
+};
+
+local function is_usable_identifier(s)
+	return type(s) == "string" and not keywords[s] and s:find("^[%a_][%w_]*$");
+end
+
+local function serialize_key(key)
+	if is_usable_identifier(key) then
+		return key;
+	else
+		return "_ENV[" .. dump(key) .. "]";
+	end
+end
+
+local function serialize_value(value)
+	if value == REMOVE then
+		return "nil";
+	else
+		return dump(value);
+	end
+end
+
+local function serialize_pair(key, value)
+	key = serialize_key(key);
+	value = serialize_value(value);
+	return key .. " = " .. value .. ";\n";
+end
+
+local function serialize_map(keyvalues)
+	local keys, values = {}, {};
+	for key, value in pairs(keyvalues) do
+		key = serialize_key(key);
+		value = serialize_value(value);
+		table.insert(keys, key);
+		table.insert(values, value);
+	end
+	return table.concat(keys, ", ") .. " = " .. table.concat(values, ", ") .. ";\n";
+end
+
+local map = { remove = REMOVE };
 local map_mt = { __index = map };
-map.remove = {};
 
 function map:get(user, key)
 	module:log("debug", "map:get(%s, %s)", tostring(user), tostring(key))
@@ -29,36 +80,8 @@ function map:get(user, key)
 	return env[key];
 end
 
-local keywords = {
-	["do"] = true; ["and"] = true; ["else"] = true; ["break"] = true;
-	["if"] = true; ["end"] = true; ["goto"] = true; ["false"] = true;
-	["in"] = true; ["for"] = true; ["then"] = true; ["local"] = true;
-	["or"] = true; ["nil"] = true; ["true"] = true; ["until"] = true;
-	["elseif"] = true; ["function"] = true; ["not"] = true;
-	["repeat"] = true; ["return"] = true; ["while"] = true;
-
-	-- _ENV is not technically a keyword but we need to treat it as such
-	["_ENV"] = true;
-};
-
 function map:set_keys(user, keyvalues)
-	local keys, values = {}, {};
-	if _VERSION == "Lua 5.1" then
-		assert(keyvalues._ENV == nil, "'_ENV' is a restricted key");
-	end
-	for key, value in pairs(keyvalues) do
-		module:log("debug", "user %s sets %q to %s", user, key, tostring(value))
-		if type(key) ~= "string" or not key:find("^[%a_][%w_]*$") or keywords[key] then
-			key = "_ENV[" .. dump(key) .. "]";
-		end
-		table.insert(keys, key);
-		if value == self.remove then
-			table.insert(values, "nil")
-		else
-			table.insert(values, dump(value))
-		end
-	end
-	local data = table.concat(keys, ", ") .. " = " .. table.concat(values, ", ") .. ";\n";
+	local data = serialize_map(keyvalues);
 	return dm.append_raw(user, module.host, self.store, "map", data);
 end
 
@@ -68,31 +91,22 @@ function map:set(user, key, value)
 	end
 	if key == nil then
 		local filename = dm.getpath(user, module.host, self.store, "map");
-		os.remove(filename);
-		return true;
+		return os.remove(filename);
 	end
-	if type(key) ~= "string" or not key:find("^[%w_][%w%d_]*$") or key == "_ENV" then
-		key = "_ENV[" .. dump(key) .. "]";
-	end
-	local data = key .. " = " .. dump(value) .. ";\n";
+	local data = serialize_pair(key, value);
 	return dm.append_raw(user, module.host, self.store, "map", data);
 end
 
-local keyval = {};
+local keyval = { remove = REMOVE };
 local keyval_mt = { __index = keyval };
 
 function keyval:get(user)
-	return map.get(self, user);
+	return map.get(self, user, nil);
 end
 
-function keyval:set(user, data)
-	map.set(self, user);
-	if data then
-		for k, v in pairs(data) do
-			map.set(self, user, k, v);
-		end
-	end
-	return true;
+function keyval:set(user, keyvalues)
+	local data = serialize_map(keyvalues);
+	return dm.store_raw(user, module.host, self.store, "map", data);
 end
 
 -- TODO some kind of periodic compaction thing?
