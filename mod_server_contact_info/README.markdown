@@ -24,8 +24,8 @@ contact_info = {
   abuse = { "mailto:abuse@shakespeare.lit", "xmpp:abuse@shakespeare.lit" };
   admin = { "mailto:admin@shakespeare.lit", "xmpp:admin@shakespeare.lit" };
   feedback = { "http://shakespeare.lit/feedback.php", "mailto:feedback@shakespeare.lit", "xmpp:feedback@shakespeare.lit" };
-  sales = "xmpp:bard@shakespeare.lit";
-  security = "xmpp:security@shakespeare.lit";
+  sales = { "xmpp:bard@shakespeare.lit" };
+  security = { "xmpp:security@shakespeare.lit" };
   support = { "http://shakespeare.lit/support.php", "xmpp:support@shakespeare.lit" };
 };
 ```
