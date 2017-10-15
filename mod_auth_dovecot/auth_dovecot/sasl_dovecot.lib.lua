@@ -26,7 +26,13 @@ local m_random = math.random;
 local tostring, tonumber = tostring, tonumber;
 
 local socket = require "socket"
-pcall(require, "socket.unix");
+
+local unix_success, unix = pcall(require, "socket.unix");
+if unix_success and unix and not socket.unix then
+	-- COMPAT map new luasocket API to old
+	socket.unix = unix.stream or unix.tcp;
+end
+
 local base64 = require "util.encodings".base64;
 local b64, unb64 = base64.encode, base64.decode;
 local jid_escape = require "util.jid".escape;
