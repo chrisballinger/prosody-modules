@@ -14,6 +14,7 @@ local hashes = require"util.hashes";
 local xmlns_push = "urn:xmpp:push:0";
 
 -- configuration
+local include_priority = module:get_option_boolean("push_notification_with_priority", true);
 local include_body = module:get_option_boolean("push_notification_with_body", false);
 local include_sender = module:get_option_boolean("push_notification_with_sender", false);
 local max_push_errors = module:get_option_number("push_max_errors", 50);
@@ -269,6 +270,13 @@ local function handle_notify_request(stanza, node, user_push_services)
 			end
 			if stanza and include_body then
 				form_data["last-message-body"] = stanza:get_child_text("body");
+			end
+			if stanza and include_priority then
+				if stanza:get_child("body") or stanza:get_child("encrypted", "eu.siacs.conversations.axolotl") then
+					form_data["last-message-priority"] = "high"
+				else
+					form_data["last-message-priority"] = "low"
+				end
 			end
 			push_publish:add_child(push_form:form(form_data));
 			if stanza and push_info.include_payload == "stripped" then
